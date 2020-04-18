@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{7f777fe9-9de2-4ae7-8418-5f35a0ea5d73}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Memory\MallocTests.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\AllocTrackerTests.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\AllocMacroTests.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
