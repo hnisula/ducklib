@@ -19,21 +19,17 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Memory\AllocTracker.h" />
-    <ClInclude Include="Memory\IAlloc.h" />
-    <ClInclude Include="Memory\Malloc.h" />
-    <ClInclude Include="Memory\MemoryInternal.h" />
+    <ClInclude Include="JobManager.h" />
+    <ClInclude Include="ConcurrentQueue.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Memory\AllocTracker.cpp" />
-    <ClCompile Include="Memory\Malloc.cpp" />
-    <ClCompile Include="Memory\MemoryInternal.cpp" />
+    <ClCompile Include="JobManager.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
-    <ProjectGuid>{ADAF85EF-BF64-43E8-843E-A1C16679B2CB}</ProjectGuid>
+    <ProjectGuid>{BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <RootNamespace>Core</RootNamespace>
+    <RootNamespace>Jobs</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -98,7 +94,7 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>DL_TRACK_ALLOCS;WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>

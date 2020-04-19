@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{422b6952-c818-4cea-aecc-d0ab77cd9dcb}</ProjectGuid>
+    <ProjectGuid>{288cdac2-66e0-4720-ba6b-080e4026aa2e}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <ConfigurationType>Application</ConfigurationType>
@@ -32,26 +32,23 @@
   <ImportGroup Label="Shared" />
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>../../Core;$(IncludePath)</IncludePath>
-    <LibraryPath>../../x64/Debug;$(LibraryPath)</LibraryPath>
-  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../../Core;$(IncludePath)</IncludePath>
+    <IncludePath>../../Jobs;$(IncludePath)</IncludePath>
     <LibraryPath>../../x64/Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
+  <ItemGroup>
+    <ClCompile Include="ConcurrentQueueTests.cpp" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.vcxproj">
       <Project>{adaf85ef-bf64-43e8-843e-a1c16679b2cb}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\..\Jobs\Jobs.vcxproj">
+      <Project>{bef0da5b-00af-4ca2-9a4a-3b6576e9bc60}</Project>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="Memory\AllocMacroTests.cpp" />
-    <ClCompile Include="Memory\AllocTrackerTests.cpp" />
-    <ClCompile Include="Memory\MallocTests.cpp" />
   </ItemGroup>
   <ItemDefinitionGroup />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -60,10 +57,10 @@
   </ImportGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>DL_TRACK_ALLOCS;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
