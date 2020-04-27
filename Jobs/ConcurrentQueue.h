@@ -9,10 +9,10 @@ class ConcurrentQueue
 {
 public:
 
-	ConcurrentQueue(uint32_t size);
-
+	ConcurrentQueue(uint32_t size, T* initialItems = nullptr, uint32_t numInitialItems = 0);
+	
 	bool TryPush(T item);
-	bool TryPop(T& item);
+	bool TryPop(T* item);
 
 private:
 
@@ -20,7 +20,7 @@ private:
 
 	struct alignas(CACHE_LINE_SIZE) Slot
 	{
-		std::atomic<uint64_t> gen; // TODO: There must be a better name...
+		std::atomic<uint64_t> gen;
 		T item;
 	};
 
@@ -32,16 +32,22 @@ private:
 };
 
 template <typename T>
-ConcurrentQueue<T>::ConcurrentQueue(uint32_t size)
+ConcurrentQueue<T>::ConcurrentQueue(uint32_t size, T* initialItems, uint32_t numInitialItems)
 	: size(size)
 {
 	slots = DL_NEW_ARRAY(DefAlloc(), Slot, size);
 
-	for (uint32_t i = 0; i < size; ++i)
+	for (uint32_t i = 0; i < numInitialItems; ++i)
+	{
+		slots[i].item = initialItems[i];
+		slots[i].gen.store(i << 1);
+	}
+	
+	for (uint32_t i = numInitialItems; i < size; ++i)
 		slots[i].gen.store((i << 1) + 1);
-
+	
 	head.store(0);
-	tail.store(0);
+	tail.store(numInitialItems);
 }
 
 template <typename T>
@@ -78,7 +84,7 @@ bool ConcurrentQueue<T>::TryPush(T item)
 }
 
 template <typename T>
-bool ConcurrentQueue<T>::TryPop(T& item)
+bool ConcurrentQueue<T>::TryPop(T* item)
 {
 	while (true)
 	{
@@ -93,7 +99,7 @@ bool ConcurrentQueue<T>::TryPop(T& item)
 			{
 				Slot& queueSlot = slots[cachedHead % size];
 				
-				item = queueSlot.item;
+				*item = queueSlot.item;
 				queueSlot.gen.store(((cachedHead + 1) << 1) + 1, std::memory_order_release);
 
 				return true;

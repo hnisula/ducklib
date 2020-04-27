@@ -1,10 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClInclude Include="JobManager.h" />
     <ClInclude Include="ConcurrentQueue.h" />
+    <ClInclude Include="Thread.h" />
+    <ClInclude Include="JobDoer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="JobManager.cpp" />
+    <ClCompile Include="Thread.cpp" />
+    <ClCompile Include="JobDoer.cpp" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include "ConcurrentQueue.h"
+#include "Thread.h"
 
 namespace DuckLib
 {
@@ -9,7 +10,7 @@ namespace Internal
 namespace Job
 {
 void _stdcall FiberJobWrapper(void* data);
-DWORD _stdcall WorkerThreadJob(void* dummy);
+uint32_t _stdcall WorkerThreadJob(void* data);
 }
 }
 
@@ -19,20 +20,17 @@ struct Job
 	void* jobData;
 };
 
-class JobManager
+class JobDoer
 {
 public:
 
-	JobManager();
+	JobDoer(uint32_t jobQueueSize, uint32_t numFibers);
 
 private:
 
-	friend DWORD _stdcall Internal::Job::WorkerThreadJob(void* dummy);
+	friend uint32_t _stdcall Internal::Job::WorkerThreadJob(void* data);
 	friend void _stdcall Internal::Job::FiberJobWrapper(void* data);
 
-	static const uint32_t NUM_FIBERS = 128;
-	static const uint32_t MAX_NUM_WORKER_THREADS = 64;
-	static const uint8_t INVALID_FIBER_INDEX = (uint8_t)-1;
 	static const uint8_t CACHE_LINE_SIZE = 64;
 
 	struct Fiber
@@ -44,14 +42,23 @@ private:
 		static const uint32_t DEFAULT_STACK_SIZE = 65536;
 	};
 
-	uint32_t GetFreeFiberIndex();
-	void ReturnFiber(uint8_t fiberIndex);
+	struct WorkerThreadData
+	{
+		Thread* thread;
+		JobDoer* jobDoer;
+	};
+
+	Fiber CreateFiber(void* fiberData);
 	uint32_t GetNumLogicalCores() const;
 
-	Fiber fibers[NUM_FIBERS];
-	uint8_t fiberFreeList[NUM_FIBERS];
-	std::atomic<uint8_t> freeFiberIndex;
+	Fiber* fibers;
+	uint32_t numFibers;
 
-	HANDLE workerThreads[MAX_NUM_WORKER_THREADS];
+	uint32_t jobQueueSize;
+
+	ConcurrentQueue<Fiber>* fiberQueue;
+	ConcurrentQueue<Job>* jobQueue;
+
+	Thread** workerThreads;
 };
 }

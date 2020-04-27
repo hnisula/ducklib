@@ -9,7 +9,7 @@ TEST(ConcurrentQueueTest, TryPushSingle)
 	uint32_t result;
 
 	queue.TryPush(200);
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_TRUE(result == 200);
 }
 
@@ -24,15 +24,15 @@ TEST(ConcurrentQueueTest, TryPushMultiple)
 	queue.TryPush(420);
 	queue.TryPush(1337);
 
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_TRUE(result == 200);
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_TRUE(result == 100);
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_TRUE(result == 69);
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_TRUE(result == 420);
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_TRUE(result == 1337);
 }
 
@@ -41,7 +41,7 @@ TEST(ConcurrentQueueTest, TryPopEmpty)
 	ConcurrentQueue<uint32_t> queue(128);
 	uint32_t result;
 
-	EXPECT_FALSE(queue.TryPop(result));
+	EXPECT_FALSE(queue.TryPop(&result));
 }
 
 TEST(ConcurrentQueueTest, TryPushFull)
@@ -62,9 +62,9 @@ TEST(ConcurrentQueueTest, TryPopAfterPushFull)
 	EXPECT_TRUE(queue.TryPush(2));
 	EXPECT_FALSE(queue.TryPush(3));
 
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_EQ(1, result);
-	EXPECT_TRUE(queue.TryPop(result));
+	EXPECT_TRUE(queue.TryPop(&result));
 	EXPECT_EQ(2, result);
-	EXPECT_FALSE(queue.TryPop(result));
+	EXPECT_FALSE(queue.TryPop(&result));
 }
