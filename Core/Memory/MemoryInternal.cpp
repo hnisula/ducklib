@@ -1,7 +1,15 @@
 #include "MemoryInternal.h"
+#include "Malloc.h"
 
 namespace DuckLib
 {
+IAlloc& DefAlloc()
+{
+	static Malloc malloc;
+
+	return malloc;
+}
+
 namespace Internal
 {
 namespace Memory

@@ -6,7 +6,7 @@ using namespace DuckLib;
 
 // TODO: Check if they've added support for x64 in the ASan support
 // Because ASan support for x64 is not added yet and the values checked for are only set in debug
-#ifdef _DEBUG
+#ifndef NDEBUG
 TEST( MallocTest, AllocCheckBlockValues )
 {
 	Malloc malloc;
