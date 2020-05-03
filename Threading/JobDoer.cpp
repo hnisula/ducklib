@@ -97,6 +97,11 @@ JobDoer::JobDoer(uint32_t jobQueueSize, uint32_t numFibers)
 	jobQueue = DL_NEW(DefAlloc(), ConcurrentQueue<Job>, jobQueueSize);
 }
 
+bool JobDoer::Queue(Job* job)
+{
+	return jobQueue->TryPush(*job);
+}
+
 Internal::Job::Fiber JobDoer::CreateFiber(void* fiberData)
 {
 	Internal::Job::Fiber fiber;

@@ -20,7 +20,6 @@ struct Fiber
 	void* osFiber;
 	DuckLib::Job* currentJob;
 
-	// TODO: Investigate what would be more appropriate: 64000 or 65536
 	static const uint32_t DEFAULT_STACK_SIZE = 65536;
 };
 
@@ -36,6 +35,8 @@ class JobDoer
 public:
 
 	JobDoer(uint32_t jobQueueSize, uint32_t numFibers);
+
+	bool Queue(Job* job);
 
 private:
 
