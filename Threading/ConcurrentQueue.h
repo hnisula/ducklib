@@ -40,11 +40,11 @@ ConcurrentQueue<T>::ConcurrentQueue(uint32_t size, T* initialItems, uint32_t num
 	for (uint32_t i = 0; i < numInitialItems; ++i)
 	{
 		slots[i].item = initialItems[i];
-		slots[i].gen.store(i << 1);
+		slots[i].gen.store(0);
 	}
 	
 	for (uint32_t i = numInitialItems; i < size; ++i)
-		slots[i].gen.store((i << 1) + 1);
+		slots[i].gen.store(1);
 	
 	head.store(0);
 	tail.store(numInitialItems);
@@ -56,18 +56,21 @@ bool ConcurrentQueue<T>::TryPush(T item)
 	while (true)
 	{
 		uint64_t cachedTail = tail.load();
-		uint64_t tailItemGen = slots[cachedTail].gen.load();
+		uint64_t index = cachedTail % size;
+		uint64_t tailItemGen = slots[index].gen.load();
+		uint64_t tailGen = cachedTail / size;
+		uint64_t shiftedTailGen = tailGen << 1;
 
-		if ((cachedTail << 1) + 1 == tailItemGen)
+		if (shiftedTailGen + 1 == tailItemGen)
 		{
 			uint64_t newTail = cachedTail + 1;
 
 			if (tail.compare_exchange_strong(cachedTail, newTail))
 			{
-				Slot& queueSlot = slots[cachedTail % size];
+				Slot& queueSlot = slots[index];
 
 				queueSlot.item = item;
-				queueSlot.gen.store((cachedTail + 1) << 1, std::memory_order_release);
+				queueSlot.gen.store(shiftedTailGen, std::memory_order_release);
 
 				return true;
 			}
@@ -89,18 +92,20 @@ bool ConcurrentQueue<T>::TryPop(T* item)
 	while (true)
 	{
 		uint64_t cachedHead = head.load();
-		uint64_t headItemGen = slots[cachedHead].gen;
+		uint64_t index = cachedHead % size;
+		uint64_t headItemGen = slots[index].gen;
+		uint64_t headGen = cachedHead / size;
 
-		if ((cachedHead + 1) << 1 == headItemGen)
+		if (headGen << 1 == headItemGen)
 		{
 			uint64_t newHead = cachedHead + 1;
 
 			if (head.compare_exchange_strong(cachedHead, newHead))
 			{
-				Slot& queueSlot = slots[cachedHead % size];
+				Slot& queueSlot = slots[index];
 				
 				*item = queueSlot.item;
-				queueSlot.gen.store(((cachedHead + 1) << 1) + 1, std::memory_order_release);
+				queueSlot.gen.store(((headGen + 1) << 1) + 1, std::memory_order_release);
 
 				return true;
 			}

@@ -9,9 +9,9 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Tests", "Tests\Core.Tests\Core.Tests.vcxproj", "{422B6952-C818-4CEA-AECC-D0AB77CD9DCB}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jobs", "Jobs\Jobs.vcxproj", "{BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading", "Threading\Threading.vcxproj", "{BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Jobs.Tests", "Tests\Jobs.Tests\Jobs.Tests.vcxproj", "{288CDAC2-66E0-4720-BA6B-080E4026AA2E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading.Tests", "Tests\Threading.Tests\Threading.Tests.vcxproj", "{288CDAC2-66E0-4720-BA6B-080E4026AA2E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ADAF85EF-BF64-43E8-843E-A1C16679B2CB} = {ADAF85EF-BF64-43E8-843E-A1C16679B2CB}
 	EndProjectSection

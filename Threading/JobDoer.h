@@ -5,20 +5,31 @@
 
 namespace DuckLib
 {
-namespace Internal
-{
-namespace Job
-{
-void _stdcall FiberJobWrapper(void* data);
-uint32_t _stdcall WorkerThreadJob(void* data);
-}
-}
-
 struct Job
 {
 	void (*jobFunction)(void*);
 	void* jobData;
 };
+
+namespace Internal
+{
+namespace Job
+{
+struct Fiber
+{
+	void* osFiber;
+	DuckLib::Job* currentJob;
+
+	// TODO: Investigate what would be more appropriate: 64000 or 65536
+	static const uint32_t DEFAULT_STACK_SIZE = 65536;
+};
+
+void SwitchFiber(Fiber* fiber);
+void InitWorkerThread();
+uint32_t _stdcall WorkerThreadJob(void* data);
+void _stdcall FiberJobWrapper(void* data);
+}
+}
 
 class JobDoer
 {
@@ -33,30 +44,21 @@ private:
 
 	static const uint8_t CACHE_LINE_SIZE = 64;
 
-	struct Fiber
-	{
-		void* osFiber;
-		Job* currentJob;
-
-		// TODO: Investigate what would be more appropriate: 64000 or 65536
-		static const uint32_t DEFAULT_STACK_SIZE = 65536;
-	};
-
 	struct WorkerThreadData
 	{
 		Thread* thread;
 		JobDoer* jobDoer;
 	};
 
-	Fiber CreateFiber(void* fiberData);
+	Internal::Job::Fiber CreateFiber(void* fiberData);
 	uint32_t GetNumLogicalCores() const;
 
-	Fiber* fibers;
+	Internal::Job::Fiber* fibers;
 	uint32_t numFibers;
 
 	uint32_t jobQueueSize;
 
-	ConcurrentQueue<Fiber>* fiberQueue;
+	ConcurrentQueue<Internal::Job::Fiber>* fiberQueue;
 	ConcurrentQueue<Job>* jobQueue;
 
 	Thread** workerThreads;

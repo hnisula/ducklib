@@ -10,18 +10,33 @@ namespace Internal
 namespace Job
 {
 std::atomic<bool> runWorkers;
-thread_local void* workerFiber {};
+thread_local Fiber* workerThreadFiber {};
+
+void SwitchFiber(Fiber* fiber)
+{
+#ifdef _WIN32
+	SwitchToFiber(fiber->osFiber);
+#endif
+}
+
+void InitWorkerThread()
+{
+#ifdef _WIN32
+	workerThreadFiber->osFiber = ConvertThreadToFiber(workerThreadFiber);
+#endif
+}
 
 uint32_t _stdcall WorkerThreadJob(void* data)
 {
 	JobDoer::WorkerThreadData* workerThreadData = (JobDoer::WorkerThreadData*)data;
 	JobDoer* jobDoer = workerThreadData->jobDoer;
 	Thread* thread = workerThreadData->thread;
-	workerFiber = ConvertThreadToFiber(nullptr);
+
+	InitWorkerThread();
 
 	while (runWorkers)
 	{
-		JobDoer::Fiber fiber;
+		Fiber jobFiber;
 		DuckLib::Job job;
 
 		if (!jobDoer->jobQueue->TryPop(&job))
@@ -29,13 +44,12 @@ uint32_t _stdcall WorkerThreadJob(void* data)
 			thread->Sleep(10);
 			continue;
 		}
-		
-		// TODO: Decide what to do if popping one fails
-		jobDoer->fiberQueue->TryPop(&fiber);
-		fiber.currentJob = &job;
-		SwitchToFiber(fiber.osFiber);
-		// TODO: Decide what to do if pushing one fails
-		jobDoer->fiberQueue->TryPush(fiber);
+
+		// TODO: Decide what to do if popping or pushing fails
+		jobDoer->fiberQueue->TryPop(&jobFiber);
+		jobFiber.currentJob = &job;
+		SwitchFiber(&jobFiber);
+		jobDoer->fiberQueue->TryPush(jobFiber);
 	}
 
 	// TODO: Consider resetting back to thread before quitting, or is it redundant?
@@ -45,16 +59,14 @@ uint32_t _stdcall WorkerThreadJob(void* data)
 
 void _stdcall FiberJobWrapper(void* data)
 {
-	JobDoer::Fiber* fiberData = (JobDoer::Fiber*)data;
+	Fiber* fiberData = (Fiber*)data;
 
 	while (true)
 	{
 		DuckLib::Job* job = fiberData->currentJob;
 
 		job->jobFunction(job->jobData);
-#ifdef _WIN32
-		SwitchToFiber(workerFiber);
-#endif
+		SwitchFiber(workerThreadFiber);
 	}
 }
 }
@@ -62,17 +74,21 @@ void _stdcall FiberJobWrapper(void* data)
 
 JobDoer::JobDoer(uint32_t jobQueueSize, uint32_t numFibers)
 	: numFibers(numFibers)
-, jobQueueSize(jobQueueSize)
+	, jobQueueSize(jobQueueSize)
 {
 	uint32_t logicalCoreCount = GetNumLogicalCores();
-	fibers = DL_NEW_ARRAY(DefAlloc(), Fiber, numFibers);
+	fibers = DL_NEW_ARRAY(DefAlloc(), Internal::Job::Fiber, numFibers);
 
 	for (uint32_t i = 0; i < numFibers; ++i)
 	{
 		fibers[i] = CreateFiber(&fibers[i]);
 	}
 
-	fiberQueue = DL_NEW(DefAlloc(), ConcurrentQueue<Fiber>, numFibers, fibers, numFibers);
+	fiberQueue = DL_NEW(DefAlloc(),
+		ConcurrentQueue<Internal::Job::Fiber>,
+		numFibers,
+		fibers,
+		numFibers);
 	workerThreads = DL_NEW_ARRAY(DefAlloc(), Thread*, logicalCoreCount);
 
 	for (uint32_t i = 0; i < logicalCoreCount; ++i)
@@ -81,13 +97,13 @@ JobDoer::JobDoer(uint32_t jobQueueSize, uint32_t numFibers)
 	jobQueue = DL_NEW(DefAlloc(), ConcurrentQueue<Job>, jobQueueSize);
 }
 
-JobDoer::Fiber JobDoer::CreateFiber(void* fiberData)
+Internal::Job::Fiber JobDoer::CreateFiber(void* fiberData)
 {
-	Fiber fiber;
+	Internal::Job::Fiber fiber;
 
 	fiber.currentJob = nullptr;
 #ifdef _WIN32
-	fiber.osFiber = ::CreateFiber((SIZE_T)Fiber::DEFAULT_STACK_SIZE,
+	fiber.osFiber = ::CreateFiber((SIZE_T)Internal::Job::Fiber::DEFAULT_STACK_SIZE,
 		(LPFIBER_START_ROUTINE)&Internal::Job::FiberJobWrapper,
 		fiberData);
 #endif

@@ -33,7 +33,7 @@
   <ImportGroup Label="PropertySheets" />
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>../../Jobs;$(IncludePath)</IncludePath>
+    <IncludePath>../../Threading;$(IncludePath)</IncludePath>
     <LibraryPath>../../x64/Debug;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
@@ -43,7 +43,7 @@
     <ProjectReference Include="..\..\Core\Core.vcxproj">
       <Project>{adaf85ef-bf64-43e8-843e-a1c16679b2cb}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\..\Jobs\Jobs.vcxproj">
+    <ProjectReference Include="..\..\Threading\Threading.vcxproj">
       <Project>{bef0da5b-00af-4ca2-9a4a-3b6576e9bc60}</Project>
     </ProjectReference>
   </ItemGroup>
