@@ -11,7 +11,6 @@ public:
 	Thread(uint32_t (*func)(void*), void* data);
 
 	void Join();
-	void Sleep(uint32_t ms);
 
 private:
 
@@ -19,4 +18,6 @@ private:
 	HANDLE osHandle;
 #endif
 };
+
+void YieldThread(uint32_t ms);
 }

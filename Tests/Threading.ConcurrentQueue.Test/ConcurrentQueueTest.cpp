@@ -1,85 +1,9 @@
-#include <gtest/gtest.h>
-#include "ConcurrentQueue.h"
-#include "Thread.h"
+#include <exception>
+#include <iostream>
+#include "../../Threading/ConcurrentQueue.h"
+#include "../../Threading/Thread.h"
 
 using namespace DuckLib;
-
-const uint32_t pushValue = 420;
-
-uint32_t PushThread(void* data)
-{
-	ConcurrentQueue<uint32_t>* queue = (ConcurrentQueue<uint32_t>*)data;
-
-	queue->TryPush(pushValue);
-
-	return 0;
-}
-
-TEST(ConcurrentQueueTest, TryPushSingle)
-{
-	ConcurrentQueue<uint32_t> queue(128);
-	uint32_t result;
-
-	queue.TryPush(200);
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_TRUE(result == 200);
-}
-
-TEST(ConcurrentQueueTest, TryPushMultiple)
-{
-	ConcurrentQueue<uint32_t> queue(128);
-	uint32_t result;
-
-	queue.TryPush(200);
-	queue.TryPush(100);
-	queue.TryPush(69);
-	queue.TryPush(420);
-	queue.TryPush(1337);
-
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_TRUE(result == 200);
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_TRUE(result == 100);
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_TRUE(result == 69);
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_TRUE(result == 420);
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_TRUE(result == 1337);
-}
-
-TEST(ConcurrentQueueTest, TryPopEmpty)
-{
-	ConcurrentQueue<uint32_t> queue(128);
-	uint32_t result;
-
-	EXPECT_FALSE(queue.TryPop(&result));
-}
-
-TEST(ConcurrentQueueTest, TryPushFull)
-{
-	ConcurrentQueue<uint32_t> queue(2);
-
-	EXPECT_TRUE(queue.TryPush(1));
-	EXPECT_TRUE(queue.TryPush(2));
-	EXPECT_FALSE(queue.TryPush(3));
-}
-
-TEST(ConcurrentQueueTest, TryPopAfterPushFull)
-{
-	ConcurrentQueue<uint32_t> queue(2);
-	uint32_t result {};
-
-	EXPECT_TRUE(queue.TryPush(1));
-	EXPECT_TRUE(queue.TryPush(2));
-	EXPECT_FALSE(queue.TryPush(3));
-
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_EQ(1, result);
-	EXPECT_TRUE(queue.TryPop(&result));
-	EXPECT_EQ(2, result);
-	EXPECT_FALSE(queue.TryPop(&result));
-}
 
 struct WorkerConfig
 {
@@ -106,8 +30,8 @@ uint32_t QueueWorker(void* configData)
 
 	while (counter < config->numItems || pushReservation < config->numItems || !queueIsEmpty)
 	{
-		Sleep(10);
-		
+		YieldThread(10);
+
 		if (config->push && pushReservation < config->numItems)
 			if (config->queue->TryPush(config->items[pushReservation]))
 			{
@@ -118,7 +42,7 @@ uint32_t QueueWorker(void* configData)
 		if (config->pop)
 		{
 			queueIsEmpty = !config->queue->TryPop(&value);
-			
+
 			if (!queueIsEmpty)
 				poppedItems[numPopped++] = value;
 		}
@@ -132,12 +56,13 @@ uint32_t QueueWorker(void* configData)
 		config->allPoppedItems[startTotalPoppedIndex + i] = poppedItems[i];
 
 	DL_DELETE_ARRAY(DefAlloc(), poppedItems);
-	
+
 	return 0;
 }
 
-TEST(ConcurrentQueueTest, ConcurrentTryPush)
+int main()
 {
+	// TODO: Get these from console input or at least print them when running
 	const uint32_t numPushers = 8;
 	const uint32_t numPoppers = 8;
 	const uint32_t numHybrids = 4;
@@ -158,10 +83,11 @@ TEST(ConcurrentQueueTest, ConcurrentTryPush)
 	for (uint32_t i = 0; i < numItems; ++i)
 		items[i] = numItems - i;
 
+	// TODO: Fix temp object ptr being passed as arg
 	for (uint32_t i = 0; i < numPushers; ++i)
 		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker,
-			&WorkerConfig { &queue, &pushCounter, &pushReservation, items, allPoppedItems, numItems,
-				&numAllPoppedItems, true, false });
+			&WorkerConfig {&queue, &pushCounter, &pushReservation, items, allPoppedItems, numItems,
+			&numAllPoppedItems, true, false});
 
 	numWorkers += numPushers;
 
@@ -190,7 +116,7 @@ TEST(ConcurrentQueueTest, ConcurrentTryPush)
 	for (uint32_t i = 0; i < numItems; ++i)
 	{
 		uint32_t matchedIndex = (uint32_t)-1;
-		
+
 		for (uint32_t u = 0; u < numItems; ++u)
 			if (!itemIsUsed[u] && items[i] == allPoppedItems[u])
 			{
@@ -199,6 +125,11 @@ TEST(ConcurrentQueueTest, ConcurrentTryPush)
 				break;
 			}
 
-		EXPECT_NE((uint32_t)-1, matchedIndex);
+		if (matchedIndex == (uint32_t)-1)
+			throw std::exception("ERROR: Item missing!");
 	}
+
+	std::cout << "Test completed successfully" << std::endl;
+
+	return 0;
 }

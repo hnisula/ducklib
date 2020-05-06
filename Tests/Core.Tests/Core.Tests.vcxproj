@@ -38,7 +38,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>../../Core;$(IncludePath)</IncludePath>
-    <LibraryPath>../../x64/Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.vcxproj">

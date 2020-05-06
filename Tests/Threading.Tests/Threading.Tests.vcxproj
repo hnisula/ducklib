@@ -34,10 +34,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>../../Threading;$(IncludePath)</IncludePath>
-    <LibraryPath>../../x64/Debug;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="ConcurrentQueueTests.cpp" />
+    <ClCompile Include="ConcurrentQueueSimpleTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Core\Core.vcxproj">
