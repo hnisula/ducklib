@@ -35,6 +35,7 @@ class JobDoer
 public:
 
 	JobDoer(uint32_t jobQueueSize, uint32_t numFibers);
+	~JobDoer();
 
 	bool Queue(Job* job);
 
@@ -47,21 +48,23 @@ private:
 
 	struct WorkerThreadData
 	{
-		Thread* thread;
 		JobDoer* jobDoer;
+		std::atomic<bool> runFlag;
+		std::atomic<bool> startFlag;
 	};
 
 	Internal::Job::Fiber CreateFiber(void* fiberData);
 	uint32_t GetNumLogicalCores() const;
 
+	IAlloc& alloc;
+
 	Internal::Job::Fiber* fibers;
-	uint32_t numFibers;
+	ConcurrentQueue<Internal::Job::Fiber*>* fiberQueue;
 
-	uint32_t jobQueueSize;
-
-	ConcurrentQueue<Internal::Job::Fiber>* fiberQueue;
 	ConcurrentQueue<Job>* jobQueue;
 
+	uint32_t numWorkers;
 	Thread** workerThreads;
+	WorkerThreadData workerThreadData;
 };
 }

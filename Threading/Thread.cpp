@@ -21,8 +21,10 @@ void Thread::Join()
 	WaitForSingleObject(osHandle, INFINITE);
 }
 
-void Thread::Sleep(uint32_t ms)
+void YieldThread(uint32_t ms)
 {
+#ifdef _WIN32
 	::Sleep(ms);
+#endif
 }
 }
