@@ -4,19 +4,21 @@
 
 namespace DuckLib
 {
+const uint32_t CACHE_LINE_SIZE = 128;
+
 template <typename T>
 class ConcurrentQueue
 {
 public:
 
 	ConcurrentQueue(uint32_t size, T* initialItems = nullptr, uint32_t numInitialItems = 0);
+	~ConcurrentQueue();
 	
-	bool TryPush(T item);
+	uint32_t TryPush(T item);
+	uint32_t TryPush(T* items, uint32_t numItems);
 	bool TryPop(T* item);
 
 private:
-
-	static const uint32_t CACHE_LINE_SIZE = 128;
 
 	struct alignas(CACHE_LINE_SIZE) Slot
 	{
@@ -51,7 +53,13 @@ ConcurrentQueue<T>::ConcurrentQueue(uint32_t size, T* initialItems, uint32_t num
 }
 
 template <typename T>
-bool ConcurrentQueue<T>::TryPush(T item)
+ConcurrentQueue<T>::~ConcurrentQueue()
+{
+	DL_DELETE_ARRAY(DefAlloc(), slots);
+}
+
+template <typename T>
+uint32_t ConcurrentQueue<T>::TryPush(T item)
 {
 	while (true)
 	{
@@ -72,7 +80,7 @@ bool ConcurrentQueue<T>::TryPush(T item)
 				queueSlot.item = item;
 				queueSlot.gen.store(shiftedTailGen, std::memory_order_release);
 
-				return true;
+				return 1;
 			}
 		}
 		else
@@ -81,9 +89,22 @@ bool ConcurrentQueue<T>::TryPush(T item)
 			cachedTail = tail.load();
 
 			if (cachedTail == oldCachedTail)
-				return false;
+				return 0;
 		}
 	}
+}
+
+template < typename T>
+uint32_t ConcurrentQueue<T>::TryPush(T* items, uint32_t numItems)
+{
+	uint32_t i = 0;
+	
+	while (i < numItems && TryPush(items[i]))
+	{
+		++i;
+	}
+
+	return i;
 }
 
 template <typename T>

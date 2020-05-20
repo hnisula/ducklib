@@ -18,7 +18,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading.Tests", "Tests\Th
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading.ConcurrentQueue.Test", "Tests\Threading.ConcurrentQueue.Test\Threading.ConcurrentQueue.Test.vcxproj", "{F53860E9-07D8-4D3E-978D-A5BC1545C3FE}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading.JobDoer.Test", "Tests\Threading.JobDoer.Test\Threading.JobDoer.Test.vcxproj", "{9F4A2BA3-9B29-4B64-B533-D47599189D7A}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading.JobQueue.Test", "Tests\Threading.JobQueue.Test\Threading.JobQueue.Test.vcxproj", "{9F4A2BA3-9B29-4B64-B533-D47599189D7A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
