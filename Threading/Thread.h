@@ -16,6 +16,8 @@ private:
 
 #ifdef _WIN32
 	HANDLE osHandle;
+#else
+	void* osHandle;
 #endif
 };
 

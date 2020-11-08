@@ -24,7 +24,7 @@ void WriteAllocHeader( void* headerPtr, uint64_t sizeWithHeader, uint8_t align )
 	Header* header = (Header*)headerPtr;
 	header->totalSize = sizeWithHeader;
 	header->align = align;
-	uint8_t* iterator = (uint8_t*)(header + sizeof( Header ));
+	uint8_t* iterator = (uint8_t*)header + sizeof( Header );
 
 	while ( (uintptr_t)iterator % align )
 	{

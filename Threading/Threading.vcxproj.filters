@@ -3,10 +3,10 @@
   <ItemGroup>
     <ClInclude Include="ConcurrentQueue.h" />
     <ClInclude Include="Thread.h" />
-    <ClInclude Include="JobDoer.h" />
+    <ClInclude Include="JobQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Thread.cpp" />
-    <ClCompile Include="JobDoer.cpp" />
+    <ClCompile Include="JobQueue.cpp" />
   </ItemGroup>
 </Project>

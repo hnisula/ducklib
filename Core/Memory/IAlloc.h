@@ -1,4 +1,5 @@
 #pragma once
+#include <new>
 #include "MemoryInternal.h"
 
 namespace DuckLib
