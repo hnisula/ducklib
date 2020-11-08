@@ -1,17 +1,20 @@
 #include <iostream>
 #include <conio.h>
+
 #include "../../Threading/JobQueue.h"
 
 using namespace DuckLib;
 
 std::atomic<uint32_t> numJobsCompleted {0};
 uint32_t* jobItems;
-const uint32_t NUM_CHILD_JOBS = 8;
-const uint32_t NUM_PAUSE_JOBS = 1024;
-const uint32_t PAUSE_QUEUE_SIZE = 512;
-const uint32_t NUM_PAUSE_FIBERS = 256;
+const uint32_t NUM_JOBS_NOPAUSE = 512;
+const uint32_t NUM_CHILD_JOBS = 16;
+const uint32_t NUM_PAUSE_JOBS = 16;
+const uint32_t QUEUE_SIZE = 1024;
+const uint32_t NUM_FIBERS = 512;
+uint32_t pausePushCounter = 0;
 
-JobQueue jobQueue(PAUSE_QUEUE_SIZE, NUM_PAUSE_FIBERS);
+JobQueue jobQueue(QUEUE_SIZE, NUM_FIBERS);
 
 struct ChildJobData
 {
@@ -53,7 +56,8 @@ void PauseJobFunc(void* data)
 		jobs[i] = {&ChildPauseJobFunc, &jobData->childJobData[i]};
 	}
 
-	std::atomic<uint32_t>* counter = jobQueue.Push(jobs, NUM_CHILD_JOBS);
+	pausePushCounter++;
+	JobCounter* counter = jobQueue.Push(jobs, NUM_CHILD_JOBS);
 
 	jobQueue.WaitForCounter(counter);
 }
@@ -84,6 +88,16 @@ bool CheckJobResult(uint32_t numJobs)
 	return true;
 }
 
+bool CheckPauseJobResults(PauseJobData* jobData)
+{
+	for (uint32_t i = 0; i < NUM_PAUSE_JOBS; ++i)
+		for (uint32_t u = 0; u < NUM_CHILD_JOBS; ++u)
+			if (jobData[i].childJobData[u].result != jobData[i].childJobData[u].index * 10 + 2)
+				return false;
+
+	return true;
+}
+
 void CleanupJobData(uint32_t numJobs)
 {
 	DL_DELETE_ARRAY(DefAlloc(), jobItems);
@@ -91,28 +105,22 @@ void CleanupJobData(uint32_t numJobs)
 
 void NoPauseTest()
 {
-	const uint32_t jobQueueSize = 512;
-	const uint32_t numJobs = 512;
+	InitJobData(NUM_JOBS_NOPAUSE);
 
-	static_assert(numJobs <= jobQueueSize,
-		"numJobs must be less than queue size as there is just one pass for submitting jobs");
+	Job* jobs = GenerateJobs(NUM_JOBS_NOPAUSE);
 
-	InitJobData(numJobs);
-
-	Job* jobs = GenerateJobs(numJobs);
-
-	for (uint32_t i = 0; i < numJobs; ++i)
+	for (uint32_t i = 0; i < NUM_JOBS_NOPAUSE; ++i)
 		jobQueue.Push(&jobs[i], 1);
 
-	while (numJobsCompleted.load() < numJobs)
+	while (numJobsCompleted.load() < NUM_JOBS_NOPAUSE)
 		YieldThread(100);
 
-	if (!CheckJobResult(numJobs))
+	if (!CheckJobResult(NUM_JOBS_NOPAUSE))
 		std::cout << "ERROR: Job result is incorrect" << std::endl;
 	else
 		std::cout << "Jobs executed successfully" << std::endl;
 
-	CleanupJobData(numJobs);
+	CleanupJobData(NUM_JOBS_NOPAUSE);
 }
 
 void PauseTest()
@@ -123,9 +131,14 @@ void PauseTest()
 	for (uint32_t i = 0; i < NUM_PAUSE_JOBS; ++i)
 		pauseJobs[i] = {&PauseJobFunc, &pauseJobData[i]};
 	
-	std::atomic<uint32_t>* counter = jobQueue.Push(pauseJobs, NUM_PAUSE_JOBS);
+	JobCounter* counter = jobQueue.Push(pauseJobs, NUM_PAUSE_JOBS); // check if counter ever changes. Also check workers if they actually do any job
 	
 	jobQueue.WaitForCounter(counter);
+
+	if (!CheckPauseJobResults(pauseJobData))
+		std::cout << "Data check failed!" << std::endl;
+	else
+		std::cout << "Data check passed!" << std::endl;
 }
 
 int main()

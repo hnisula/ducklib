@@ -2,19 +2,21 @@
 #include <atomic>
 #include <cassert>
 #include "JobQueue.h"
+#include <mutex>
+#include <unordered_map>
 
 namespace DuckLib
 {
 Job::Job()
-	: jobFunction(nullptr)
+	: jobCounter(nullptr)
+, jobFunction(nullptr)
 , jobData(nullptr)
-, jobCounter(nullptr)
 {}
 
 Job::Job(void (*jobFunction)(void*), void* jobData)
-	: jobFunction(jobFunction)
+	: jobCounter(nullptr)
+, jobFunction(jobFunction)
 , jobData(jobData)
-, jobCounter(nullptr)
 {}
 
 namespace Internal
@@ -22,7 +24,7 @@ namespace Internal
 std::atomic<bool> runWorkers;
 thread_local Fiber workerThreadFiber {};
 thread_local bool isWorkerThread { false };
-thread_local Job currentJob {};
+thread_local Fiber* currentFiber {};
 
 void SwitchFiber(Fiber* fiber)
 {
@@ -49,7 +51,7 @@ uint32_t _stdcall WorkerThreadJob(void* data)
 	JobQueue::WorkerThreadData* workerThreadData = (JobQueue::WorkerThreadData*)data;
 	std::atomic<bool>& runFlag = workerThreadData->runFlag;
 	std::atomic<bool>& startFlag = workerThreadData->startFlag;
-	JobQueue* jobDoer = workerThreadData->jobDoer;
+	JobQueue* jobQueue = workerThreadData->jobQueue;
 
 	InitWorkerThread();
 
@@ -58,20 +60,21 @@ uint32_t _stdcall WorkerThreadJob(void* data)
 
 	while (runFlag.load())
 	{
-		Fiber* jobFiber;
+		Fiber* jobFiber = jobQueue->GetReadyJobAndFiber();
 
-		if (!jobDoer->GetReadyJob(&currentJob))
+		if (!jobFiber)
 		{
 			YieldThread(10);
 			continue;
 		}
 
-		// TODO: Decide what to do if popping or pushing fails
-		jobDoer->fiberQueue->TryPop(&jobFiber);
-		jobFiber->currentJob = &currentJob;
-		SwitchFiber(jobFiber);
-		jobDoer->fiberQueue->TryPush(jobFiber);
-		currentJob = {};
+		if (!jobFiber->currentJob.jobFunction)
+			throw std::exception("Tried to start a fiber with a nullptr job");
+		
+		currentFiber = jobFiber;
+		SwitchFiber(currentFiber);
+		currentFiber = nullptr;
+		jobQueue->ReturnFiberIfJobCompleted(jobFiber);
 	}
 
 	return 0;
@@ -83,13 +86,25 @@ void _stdcall FiberJobWrapper(void* data)
 
 	while (true)
 	{
-		Job* job = fiberData->currentJob;
+		Job job = fiberData->currentJob;
 
-		job->jobFunction(job->jobData);
-		--job->jobCounter;
+		job.jobFunction(job.jobData);
+		job.jobCounter->Decrement();
+		fiberData->currentJob = {};
 		SwitchToWorker();
 	}
 }
+}
+
+void JobCounter::Reset()
+{
+	waitingJobFiber = nullptr;
+}
+
+void JobCounter::Decrement()
+{
+	if (--counter == 0 && waitingJobFiber)
+		jobQueue->FinalizeCompletedJobCounter(this);
 }
 
 JobQueue::JobQueue(uint32_t size, uint32_t numFibers, uint32_t numWorkers)
@@ -98,9 +113,7 @@ JobQueue::JobQueue(uint32_t size, uint32_t numFibers, uint32_t numWorkers)
 	this->numWorkers = numWorkers == MATCH_NUM_LOGICAL_CORES ? GetNumLogicalCores() : numWorkers;
 	queueSize = size;
 
-	uint32_t t = max(size, numFibers);
 	uintptr_t* initPtrArrayBuffer = DL_NEW_ARRAY(alloc, uintptr_t, max(size, numFibers));
-	// TEST: this causes the delete to loop almost forever, why?
 
 	SetupCounters(size, initPtrArrayBuffer);
 	SetupFibers(numFibers, initPtrArrayBuffer);
@@ -120,56 +133,91 @@ JobQueue::~JobQueue()
 	TearDownCounters();
 }
 
-std::atomic<uint32_t>* JobQueue::Push(Job* jobs, uint32_t numJobs)
+JobCounter* JobQueue::Push(Job* jobs, uint32_t numJobs)
 {
-	Internal::AlignedCounter* jobCounter;
+	JobCounter* jobCounter;
 
-	counterQueue->TryPop(&jobCounter);
+	if (!counterQueue->TryPop(&jobCounter))
+		throw std::exception("Failed to acquire job counter");
 
 	for (uint32_t i = 0; i < numJobs; ++i)
 		jobs[i].jobCounter = jobCounter;
 
 	uint32_t jobsQueued = jobQueue->TryPush(jobs, numJobs);
 
-	for (uint32_t i = jobsQueued; i < numJobs; ++i)
-		jobs[i].jobCounter = nullptr;
+	if (jobsQueued != numJobs)
+		throw std::exception("Failed to push jobs to queue");
 
-	jobCounter->store(jobsQueued);
+	jobCounter->counter.store(jobsQueued);
 
-	return (std::atomic<uint32_t>*)jobCounter;
+	return jobCounter;
 }
 
-void JobQueue::WaitForCounter(std::atomic<uint32_t>* counter)
+void JobQueue::WaitForCounter(JobCounter* counter)
 {
-	// TODO: Fix this currentJob having nullptr members when it should not, probably
-	PauseJob(&Internal::currentJob);
-
 	if (Internal::isWorkerThread)
+	{
+		counter->waitingJobFiber = Internal::currentFiber;
+		std::atomic_thread_fence(std::memory_order_release);
 		Internal::SwitchToWorker();
+	}
 	else
-		WaitWithoutWork(counter);
+		WaitIdle(counter);
 }
 
-void JobQueue::PauseJob(Job* job)
+Internal::Fiber* JobQueue::GetReadyJobAndFiber()
 {
-	if (numPausedJobs == queueSize)
-		throw std::exception("Paused jobs queue is full");
+	Internal::Fiber* readyPausedJobFiber;
 
-	pausedJobs[numPausedJobs++] = *job;
+	if (readyPausedJobFiberQueue->TryPop(&readyPausedJobFiber))
+	{
+		if (!readyPausedJobFiber->currentJob.jobFunction)
+			throw std::exception("lol");
+		
+		return readyPausedJobFiber;
+	}
+
+	Job newJob;
+	Internal::Fiber* newJobFiber;
+
+	if (jobQueue->TryPop(&newJob))
+	{
+		if (!fiberQueue->TryPop(&newJobFiber))
+			throw std::exception("Failed to acquire fiber for new job");
+		
+		newJobFiber->currentJob = newJob;
+		return newJobFiber;
+	}
+
+	return nullptr;
 }
 
-bool JobQueue::GetReadyJob(Job* job)
+void JobQueue::ReturnFiberIfJobCompleted(Internal::Fiber* completedFiber)
 {
-	// Check paused jobs
+	// jobFunction == nullptr -> completed, otherwise paused
+	if (completedFiber->currentJob.jobFunction)
+		return;
+	
+	if (!fiberQueue->TryPush(completedFiber))
+		throw std::exception("Failed to push used fiber back on fiber queue. Wtf?");
+}
 
-	return jobQueue->TryPop(job);
+void JobQueue::FinalizeCompletedJobCounter(JobCounter* counter)
+{
+	if (!readyPausedJobFiberQueue->TryPush(counter->waitingJobFiber))
+		throw std::exception("Failed to push job onto job queue");
+
+	counter->Reset();
+
+	if (!counterQueue->TryPush(counter))
+		throw std::exception("Failed to push job counter back on job counter queue");
 }
 
 Internal::Fiber JobQueue::CreateFiber(void* fiberData)
 {
 	Internal::Fiber fiber;
 
-	fiber.currentJob = nullptr;
+	fiber.currentJob = {};
 #ifdef _WIN32
 	fiber.osFiber = ::CreateFiber((SIZE_T)Internal::Fiber::DEFAULT_STACK_SIZE,
 		(LPFIBER_START_ROUTINE)&Internal::FiberJobWrapper,
@@ -195,24 +243,27 @@ uint32_t JobQueue::GetNumLogicalCores() const
 #endif
 }
 
-void JobQueue::WaitWithoutWork(std::atomic<uint32_t>* counter)
+void JobQueue::WaitIdle(JobCounter* counter)
 {
-	while (*counter != 0)
+	while (counter->counter.load() != 0)
 		Sleep(5);
 }
 
 void JobQueue::SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer)
 {
 	this->numCounters = numCounters;
-	counters = DL_NEW_ARRAY(DefAlloc(), Internal::AlignedCounter, numCounters);
+	counters = DL_NEW_ARRAY(DefAlloc(), JobCounter, numCounters);
 
 	for (uint32_t i = 0; i < numCounters; ++i)
+	{
+		counters[i].jobQueue = this;
 		initPtrArrayBuffer[i] = (uintptr_t)&counters[i];
+	}
 
 	counterQueue = DL_NEW(DefAlloc(),
-		ConcurrentQueue<Internal::AlignedCounter*>,
+		ConcurrentQueue<JobCounter*>,
 		numCounters,
-		(Internal::AlignedCounter**)initPtrArrayBuffer,
+		(JobCounter**)initPtrArrayBuffer,
 		numCounters);
 }
 
@@ -236,9 +287,7 @@ void JobQueue::SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer)
 
 void JobQueue::SetupJobStorage(uint32_t size)
 {
-	numPausedJobs = 0;
-	pausedJobs = DL_NEW_ARRAY(alloc, Job, size);
-	readyPausedJobs = DL_NEW(alloc, ConcurrentQueue<Job>, size);
+	readyPausedJobFiberQueue = DL_NEW(alloc, ConcurrentQueue<Internal::Fiber*>, size);
 	jobQueue = DL_NEW(alloc, ConcurrentQueue<Job>, size);
 }
 
@@ -246,7 +295,7 @@ void JobQueue::SetupWorkers(uint32_t numWorkers)
 {
 	workerThreads = DL_NEW_ARRAY(alloc, Thread*, numWorkers);
 
-	workerThreadData.jobDoer = this;
+	workerThreadData.jobQueue = this;
 	workerThreadData.runFlag.store(true);
 	workerThreadData.startFlag.store(false);
 
@@ -274,8 +323,7 @@ void JobQueue::TearDownJobStorage()
 {
 	// TODO: Consider checking if all jobs have been completed before tearing down? Or quick exit?
 	DL_DELETE(DefAlloc(), jobQueue);
-	DL_DELETE(DefAlloc(), readyPausedJobs);
-	DL_DELETE_ARRAY(DefAlloc(), pausedJobs);
+	DL_DELETE(DefAlloc(), readyPausedJobFiberQueue);
 }
 
 void JobQueue::TearDownFibers()

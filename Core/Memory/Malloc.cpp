@@ -44,7 +44,7 @@ void Malloc::Free( void* ptr )
 	free( headerPtr );
 
 #ifdef DL_TRACK_ALLOCS
-	AllocTracker::Remove( ptr );
+	GetAllocTracker().Remove( ptr );
 #endif
 }
 
@@ -53,7 +53,7 @@ void* Malloc::Allocate( uint64_t size, uint8_t align, const char* file, const ch
 	uint32_t line )
 {
 	void* ptr = Allocate( size, align );
-	AllocTracker::Track( ptr, size, file, function, line );
+	GetAllocTracker().Track( ptr, size, file, function, line );
 
 	return ptr;
 }
@@ -62,7 +62,7 @@ void* Malloc::Reallocate( void* ptr, uint64_t size, const char* file, const char
 	uint32_t line )
 {
 	void* newPtr = Reallocate( ptr, size );
-	AllocTracker::Modify( ptr, newPtr, size, file, function, line );
+	GetAllocTracker().Modify( ptr, newPtr, size, file, function, line );
 
 	return ptr;
 }

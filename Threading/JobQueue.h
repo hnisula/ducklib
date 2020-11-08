@@ -5,26 +5,11 @@
 
 namespace DuckLib
 {
+struct JobCounter;
 class JobQueue;
-struct Job;
 
 namespace Internal
 {
-class alignas(CACHE_LINE_SIZE) AlignedCounter
-{
-	std::atomic<uint32_t> counter;
-	Job* waitingJob;
-};
-
-struct alignas(CACHE_LINE_SIZE) Fiber
-{
-	void* osFiber;
-	Job* currentJob;
-
-	static const uint32_t DEFAULT_STACK_SIZE = 65536;
-};
-
-void SwitchFiber(Fiber* fiber);
 void SwitchToWorker();
 void InitWorkerThread();
 uint32_t __stdcall WorkerThreadJob(void* data);
@@ -39,11 +24,42 @@ struct Job
 private:
 
 	friend void __stdcall Internal::FiberJobWrapper(void*);
+	friend uint32_t __stdcall Internal::WorkerThreadJob(void*);
 	friend class JobQueue;
 
+	JobCounter* jobCounter;
 	void (*jobFunction)(void*);
 	void* jobData;
-	std::atomic<uint32_t>* jobCounter;
+};
+
+namespace Internal
+{
+void _stdcall FiberJobWrapper(void*);
+	
+struct alignas(CACHE_LINE_SIZE) Fiber
+{
+	Job currentJob;
+	void* osFiber;
+
+	static const uint32_t DEFAULT_STACK_SIZE = 65536;
+};
+
+void SwitchFiber(Fiber* fiber);
+}
+
+struct alignas(CACHE_LINE_SIZE) JobCounter
+{
+	friend void _stdcall Internal::FiberJobWrapper(void*);
+	friend class JobQueue;
+
+protected:
+
+	void Reset();
+	void Decrement();
+	
+	JobQueue* jobQueue;
+	std::atomic<uint32_t> counter;
+	Internal::Fiber* waitingJobFiber;
 };
 
 class JobQueue
@@ -55,31 +71,34 @@ public:
 	JobQueue(uint32_t size, uint32_t numFibers, uint32_t numWorkers = MATCH_NUM_LOGICAL_CORES);
 	~JobQueue();
 
-	std::atomic<uint32_t>* Push(Job* jobs, uint32_t numJobs);
+	JobCounter* Push(Job* jobs, uint32_t numJobs);
 
-	void WaitForCounter(std::atomic<uint32_t>* counter);
+	void WaitForCounter(JobCounter* counter);
 
 private:
 
 	friend struct Internal::Fiber;
+	friend struct JobCounter;
 	friend uint32_t __stdcall Internal::WorkerThreadJob(void* data);
 	friend void __stdcall Internal::FiberJobWrapper(void* data);
 
 	struct WorkerThreadData
 	{
-		JobQueue* jobDoer;
+		JobQueue* jobQueue;
 		std::atomic<bool> runFlag;
 		std::atomic<bool> startFlag;
 	};
 
-	void PauseJob(Job* job);
-	bool GetReadyJob(Job* job);
+	Internal::Fiber* GetReadyJobAndFiber();
+	void ReturnFiberIfJobCompleted(Internal::Fiber* completedFiber);
+
+	void FinalizeCompletedJobCounter(JobCounter* counter);
 
 	Internal::Fiber CreateFiber(void* fiberData);
 	void DeleteFiber(Internal::Fiber* fiber);
 	uint32_t GetNumLogicalCores() const;
 
-	void WaitWithoutWork(std::atomic<uint32_t>* counter);
+	void WaitIdle(JobCounter* counter);
 
 	void SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer);
 	void SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer);
@@ -94,21 +113,27 @@ private:
 	IAlloc& alloc;
 
 	uint32_t numCounters;
-	Internal::AlignedCounter* counters;
-	ConcurrentQueue<Internal::AlignedCounter*>* counterQueue;
+	JobCounter* counters;
+	ConcurrentQueue<JobCounter*>* counterQueue;
 	
 	uint32_t numFibers;
 	Internal::Fiber* fibers;
 	ConcurrentQueue<Internal::Fiber*>* fiberQueue;
 
-	uint32_t numPausedJobs;
 	uint32_t queueSize;
-	Job* pausedJobs;
-	ConcurrentQueue<Job>* readyPausedJobs;
+	ConcurrentQueue<Internal::Fiber*>* readyPausedJobFiberQueue;
 	ConcurrentQueue<Job>* jobQueue;
 
 	uint32_t numWorkers;
 	Thread** workerThreads;
 	WorkerThreadData workerThreadData;
+
+	// TODO: Implement
+#ifdef _DEBUG
+	uint32_t maxNumFibers;
+	uint32_t maxNumJobs;
+	uint32_t maxNumPausedJobs;
+	uint32_t maxNumJobCounters;
+#endif
 };
 }

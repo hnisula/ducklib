@@ -5,10 +5,12 @@ using namespace DuckLib::Internal::Memory;
 
 TEST( TestAllocTest, Track )
 {
-	AllocTracker::Clear();
-	AllocTracker::Track( (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
-	const AllocTracker::Entry* entries = AllocTracker::GetEntries();
-	uint32_t entryCount = AllocTracker::GetEntryCount();
+	AllocTracker allocTracker;
+	
+	allocTracker.Clear();
+	allocTracker.Track( (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
+	const AllocTracker::Entry* entries = allocTracker.GetEntries();
+	uint32_t entryCount = allocTracker.GetEntryCount();
 
 	EXPECT_EQ( 1, entryCount );
 	EXPECT_EQ( (void*)0x1337, entries[0].ptr );
@@ -20,11 +22,13 @@ TEST( TestAllocTest, Track )
 
 TEST( TestAllocTest, TrackModify )
 {
-	AllocTracker::Clear();
-	AllocTracker::Track( (void*)0x16, 16, "dummer.cpp", "DoDummer", 20 );
-	AllocTracker::Modify( (void*)0x16, (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
-	const AllocTracker::Entry* entries = AllocTracker::GetEntries();
-	uint32_t entryCount = AllocTracker::GetEntryCount();
+	AllocTracker allocTracker;
+	
+	allocTracker.Clear();
+	allocTracker.Track( (void*)0x16, 16, "dummer.cpp", "DoDummer", 20 );
+	allocTracker.Modify( (void*)0x16, (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
+	const AllocTracker::Entry* entries = allocTracker.GetEntries();
+	uint32_t entryCount = allocTracker.GetEntryCount();
 
 	EXPECT_EQ( 1, entryCount );
 	EXPECT_EQ( (void*)0x1337, entries[0].ptr );
@@ -36,10 +40,12 @@ TEST( TestAllocTest, TrackModify )
 
 TEST( TestAllocTest, TrackDelete )
 {
-	AllocTracker::Clear();
-	AllocTracker::Track( (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
-	AllocTracker::Remove( (void*)0x1337 );
-	uint32_t entryCount = AllocTracker::GetEntryCount();
+	AllocTracker allocTracker;
+	
+	allocTracker.Clear();
+	allocTracker.Track( (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
+	allocTracker.Remove( (void*)0x1337 );
+	uint32_t entryCount = allocTracker.GetEntryCount();
 
 	EXPECT_EQ( 0, entryCount );
 }
