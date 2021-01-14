@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="Core\D3D12\D3D12Api.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12Adapter.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IAdapter.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ISwapChain.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12SwapChain.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12Formats.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resources\ImageBuffer.h">
+      <Filter>Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Format.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\ICommandBuffer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12CommandBuffer.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Handle.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IResourceCommandBuffer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12ResourceCommandBuffer.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12ResourceAllocator.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Core">
+      <UniqueIdentifier>{9e6320ab-7f97-497f-8fb8-099cf5aa2a68}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\D3D12">
+      <UniqueIdentifier>{00e3b17d-ec46-46f2-a06a-d42bdafb0eff}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core\Resources">
+      <UniqueIdentifier>{b8399f64-b27c-4f10-ac2d-a256810dd6c5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Core\D3D12\D3D12Api.cpp">
+      <Filter>Core\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\D3D12\D3D12Adapter.cpp">
+      <Filter>Core\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\D3D12\D3D12SwapChain.cpp">
+      <Filter>Core\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\IAdapter.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\D3D12\D3D12CommandBuffer.cpp">
+      <Filter>Core\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\D3D12\D3D12ResourceCommandBuffer.cpp">
+      <Filter>Core\D3D12</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
