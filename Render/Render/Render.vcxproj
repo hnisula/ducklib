@@ -38,6 +38,7 @@
     <ClInclude Include="Core\IAdapter.h" />
     <ClInclude Include="Core\D3D12\D3D12Adapter.h" />
     <ClInclude Include="Core\D3D12\D3D12Api.h" />
+    <ClInclude Include="Core\IApi.h" />
     <ClInclude Include="Core\ICommandBuffer.h" />
     <ClInclude Include="Core\IFrameSyncer.h" />
     <ClInclude Include="Core\ISwapChain.h" />

@@ -55,6 +55,9 @@
     <ClInclude Include="Core\D3D12\D3D12FrameSyncer.h">
       <Filter>Core\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Core\IApi.h">
+      <Filter>Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
