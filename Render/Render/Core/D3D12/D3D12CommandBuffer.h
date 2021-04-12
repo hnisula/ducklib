@@ -14,11 +14,15 @@ public:
 
 	const void* GetApiHandle() const override;
 
-	void TransitionTo(ImageBuffer* image) override;
+	void Reset() override;
+	void Close() override;
+
+	void Transition(ImageBuffer* image, ResourceState from, ResourceState to) override;
 
 protected:
 
-	D3D12CommandBuffer(ID3D12GraphicsCommandList1* apiCommandList,
+	D3D12CommandBuffer(
+		ID3D12GraphicsCommandList1* apiCommandList,
 		ID3D12CommandAllocator* apiCommandAllocator);
 	~D3D12CommandBuffer();
 

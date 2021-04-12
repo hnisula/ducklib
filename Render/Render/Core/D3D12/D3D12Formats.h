@@ -108,5 +108,10 @@ static DXGI_FORMAT dxgiFormatMap[] = {
 	DXGI_FORMAT_B5G5R5A1_UNORM,
 	DXGI_FORMAT_R10G10B10_XR_BIAS_A2_UNORM
 };
+
+inline DXGI_FORMAT MapToD3D12Format(Format format)
+{
+	return dxgiFormatMap[(uint32_t)format];
+}
 }
 }

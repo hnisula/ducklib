@@ -9,8 +9,10 @@ class D3D12ResourceAllocator
 {
 public:
 
-	Buffer* AllocateBuffer();
+	// Buffer* AllocateBuffer();
 	ImageBuffer* AllocatorImageBuffer();
+
+	void FreeImageBuffer(ImageBuffer* imageBuffer);
 	
 private:
 

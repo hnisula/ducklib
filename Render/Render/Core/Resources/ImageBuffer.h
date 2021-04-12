@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "../Format.h"
+#include "Format.h"
 
 namespace DuckLib
 {

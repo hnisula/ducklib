@@ -8,9 +8,9 @@ class IApi
 {
 public:
 
-	virtual ~IApi() = 0;
+	virtual ~IApi() {};
 	
-	virtual const IAdapter* const* GetAdapters() const = 0;
+	virtual const std::vector<IAdapter*>& GetAdapters() const = 0;
 	virtual ISwapChain* CreateSwapChain(
 		uint32_t width,
 		uint32_t height,
@@ -27,6 +27,8 @@ public:
 	virtual void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
 		uint32_t numCommandBuffers) = 0;
+
+	virtual void WaitForPreviousFrame() = 0;
 };
 }
 }

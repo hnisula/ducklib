@@ -1,5 +1,6 @@
 #include <exception>
 #include <Core/Memory/IAlloc.h>
+#include "d3dx12.h"
 #include "D3D12Api.h"
 #include "D3D12CommandBuffer.h"
 #include "D3D12ResourceCommandBuffer.h"
@@ -14,11 +15,26 @@ D3D12Api::D3D12Api()
 	: factory(nullptr)
 	, device(nullptr)
 {
-	DL_D3D12_THROW_FAIL(CreateDXGIFactory1(IID_PPV_ARGS(&factory)), "Failed to create DXGI factory");
+#ifdef _DEBUG
+	DL_D3D12_THROW_FAIL(
+		CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory)),
+		"Failed to create DXGI factory");
 
-	const IAdapter* const* adapters = GetAdapters();
+	DL_D3D12_THROW_FAIL(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)),
+		"Failed to get debugInterface interface");
+
+	debugInterface->EnableDebugLayer();
+#else
+	DL_D3D12_THROW_FAIL(
+		CreateDXGIFactory2(IID_PPV_ARGS(&factory)),
+		"Failed to create DXGI factory");
+#endif
+
+	EnumAndCreateAdapters();
+
 	const IAdapter* adapter = nullptr;
-
+	const std::vector<IAdapter*>& adapters = GetAdapters();
+	
 	for (const IAdapter* a : adapters)
 		if (a->IsHardware())
 			adapter = a;
@@ -41,9 +57,9 @@ D3D12Api::~D3D12Api()
 		DestroySwapChain(swapChain);
 }
 
-const IAdapter* const* D3D12Api::GetAdapters() const
+const std::vector<IAdapter*>& D3D12Api::GetAdapters() const
 {
-	return adapters.data();
+	return adapters;
 }
 
 ISwapChain* D3D12Api::CreateSwapChain(
@@ -59,7 +75,7 @@ ISwapChain* D3D12Api::CreateSwapChain(
 
 	swapChainDesc.Width = width;
 	swapChainDesc.Height = height;
-	swapChainDesc.Format = MapFormat(format);
+	swapChainDesc.Format = MapToD3D12Format(format);
 	swapChainDesc.Stereo = FALSE;
 	swapChainDesc.SampleDesc = { 1, 0 };
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -70,12 +86,12 @@ ISwapChain* D3D12Api::CreateSwapChain(
 	swapChainDesc.Flags = 0;
 
 	DL_D3D12_THROW_FAIL(
-		factory->CreateSwapChainForHwnd(device, windowHandle, &swapChainDesc, nullptr, nullptr, &apiSwapChain),
+		factory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &apiSwapChain),
 		"Failed to create swap chain");
 
 	uint32_t descriptorSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	ID3D12DescriptorHeap* descriptorHeap = CreateDescriptorHeap(bufferCount, D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-	D3D12_CPU_DESCRIPTOR_HANDLE firstDescriptor = descriptorHeap->GetCPUDescriptorHandleForHeapStart();
+	CD3DX12_CPU_DESCRIPTOR_HANDLE descriptorIterator(descriptorHeap->GetCPUDescriptorHandleForHeapStart());
 	ImageBuffer rtvHandles[ISwapChain::MAX_BUFFERS];
 
 	for (uint32_t i = 0; i < bufferCount; ++i)
@@ -84,12 +100,25 @@ ISwapChain* D3D12Api::CreateSwapChain(
 			apiSwapChain->GetBuffer(i, IID_PPV_ARGS(&apiBuffer)),
 			"Failed to get buffer from D3D12 swap chain");
 
-		rtvHandles[i].ptr = (uintptr_t)firstDescriptor.ptr + (uintptr_t)descriptorSize;
+		device->CreateRenderTargetView(apiBuffer, nullptr, descriptorIterator);
 
-		device->CreateRenderTargetView(apiBuffer, nullptr, rtvHandles[i]);
+		descriptorIterator.Offset(1, descriptorSize);
+		rtvHandles[i].width = width;
+		rtvHandles[i].height = height;
+		rtvHandles[i].format = format;
+		rtvHandles[i].apiResource = apiBuffer;
+		rtvHandles[i].apiDescriptor = (void*)descriptorIterator.ptr;
 	}
 
-	D3D12SwapChain* swapChain = DL_NEW(DefAlloc(), D3D12SwapChain, width, height, format, apiSwapChain, rtvHandles);
+	D3D12SwapChain* swapChain = DL_NEW(
+		DefAlloc(),
+		D3D12SwapChain,
+		width,
+		height,
+		format,
+		apiSwapChain,
+		bufferCount,
+		rtvHandles);
 	swapChains.push_back(swapChain);
 
 	return swapChain;
@@ -161,12 +190,12 @@ void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t n
 	for (uint32_t i = 0; i < numCommandBuffers; ++i)
 		apiLists[i] = (ID3D12CommandList*)commandBuffers[i]->GetApiHandle();
 
-	commandQueue->ExecuteCommandLists(numCommandBuffers, (ID3D12CommandList* const*)apiLists);
+	commandQueue->ExecuteCommandLists(numCommandBuffers, apiLists);
 }
 
-DXGI_FORMAT D3D12Api::MapFormat(Format format)
+void D3D12Api::WaitForPreviousFrame()
 {
-	return dxgiFormatMap[(uint32_t)format];
+	
 }
 
 void D3D12Api::EnumAndCreateAdapters()
@@ -185,13 +214,14 @@ void D3D12Api::EnumAndCreateAdapters()
 
 		wcstombs_s(&dummy, descriptionBuffer, desc.Description, 128);
 
-		if (D3D12CreateDevice(apiAdapter, DL_D3D_FEATURE_LEVEL, _uuidof(ID3D12Device), nullptr) == S_OK)
+		// S_FALSE because apparently that's what it's supposed to do on success with null device
+		if (D3D12CreateDevice(apiAdapter, DL_D3D_FEATURE_LEVEL, _uuidof(ID3D12Device), nullptr) == S_FALSE)
 		{
 			IAdapter* adapter = DL_NEW(
 				DefAlloc(),
 				D3D12Adapter,
 				descriptionBuffer,
-				desc.Flags,
+				(desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
 				apiAdapter);
 			adapters.push_back(adapter);
 		}
@@ -201,7 +231,7 @@ void D3D12Api::EnumAndCreateAdapters()
 ID3D12CommandQueue* D3D12Api::CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags)
 {
 	ID3D12CommandQueue* queue;
-	D3D12_COMMAND_QUEUE_DESC queueDesc;
+	D3D12_COMMAND_QUEUE_DESC queueDesc {};
 
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;

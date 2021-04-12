@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "../Format.h"
+#include "Resources/Format.h"
 #include "Resources/ImageBuffer.h"
 
 namespace DuckLib
@@ -13,9 +13,17 @@ public:
 
 	static const uint32_t MAX_BUFFERS = 4;
 
-protected:
+	ISwapChain();
+	virtual ~ISwapChain() {}
 
-	virtual ~ISwapChain() = 0;
+	ImageBuffer* GetBuffer(uint32_t index);
+	ImageBuffer* GetCurrentBuffer();
+
+	virtual void Present() = 0;
+	// TODO: Rename
+	void AdvanceBuffer();
+
+protected:
 
 	virtual void* GetApiHandle() const = 0;
 	
@@ -23,7 +31,11 @@ protected:
 	uint32_t height;
 	Format format;
 	uint32_t bufferCount;
-	ImageBuffer* buffers[MAX_BUFFERS];
+	// Should these be stored in the resource allocator or individually inside these other structures?
+	// There are others that don't have any obvious parent so they should be stored in the allocator. Do the same with these? Yes, probably.
+	ImageBuffer buffers[MAX_BUFFERS];
+
+	uint32_t currentBufferIndex;
 };
 }
 }

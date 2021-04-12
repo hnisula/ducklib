@@ -1,14 +1,15 @@
 #pragma once
 #include <cstdint>
 #include <d3d12.h>
-#include <dxgi1_2.h>
+#include "d3dx12.h"
+#include <dxgi1_4.h>
 #include <vector>
 #include "D3D12Adapter.h"
 #include "D3D12SwapChain.h"
 #include "../ICommandBuffer.h"
 #include "../IResourceCommandBuffer.h"
 #include "../IApi.h"
-#include "../Format.h"
+#include "../Resources/Format.h"
 
 namespace DuckLib
 {
@@ -27,7 +28,7 @@ public:
 	D3D12Api();
 	~D3D12Api() override;
 
-	const IAdapter* const* GetAdapters() const override;
+	const std::vector<IAdapter*>& GetAdapters() const override;
 
 	ISwapChain* CreateSwapChain(
 		uint32_t width,
@@ -44,9 +45,9 @@ public:
 
 	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers) override;
 
-private:
+	void WaitForPreviousFrame() override;
 
-	static DXGI_FORMAT MapFormat(Format format);
+private:
 
 	void EnumAndCreateAdapters();
 	ID3D12CommandQueue* CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags);
@@ -64,13 +65,17 @@ private:
 
 	void DestroyAdapters();
 
-	IDXGIFactory2* factory;
+#ifdef _DEBUG
+	ID3D12Debug* debugInterface;
+#endif
+	IDXGIFactory4* factory;
 	ID3D12Device* device;
 
 	ID3D12CommandQueue* commandQueue;
 
 	ID3D12DescriptorHeap* descriptorHeap;
 
+	// TODO: Replace this temporary store with an allocation object
 	std::vector<IAdapter*> adapters;
 	std::vector<ISwapChain*> swapChains;
 };

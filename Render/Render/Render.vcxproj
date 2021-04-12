@@ -20,25 +20,33 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\D3D12\D3D12CommandBuffer.cpp" />
+    <ClCompile Include="Core\D3D12\D3D12FrameSyncer.cpp" />
+    <ClCompile Include="Core\D3D12\D3D12ResourceAllocator.cpp" />
     <ClCompile Include="Core\D3D12\D3D12ResourceCommandBuffer.cpp" />
     <ClCompile Include="Core\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="Core\FrameSyncer.cpp" />
     <ClCompile Include="Core\IAdapter.cpp" />
+    <ClCompile Include="Core\ISwapChain.cpp" />
     <ClInclude Include="Core\D3D12\D3D12CommandBuffer.h" />
     <ClInclude Include="Core\D3D12\D3D12Formats.h" />
+    <ClInclude Include="Core\D3D12\D3D12FrameSyncer.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceAllocator.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceCommandBuffer.h" />
+    <ClInclude Include="Core\D3D12\D3D12ResourceStates.h" />
     <ClInclude Include="Core\D3D12\D3D12SwapChain.h" />
     <ClInclude Include="Core\Handle.h" />
     <ClInclude Include="Core\IAdapter.h" />
     <ClInclude Include="Core\D3D12\D3D12Adapter.h" />
     <ClInclude Include="Core\D3D12\D3D12Api.h" />
     <ClInclude Include="Core\ICommandBuffer.h" />
+    <ClInclude Include="Core\IFrameSyncer.h" />
     <ClInclude Include="Core\ISwapChain.h" />
     <ClInclude Include="Core\IResourceCommandBuffer.h" />
     <ClCompile Include="Core\D3D12\D3D12Adapter.cpp" />
     <ClCompile Include="Core\D3D12\D3D12Api.cpp" />
+    <ClInclude Include="Core\Resources\Format.h" />
     <ClInclude Include="Core\Resources\ImageBuffer.h" />
-    <ClInclude Include="Core\Format.h" />
+    <ClInclude Include="Core\Resources\ResourceStates.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -101,6 +109,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
+    <IncludePath>../../Core;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -143,9 +152,9 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>DL_TRACK_ALLOCS;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>

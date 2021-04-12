@@ -7,19 +7,57 @@ using namespace DuckLib;
 using namespace Render;
 
 bool runTest = true;
+HWND window;
 
 IApi* api = new D3D12Api();
+ISwapChain* swapChain;
+ICommandBuffer* cmdBuffer;
 
-
-void InitRender()
+void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 {
+	swapChain = api->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
+	cmdBuffer = api->CreateCommandBuffer();
+}
+
+void RenderFrame()
+{
+	cmdBuffer->Reset();
 	
+	cmdBuffer->Transition(
+		swapChain->GetCurrentBuffer(),
+		ResourceState::PRESENT,
+		ResourceState::RENDER_TARGET);
+	
+	cmdBuffer->Transition(
+		swapChain->GetCurrentBuffer(),
+		ResourceState::RENDER_TARGET,
+		ResourceState::PRESENT);
+
+	cmdBuffer->Close();
+	
+	api->ExecuteCommandBuffers(&cmdBuffer, 1);
+
+	swapChain->Present();
+
+	api->WaitForPreviousFrame();
+}
+
+void DestroyRender()
+{
+	api->DestroySwapChain(swapChain);
 }
 
 LRESULT __stdcall WndProc(HWND hwnd, uint32_t msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg)
 	{
+	case WM_CLOSE:
+		DestroyWindow(window);
+		return 0;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		runTest = false;
+		return 0;
 	default:
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
@@ -35,8 +73,8 @@ HWND InitWindow(uint32_t width, uint32_t height, HINSTANCE hInstance)
 	wndClass.lpfnWndProc = WndProc;
 	wndClass.cbClsExtra = 0;
 	wndClass.cbWndExtra = 0;
-	wndClass.hIcon = 0;
-	wndClass.hIconSm = 0;
+	wndClass.hIcon = nullptr;
+	wndClass.hIconSm = nullptr;
 	wndClass.hCursor = LoadCursor(nullptr, IDC_ARROW);
 	wndClass.hInstance = hInstance;
 	wndClass.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
@@ -55,10 +93,11 @@ HWND InitWindow(uint32_t width, uint32_t height, HINSTANCE hInstance)
 	uint32_t windowWidth = clientAreaRect.right - clientAreaRect.left;
 	uint32_t windowHeight = clientAreaRect.bottom - clientAreaRect.top;
 
-	HWND hwnd = CreateWindowExA(0,
+	HWND newWindow = CreateWindowExA(
+		0,
 		"renderWindowClass",
-		"",
-		WS_OVERLAPPEDWINDOW,
+		"HelloWorld",
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 		CW_USEDEFAULT,
 		CW_USEDEFAULT,
 		windowWidth,
@@ -69,21 +108,33 @@ HWND InitWindow(uint32_t width, uint32_t height, HINSTANCE hInstance)
 		nullptr
 	);
 
-	if (hwnd == nullptr)
+	if (newWindow == nullptr)
 		throw std::exception("maddafakka");
 
-	return hwnd;
+	return newWindow;
 }
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* cmdLine, int32_t cmdShow)
 {
-	HWND window = InitWindow(800, 600, hInstance);
+	const uint32_t width = 800;
+	const uint32_t height = 600;
+	window = InitWindow(width, height, hInstance);
 	MSG msg;
+
+	InitRender(width, height, window);
 	
-	while (PeekMessage(&msg, window, 0, 0, PM_REMOVE))
+	while (runTest)
 	{
-		
+		while (PeekMessage(&msg, window, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		RenderFrame();
 	}
+
+	DestroyRender();
 
 	return 0;
 }

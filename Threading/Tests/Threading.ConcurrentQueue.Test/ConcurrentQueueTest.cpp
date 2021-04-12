@@ -1,3 +1,4 @@
+#include <conio.h>
 #include <exception>
 #include <iostream>
 #include "../../Threading/ConcurrentQueue.h"
@@ -84,24 +85,55 @@ int main()
 		items[i] = numItems - i;
 
 	// TODO: Fix temp object ptr being passed as arg
+	static WorkerConfig pusherConfig =
+	{
+		&queue,
+		&pushCounter,
+		&pushReservation,
+		items,
+		allPoppedItems,
+		numItems,
+		&numAllPoppedItems,
+		true,
+		false
+	};
+	static WorkerConfig popperConfig =
+	{
+		&queue,
+		&pushCounter,
+		&pushReservation,
+		items,
+		allPoppedItems,
+		numItems,
+		&numAllPoppedItems,
+		false,
+		true
+	};
+	static WorkerConfig hybridConfig =
+	{
+		&queue,
+		&pushCounter,
+		&pushReservation,
+		items,
+		allPoppedItems,
+		numItems,
+		&numAllPoppedItems,
+		true,
+		true
+	};
+	
 	for (uint32_t i = 0; i < numPushers; ++i)
-		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker,
-			&WorkerConfig {&queue, &pushCounter, &pushReservation, items, allPoppedItems, numItems,
-			&numAllPoppedItems, true, false});
+		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker, &pusherConfig);
 
 	numWorkers += numPushers;
 
 	for (uint32_t i = 0; i < numPoppers; ++i)
-		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker,
-			&WorkerConfig {&queue, &pushCounter, &pushReservation, items, allPoppedItems, numItems,
-			&numAllPoppedItems, false, true});
+		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker, &popperConfig);
 
 	numWorkers += numPoppers;
 
 	for (uint32_t i = 0; i < numHybrids; ++i)
-		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker,
-			&WorkerConfig {&queue, &pushCounter, &pushReservation, items, allPoppedItems, numItems,
-			&numAllPoppedItems, true, true});
+		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker, &hybridConfig);
 
 	numWorkers += numHybrids;
 
@@ -130,6 +162,8 @@ int main()
 	}
 
 	std::cout << "Test completed successfully" << std::endl;
+
+	_getch();
 
 	return 0;
 }

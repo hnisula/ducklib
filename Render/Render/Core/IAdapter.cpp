@@ -12,8 +12,8 @@ IAdapter::IAdapter(const char* description, bool isHardware)
 
 	if (description)
 	{
-		uint32_t descriptionLength = strlen(description);
-		this->description = DL_NEW_ARRAY(DefAlloc(), char, descriptionLength + 1);
+		uint32_t descriptionLength = (uint32_t)strlen(description) + 1;
+		this->description = DL_NEW_ARRAY(DefAlloc(), char, descriptionLength);
 		strcpy_s(this->description, descriptionLength, description);
 	}
 }
