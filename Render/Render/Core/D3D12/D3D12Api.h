@@ -1,9 +1,9 @@
 #pragma once
 #include <cstdint>
 #include <d3d12.h>
-#include "d3dx12.h"
 #include <dxgi1_4.h>
 #include <vector>
+#include "D3D12Common.h"
 #include "D3D12Adapter.h"
 #include "D3D12SwapChain.h"
 #include "../ICommandBuffer.h"
@@ -15,10 +15,6 @@ namespace DuckLib
 {
 namespace Render
 {
-#define DL_D3D12_THROW_FAIL(statement, text) \
-	if ((statement) != S_OK) \
-		throw std::exception((text))
-
 const D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 
 class D3D12Api : public IApi
@@ -45,7 +41,7 @@ public:
 
 	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers) override;
 
-	void WaitForPreviousFrame() override;
+	void SignalCompletion(ISwapChain* swapChain) override;
 
 private:
 
@@ -64,6 +60,8 @@ private:
 	void DestroyDescriptorHeap(ID3D12DescriptorHeap* descriptorHeap);
 
 	void DestroyAdapters();
+
+	static const uint32_t NUM_FRAME_BUFFERS = 4;
 
 #ifdef _DEBUG
 	ID3D12Debug* debugInterface;

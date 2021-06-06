@@ -6,7 +6,10 @@ namespace Render
 {
 ISwapChain::ISwapChain()
 {
-	currentBufferIndex = 0;
+	currentFrameIndex = 0;
+
+	for (uint32_t i = 0; i < MAX_BUFFERS; ++i)
+		frameCounters[i] = UINT32_MAX;
 }
 
 ImageBuffer* ISwapChain::GetBuffer(uint32_t index)
@@ -16,12 +19,16 @@ ImageBuffer* ISwapChain::GetBuffer(uint32_t index)
 
 ImageBuffer* ISwapChain::GetCurrentBuffer()
 {
-	return &buffers[currentBufferIndex % bufferCount];
+	return &buffers[currentFrameIndex % numBuffers];
 }
 
-void ISwapChain::AdvanceBuffer()
+uint32_t ISwapChain::GetSignalValue()
 {
-	++currentBufferIndex;
+	uint32_t bufferIndex = currentFrameIndex % numBuffers;
+
+	frameCounters[bufferIndex] = currentFrameIndex;
+
+	return frameCounters[bufferIndex];
 }
 }
 }

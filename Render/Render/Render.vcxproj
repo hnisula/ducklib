@@ -20,16 +20,14 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Core\D3D12\D3D12CommandBuffer.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12FrameSyncer.cpp" />
     <ClCompile Include="Core\D3D12\D3D12ResourceAllocator.cpp" />
     <ClCompile Include="Core\D3D12\D3D12ResourceCommandBuffer.cpp" />
     <ClCompile Include="Core\D3D12\D3D12SwapChain.cpp" />
-    <ClCompile Include="Core\FrameSyncer.cpp" />
     <ClCompile Include="Core\IAdapter.cpp" />
     <ClCompile Include="Core\ISwapChain.cpp" />
     <ClInclude Include="Core\D3D12\D3D12CommandBuffer.h" />
+    <ClInclude Include="Core\D3D12\D3D12Common.h" />
     <ClInclude Include="Core\D3D12\D3D12Formats.h" />
-    <ClInclude Include="Core\D3D12\D3D12FrameSyncer.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceAllocator.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceCommandBuffer.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceStates.h" />
@@ -40,7 +38,6 @@
     <ClInclude Include="Core\D3D12\D3D12Api.h" />
     <ClInclude Include="Core\IApi.h" />
     <ClInclude Include="Core\ICommandBuffer.h" />
-    <ClInclude Include="Core\IFrameSyncer.h" />
     <ClInclude Include="Core\ISwapChain.h" />
     <ClInclude Include="Core\IResourceCommandBuffer.h" />
     <ClCompile Include="Core\D3D12\D3D12Adapter.cpp" />

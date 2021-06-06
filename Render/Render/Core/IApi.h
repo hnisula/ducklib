@@ -28,7 +28,7 @@ public:
 		ICommandBuffer** commandBuffers,
 		uint32_t numCommandBuffers) = 0;
 
-	virtual void WaitForPreviousFrame() = 0;
+	virtual void SignalCompletion(ISwapChain* swapChain) = 0;
 };
 }
 }

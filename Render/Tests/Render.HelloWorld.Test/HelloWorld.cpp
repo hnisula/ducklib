@@ -27,7 +27,11 @@ void RenderFrame()
 		swapChain->GetCurrentBuffer(),
 		ResourceState::PRESENT,
 		ResourceState::RENDER_TARGET);
+
+	float clearColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
 	
+	cmdBuffer->SetRT(swapChain->GetCurrentBuffer());
+	cmdBuffer->Clear(swapChain->GetCurrentBuffer(), clearColor);
 	cmdBuffer->Transition(
 		swapChain->GetCurrentBuffer(),
 		ResourceState::RENDER_TARGET,
@@ -39,7 +43,10 @@ void RenderFrame()
 
 	swapChain->Present();
 
-	api->WaitForPreviousFrame();
+	api->SignalCompletion(swapChain);
+	swapChain->WaitForFrame();
+
+	Sleep(20);
 }
 
 void DestroyRender()

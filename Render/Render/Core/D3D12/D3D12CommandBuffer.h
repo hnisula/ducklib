@@ -6,6 +6,8 @@ namespace DuckLib
 {
 namespace Render
 {
+class ISwapChain;
+
 class D3D12CommandBuffer : public ICommandBuffer
 {
 public:
@@ -18,6 +20,10 @@ public:
 	void Close() override;
 
 	void Transition(ImageBuffer* image, ResourceState from, ResourceState to) override;
+	void SetRT(ImageBuffer* rt) override;
+	void SetRT(ISwapChain* swapChain) override;
+
+	void Clear(ImageBuffer* rt, float* rgbaColor) override;
 
 protected:
 
