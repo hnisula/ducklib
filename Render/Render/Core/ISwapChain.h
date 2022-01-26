@@ -18,7 +18,7 @@ public:
 
 	ImageBuffer* GetBuffer(uint32_t index);
 	ImageBuffer* GetCurrentBuffer();
-	uint32_t GetSignalValue();
+	uint64_t GetSignalValue();
 
 	virtual void Present() = 0;
 	virtual void WaitForFrame() = 0;

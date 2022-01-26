@@ -22,7 +22,7 @@ ImageBuffer* ISwapChain::GetCurrentBuffer()
 	return &buffers[currentFrameIndex % numBuffers];
 }
 
-uint32_t ISwapChain::GetSignalValue()
+uint64_t ISwapChain::GetSignalValue()
 {
 	uint32_t bufferIndex = currentFrameIndex % numBuffers;
 

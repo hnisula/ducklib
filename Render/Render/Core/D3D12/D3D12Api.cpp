@@ -227,7 +227,7 @@ void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t n
 void D3D12Api::SignalCompletion(ISwapChain* swapChain)
 {
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
-	uint32_t signalValue = swapChain->GetSignalValue();
+	uint64_t signalValue = swapChain->GetSignalValue();
 	
 	if (commandQueue->Signal(d3dSwapChain->apiFence, signalValue) != S_OK)
 		throw std::exception("Failed to signal completion in D3D12 rendering");
