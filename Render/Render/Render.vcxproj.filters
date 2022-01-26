@@ -55,6 +55,12 @@
     <ClInclude Include="Core\D3D12\D3D12Common.h">
       <Filter>Core\D3D12</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Resources\Buffer.h">
+      <Filter>Core\Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Resources\InputDescription.h">
+      <Filter>Core\Resources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
