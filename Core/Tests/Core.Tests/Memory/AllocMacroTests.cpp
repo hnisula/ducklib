@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <Core/Memory/Malloc.h>
+#include <Memory/Malloc.h>
 
 class Foo
 {
@@ -40,7 +40,7 @@ TEST(AllocMacroTest, NewDeleteArray)
 {
 	DuckLib::Malloc alloc;
 	uint32_t v = 2;
-	const uint32_t arraySize = 32;
+	constexpr uint32_t arraySize = 32;
 	Foo* foo = DL_NEW_ARRAY(alloc, Foo, arraySize);
 
 	for (uint32_t i = 0; i < arraySize; ++i)

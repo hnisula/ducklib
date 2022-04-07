@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include "ConcurrentQueue.h"
-#include "Thread.h"
+#include "Threading/ConcurrentQueue.h"
+#include "Threading/Thread.h"
 
 using namespace DuckLib;
 
-const uint32_t pushValue = 420;
+constexpr uint32_t pushValue = 420;
 
 uint32_t PushThread(void* data)
 {

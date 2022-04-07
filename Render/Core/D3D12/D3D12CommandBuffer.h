@@ -6,13 +6,11 @@ namespace DuckLib
 {
 namespace Render
 {
-class ISwapChain;
-
 class D3D12CommandBuffer : public ICommandBuffer
 {
 public:
 
-	friend class D3D12Api;
+	friend class D3D12Device;
 
 	const void* GetApiHandle() const override;
 
@@ -24,6 +22,14 @@ public:
 	void SetRT(ISwapChain* swapChain) override;
 
 	void Clear(ImageBuffer* rt, float* rgbaColor) override;
+
+	void SetViewport(const Viewport& viewport) override;
+	void SetScissorRect(const Rect& rect) override;
+
+	void SetPrimitiveTopology(PrimitiveTopology topology) override;
+	void SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers) override;
+
+	void Draw() override;
 
 protected:
 

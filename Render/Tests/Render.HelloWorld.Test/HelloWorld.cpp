@@ -1,49 +1,59 @@
 #include <cstdint>
 #include <exception>
 #include <Windows.h>
-#include <Render/Core/D3D12/D3D12Api.h>
+#include "Core/ICommandBuffer.h"
+#include "Core/IDevice.h"
+#include "Core/ISwapChain.h"
+#include "Core/D3D12/D3D12Device.h"
 
 using namespace DuckLib;
 using namespace Render;
 
+constexpr int WND_WIDTH = 800;
+constexpr int WND_HEIGHT = 600;
+
 bool runTest = true;
 HWND window;
 
-IApi* api = new D3D12Api();
+IDevice* adapter = new D3D12Device();
 ISwapChain* swapChain;
 ICommandBuffer* cmdBuffer;
 
 void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 {
-	swapChain = api->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
-	cmdBuffer = api->CreateCommandBuffer();
+	swapChain = adapter->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
+	cmdBuffer = adapter->CreateCommandBuffer();
 }
 
 void RenderFrame()
 {
 	cmdBuffer->Reset();
-	
+
 	cmdBuffer->Transition(
 		swapChain->GetCurrentBuffer(),
 		ResourceState::PRESENT,
 		ResourceState::RENDER_TARGET);
 
-	float clearColor[] = {0.0f, 1.0f, 0.0f, 1.0f};
-	
+	float clearColor[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+	Rect scissorRect{ 0, 0, WND_WIDTH, WND_HEIGHT };
+	Viewport viewport{ 0.0f, 0.0f, (float)WND_WIDTH, (float)WND_HEIGHT, 0, 1 };
+
+	cmdBuffer->SetScissorRect(scissorRect);
+	cmdBuffer->SetViewport(viewport);
 	cmdBuffer->SetRT(swapChain->GetCurrentBuffer());
 	cmdBuffer->Clear(swapChain->GetCurrentBuffer(), clearColor);
-	cmdBuffer->Transition(
-		swapChain->GetCurrentBuffer(),
-		ResourceState::RENDER_TARGET,
-		ResourceState::PRESENT);
+
+	// cmdBuffer->
+
+	cmdBuffer->Transition(swapChain->GetCurrentBuffer(), ResourceState::RENDER_TARGET, ResourceState::PRESENT);
 
 	cmdBuffer->Close();
-	
-	api->ExecuteCommandBuffers(&cmdBuffer, 1);
+
+	adapter->ExecuteCommandBuffers(&cmdBuffer, 1);
 
 	swapChain->Present();
 
-	api->SignalCompletion(swapChain);
+	adapter->SignalCompletion(swapChain);
 	swapChain->WaitForFrame();
 
 	Sleep(20);
@@ -51,7 +61,7 @@ void RenderFrame()
 
 void DestroyRender()
 {
-	api->DestroySwapChain(swapChain);
+	adapter->DestroySwapChain(swapChain);
 }
 
 LRESULT __stdcall WndProc(HWND hwnd, uint32_t msg, WPARAM wParam, LPARAM lParam)
@@ -123,13 +133,13 @@ HWND InitWindow(uint32_t width, uint32_t height, HINSTANCE hInstance)
 
 int __stdcall WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* cmdLine, int32_t cmdShow)
 {
-	const uint32_t width = 800;
-	const uint32_t height = 600;
+	const uint32_t width = WND_WIDTH;
+	const uint32_t height = WND_HEIGHT;
 	window = InitWindow(width, height, hInstance);
 	MSG msg;
 
 	InitRender(width, height, window);
-	
+
 	while (runTest)
 	{
 		while (PeekMessage(&msg, window, 0, 0, PM_REMOVE))

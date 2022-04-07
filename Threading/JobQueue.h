@@ -66,7 +66,7 @@ class JobQueue
 {
 public:
 
-	static const uint32_t MATCH_NUM_LOGICAL_CORES = 0;
+	static constexpr uint32_t MATCH_NUM_LOGICAL_CORES = 0;
 	
 	JobQueue(uint32_t size, uint32_t numFibers, uint32_t numWorkers = MATCH_NUM_LOGICAL_CORES);
 	~JobQueue();

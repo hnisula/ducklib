@@ -1,14 +1,18 @@
 #pragma once
 
+#include <vector>
+#include "IAdapter.h"
+#include "IResourceCommandBuffer.h"
+
 namespace DuckLib
 {
 namespace Render
 {
-class IApi
+class IDevice
 {
 public:
 
-	virtual ~IApi() {};
+	virtual ~IDevice() {}
 	
 	virtual const std::vector<IAdapter*>& GetAdapters() const = 0;
 	virtual ISwapChain* CreateSwapChain(

@@ -1,6 +1,6 @@
-#include "D3D12CommandBuffer.h"
-
 #include <exception>
+#include "D3D12CommandBuffer.h"
+#include "D3D12Common.h"
 #include "D3D12ResourceStates.h"
 #include "D3D12SwapChain.h"
 
@@ -8,13 +8,13 @@ namespace DuckLib
 {
 namespace Render
 {
+struct Buffer;
+
 D3D12CommandBuffer::D3D12CommandBuffer(
 	ID3D12GraphicsCommandList1* apiCommandList,
 	ID3D12CommandAllocator* apiCommandAllocator)
-{
-	this->apiCommandList = apiCommandList;
-	this->apiCommandAllocator = apiCommandAllocator;
-}
+	: apiCommandList(apiCommandList)
+	, apiCommandAllocator(apiCommandAllocator) { }
 
 D3D12CommandBuffer::~D3D12CommandBuffer()
 {
@@ -81,6 +81,43 @@ void D3D12CommandBuffer::Clear(ImageBuffer* rt, float* rgbaColor)
 		rgbaColor,
 		0,
 		nullptr);
+}
+
+void D3D12CommandBuffer::SetViewport(const Viewport& viewport)
+{
+	D3D12_VIEWPORT d3dViewport{
+		viewport.topLeftX,
+		viewport.topleftY,
+		viewport.width,
+		viewport.height,
+		viewport.minDepth,
+		viewport.maxDepth
+	};
+
+	apiCommandList->RSSetViewports(1, &d3dViewport);
+}
+
+void D3D12CommandBuffer::SetScissorRect(const Rect& scissorRect)
+{
+	D3D12_RECT d3dScissorRect { scissorRect.left, scissorRect.top, scissorRect.right, scissorRect.bottom };
+
+	apiCommandList->RSSetScissorRects(1, &d3dScissorRect);
+}
+
+void D3D12CommandBuffer::SetPrimitiveTopology(PrimitiveTopology topology)
+{
+	apiCommandList->IASetPrimitiveTopology(MapPrimitiveTopology(topology));
+}
+
+void D3D12CommandBuffer::SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers)
+{
+	// d3dbuffers here
+
+	// apiCommandList->IASetVertexBuffers(startIndex, numViews, buffers);
+}
+void D3D12CommandBuffer::Draw()
+{
+	
 }
 }
 }

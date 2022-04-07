@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <Core/Memory/Malloc.h>
-#include <Core/Memory/MemoryInternal.h>
+#include <Memory/Malloc.h>
+#include <Memory/MemoryInternal.h>
 
 using namespace DuckLib;
 
@@ -10,12 +10,12 @@ using namespace DuckLib;
 TEST( MallocTest, AllocCheckBlockValues )
 {
 	Malloc malloc;
-	const uint32_t ALLOC_SIZE = 36;
-	const uint8_t UNINITIALIZED_HEAP_VALUE = 0xcd;
-	const uint8_t HEAP_GUARD_BYTES_VALUE = 0xfd;
+	constexpr uint32_t ALLOC_SIZE = 36;
+	constexpr uint8_t UNINITIALIZED_HEAP_VALUE = 0xcd;
+	constexpr uint8_t HEAP_GUARD_BYTES_VALUE = 0xfd;
 	uint8_t* ptr = (uint8_t*)malloc.Allocate( ALLOC_SIZE );
 
-	// TODO: Find a better way to either handle aligns' extra memory allocation or testing it
+	// TODO: Find a better way to either handle aligns' extra memory allocations or testing it
 	for ( uint32_t i = 0; i < ALLOC_SIZE + 4; ++i )
 		EXPECT_EQ( UNINITIALIZED_HEAP_VALUE, ptr[i] );
 

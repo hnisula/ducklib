@@ -1,10 +1,10 @@
 #pragma once
 #include <atomic>
-#include <Core/Memory/IAlloc.h>
+#include "Core/Memory/IAlloc.h"
 
 namespace DuckLib
 {
-const uint32_t CACHE_LINE_SIZE = 128;
+constexpr uint32_t CACHE_LINE_SIZE = 128;
 
 template <typename T>
 class ConcurrentQueue

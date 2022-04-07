@@ -3,14 +3,14 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core\Core.vcxproj", "{ADAF85EF-BF64-43E8-843E-A1C16679B2CB}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core", "Core\Core.vcxproj", "{ADAF85EF-BF64-43E8-843E-A1C16679B2CB}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Core.Tests", "Core\Tests\Core.Tests\Core.Tests.vcxproj", "{422B6952-C818-4CEA-AECC-D0AB77CD9DCB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ADAF85EF-BF64-43E8-843E-A1C16679B2CB} = {ADAF85EF-BF64-43E8-843E-A1C16679B2CB}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading", "Threading\Threading\Threading.vcxproj", "{BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading", "Threading\Threading.vcxproj", "{BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60}"
 	ProjectSection(ProjectDependencies) = postProject
 		{ADAF85EF-BF64-43E8-843E-A1C16679B2CB} = {ADAF85EF-BF64-43E8-843E-A1C16679B2CB}
 	EndProjectSection
@@ -35,7 +35,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Threading.JobQueue.Test", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Render", "Render", "{BF64CBC2-F302-46C8-9D2F-133B928E9ADD}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Render", "Render\Render\Render.vcxproj", "{B7B6DF7F-8BA0-45DD-982A-005CD597659C}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Render", "Render\Render.vcxproj", "{B7B6DF7F-8BA0-45DD-982A-005CD597659C}"
 	ProjectSection(ProjectDependencies) = postProject
 		{BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60} = {BEF0DA5B-00AF-4CA2-9A4A-3B6576E9BC60}
 		{ADAF85EF-BF64-43E8-843E-A1C16679B2CB} = {ADAF85EF-BF64-43E8-843E-A1C16679B2CB}

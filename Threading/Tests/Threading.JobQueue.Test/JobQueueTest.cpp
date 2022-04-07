@@ -1,17 +1,17 @@
 #include <iostream>
 #include <conio.h>
 
-#include "../../Threading/JobQueue.h"
+#include "Threading/JobQueue.h"
 
 using namespace DuckLib;
 
 std::atomic<uint32_t> numJobsCompleted {0};
 uint32_t* jobItems;
-const uint32_t NUM_JOBS_NOPAUSE = 512;
-const uint32_t NUM_CHILD_JOBS = 16;
-const uint32_t NUM_PAUSE_JOBS = 16;
-const uint32_t QUEUE_SIZE = 1024;
-const uint32_t NUM_FIBERS = 512;
+constexpr uint32_t NUM_JOBS_NOPAUSE = 512;
+constexpr uint32_t NUM_CHILD_JOBS = 16;
+constexpr uint32_t NUM_PAUSE_JOBS = 16;
+constexpr uint32_t QUEUE_SIZE = 1024;
+constexpr uint32_t NUM_FIBERS = 512;
 uint32_t pausePushCounter = 0;
 
 JobQueue jobQueue(QUEUE_SIZE, NUM_FIBERS);
@@ -88,7 +88,7 @@ bool CheckJobResult(uint32_t numJobs)
 	return true;
 }
 
-bool CheckPauseJobResults(PauseJobData* jobData)
+bool CheckPauseJobResults(const PauseJobData* jobData)
 {
 	for (uint32_t i = 0; i < NUM_PAUSE_JOBS; ++i)
 		for (uint32_t u = 0; u < NUM_CHILD_JOBS; ++u)

@@ -12,7 +12,7 @@ struct Header
 	uint64_t totalSize;
 	uint8_t align;
 
-	static const uint8_t PAD_VALUE = 0xff;
+	static constexpr uint8_t PAD_VALUE = 0xff;
 };
 
 uint64_t SizeWithHeader( uint64_t sizeWithoutHeader, uint8_t align );

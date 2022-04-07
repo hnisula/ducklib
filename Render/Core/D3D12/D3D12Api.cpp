@@ -1,7 +1,7 @@
 #include <exception>
 #include <Core/Memory/IAlloc.h>
 #include "d3dx12.h"
-#include "D3D12Api.h"
+#include "D3D12Device.h"
 #include "D3D12CommandBuffer.h"
 #include "D3D12ResourceCommandBuffer.h"
 #include "D3D12SwapChain.h"
@@ -11,7 +11,7 @@ namespace DuckLib
 {
 namespace Render
 {
-D3D12Api::D3D12Api()
+D3D12Device::D3D12Device()
 	: factory(nullptr)
 	, device(nullptr)
 {
@@ -51,7 +51,7 @@ D3D12Api::D3D12Api()
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
 }
 
-D3D12Api::~D3D12Api()
+D3D12Device::~D3D12Device()
 {
 	DestroyAdapters();
 
@@ -59,12 +59,12 @@ D3D12Api::~D3D12Api()
 		DestroySwapChain(swapChain);
 }
 
-const std::vector<IAdapter*>& D3D12Api::GetAdapters() const
+const std::vector<IAdapter*>& D3D12Device::GetAdapters() const
 {
 	return adapters;
 }
 
-ISwapChain* D3D12Api::CreateSwapChain(
+ISwapChain* D3D12Device::CreateSwapChain(
 	uint32_t width,
 	uint32_t height,
 	Format format,
@@ -147,7 +147,7 @@ ISwapChain* D3D12Api::CreateSwapChain(
 	return swapChain;
 }
 
-ICommandBuffer* D3D12Api::CreateCommandBuffer()
+ICommandBuffer* D3D12Device::CreateCommandBuffer()
 {
 	ID3D12CommandAllocator* apiCommandAllocator;
 	ID3D12GraphicsCommandList1* apiCommandList;
@@ -174,7 +174,7 @@ ICommandBuffer* D3D12Api::CreateCommandBuffer()
 	return DL_NEW(DefAlloc(), D3D12CommandBuffer, apiCommandList, apiCommandAllocator);
 }
 
-IResourceCommandBuffer* D3D12Api::CreateResourceCommandBuffer()
+IResourceCommandBuffer* D3D12Device::CreateResourceCommandBuffer()
 {
 	ID3D12CommandAllocator* apiCommandAllocator;
 	ID3D12GraphicsCommandList1* apiCommandList;
@@ -196,25 +196,27 @@ IResourceCommandBuffer* D3D12Api::CreateResourceCommandBuffer()
 	if (result != S_OK)
 		throw std::exception("Failed to create D3D12 command list");
 
-	return DL_NEW(DefAlloc(), D3D12ResourceCommandBuffer, apiCommandList, apiCommandAllocator);
+	// TODO: Fix
+	// return DL_NEW(DefAlloc(), D3D12ResourceCommandBuffer, apiDevice, apiCommandList, apiCommandAllocator);
+	return nullptr;
 }
 
-void D3D12Api::DestroySwapChain(ISwapChain* swapChain)
+void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));
 
 	DL_DELETE(DefAlloc(), swapChain);
 }
 
-void D3D12Api::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
+void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 {
 }
 
-void D3D12Api::DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer)
+void D3D12Device::DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer)
 {
 }
 
-void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
+void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
 {
 	ID3D12CommandList* apiLists[128];
 
@@ -224,7 +226,7 @@ void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t n
 	commandQueue->ExecuteCommandLists(numCommandBuffers, apiLists);
 }
 
-void D3D12Api::SignalCompletion(ISwapChain* swapChain)
+void D3D12Device::SignalCompletion(ISwapChain* swapChain)
 {
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
 	uint64_t signalValue = swapChain->GetSignalValue();
@@ -233,7 +235,7 @@ void D3D12Api::SignalCompletion(ISwapChain* swapChain)
 		throw std::exception("Failed to signal completion in D3D12 rendering");
 }
 
-void D3D12Api::EnumAndCreateAdapters()
+void D3D12Device::EnumAndCreateAdapters()
 {
 	if (!factory)
 		throw std::exception("Factory not initialized");
@@ -267,7 +269,7 @@ void D3D12Api::EnumAndCreateAdapters()
 	}
 }
 
-ID3D12CommandQueue* D3D12Api::CreateQueue(
+ID3D12CommandQueue* D3D12Device::CreateQueue(
 	D3D12_COMMAND_LIST_TYPE type,
 	D3D12_COMMAND_QUEUE_FLAGS flags)
 {
@@ -285,7 +287,7 @@ ID3D12CommandQueue* D3D12Api::CreateQueue(
 	return queue;
 }
 
-ID3D12DescriptorHeap* D3D12Api::CreateDescriptorHeap(
+ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
 	uint32_t numDescriptors,
 	D3D12_DESCRIPTOR_HEAP_TYPE type)
 {
@@ -303,7 +305,7 @@ ID3D12DescriptorHeap* D3D12Api::CreateDescriptorHeap(
 	return apiDescriptorHeap;
 }
 
-ImageBuffer* D3D12Api::CreateImageBuffer(
+ImageBuffer* D3D12Device::CreateImageBuffer(
 	uint32_t width,
 	uint32_t height,
 	uint32_t depth,
@@ -324,7 +326,7 @@ ImageBuffer* D3D12Api::CreateImageBuffer(
 	return imageBuffer;
 }
 
-void D3D12Api::DestroyAdapters()
+void D3D12Device::DestroyAdapters()
 {
 	for (IAdapter* adapter : adapters)
 		DL_DELETE(DefAlloc(), adapter);
