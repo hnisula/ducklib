@@ -5,9 +5,8 @@ namespace DuckLib
 namespace Render
 {
 ISwapChain::ISwapChain()
+	: currentFrameIndex(0)
 {
-	currentFrameIndex = 0;
-
 	for (uint32_t i = 0; i < MAX_BUFFERS; ++i)
 		frameCounters[i] = UINT32_MAX;
 }

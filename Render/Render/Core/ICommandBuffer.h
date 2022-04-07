@@ -1,7 +1,11 @@
 #pragma once
-#include "Resources/ImageBuffer.h"
-#include "Resources/ResourceStates.h"
 #include "ISwapChain.h"
+#include "Resources/Buffer.h"
+#include "Resources/ImageBuffer.h"
+#include "Resources/PrimitiveTopology.h"
+#include "Resources/ResourceStates.h"
+#include "Resources/Viewport.h"
+#include "Resources/Rect.h"
 
 namespace DuckLib
 {
@@ -23,6 +27,14 @@ public:
 	virtual void SetRT(ISwapChain* swapChain) = 0;
 
 	virtual void Clear(ImageBuffer* rt, float* rgbaColor) = 0;
+
+	virtual void SetViewport(const Viewport& viewport) = 0;
+	virtual void SetScissorRect(const Rect& rect) = 0;
+
+	virtual void SetPrimitiveTopology(PrimitiveTopology topology) = 0;
+	virtual void SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers) = 0;
+
+	virtual void Draw() = 0;
 
 private:
 	

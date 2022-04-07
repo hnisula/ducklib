@@ -11,7 +11,7 @@ class D3D12SwapChain : public ISwapChain
 {
 public:
 
-	friend class D3D12Api;
+	friend class D3D12Device;
 
 	D3D12SwapChain(
 		uint32_t width,

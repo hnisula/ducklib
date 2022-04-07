@@ -5,24 +5,23 @@
 #include <vector>
 #include "D3D12Common.h"
 #include "D3D12Adapter.h"
-#include "D3D12SwapChain.h"
 #include "../ICommandBuffer.h"
 #include "../IResourceCommandBuffer.h"
-#include "../IApi.h"
+#include "../IDevice.h"
 #include "../Resources/Format.h"
 
 namespace DuckLib
 {
 namespace Render
 {
-const D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
+constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 
-class D3D12Api : public IApi
+class D3D12Device : public IDevice
 {
 public:
 
-	D3D12Api();
-	~D3D12Api() override;
+	D3D12Device();
+	~D3D12Device() override;
 
 	const std::vector<IAdapter*>& GetAdapters() const override;
 

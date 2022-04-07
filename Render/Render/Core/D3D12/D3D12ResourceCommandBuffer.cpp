@@ -4,9 +4,17 @@ namespace DuckLib
 {
 namespace Render
 {
-D3D12ResourceCommandBuffer::D3D12ResourceCommandBuffer(ID3D12CommandList* apiCommandList,
+Buffer* D3D12ResourceCommandBuffer::CreateBuffer()
+{
+	apiDevice->CreateResou
+}
+
+D3D12ResourceCommandBuffer::D3D12ResourceCommandBuffer(
+	ID3D12Device* apiDevice,
+	ID3D12CommandList* apiCommandList,
 	ID3D12CommandAllocator* apiCommandAllocator)
 {
+	this->apiDevice = apiDevice;
 	this->apiCommandList = apiCommandList;
 	this->apiCommandAllocator = apiCommandAllocator;
 }
