@@ -1,6 +1,5 @@
+#include "Lib/d3dx12.h"
 #include "D3D12SwapChain.h"
-#include "D3D12Common.h"
-#include "d3dx12.h"
 
 namespace DuckLib
 {

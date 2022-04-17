@@ -4,7 +4,7 @@
 #include <exception>
 #include "../Resources/PrimitiveTopology.h"
 
-#define DL_D3D12_THROW_FAIL(statement, text) \
+#define DL_D3D12_CHECK(statement, text) \
 	if ((statement) != S_OK) \
 		throw std::exception((text))
 

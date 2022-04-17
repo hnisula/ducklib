@@ -125,4 +125,4 @@ void DeleteArray(IAlloc& alloc, T* ptr)
 	(::DuckLib::Internal::Memory::DeleteArray((alloc), (ptr)))
 
 #define DL_FREE(alloc, ptr) \
-	((alloc).Free(ptr)
+	((alloc).Free(ptr))

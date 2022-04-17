@@ -1,8 +1,8 @@
 #pragma once
 #include <cstdint>
-#include <d3d12.h>
-#include <dxgi1_4.h>
 #include <vector>
+#include "Lib/d3d12.h"
+#include "Lib/dxgi1_4.h"
 #include "D3D12Common.h"
 #include "D3D12Adapter.h"
 #include "../ICommandBuffer.h"
@@ -32,11 +32,9 @@ public:
 		uint32_t bufferCount,
 		HWND windowHandle) override;
 	ICommandBuffer* CreateCommandBuffer() override;
-	IResourceCommandBuffer* CreateResourceCommandBuffer() override;
 
 	void DestroySwapChain(ISwapChain* swapChain) override;
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
-	void DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer) override;
 
 	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers) override;
 

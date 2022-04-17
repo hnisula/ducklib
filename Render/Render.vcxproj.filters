@@ -67,6 +67,18 @@
     <ClInclude Include="Core\Resources\Buffer.h">
       <Filter>Core\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Vulkan\VkRHI.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IRHI.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Vulkan\VkDevice.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12\D3D12RHI.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -83,7 +95,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\D3D12\D3D12Api.cpp">
+    <ClCompile Include="Core\D3D12\D3D12Device.cpp">
       <Filter>Core\D3D12</Filter>
     </ClCompile>
     <ClCompile Include="Core\D3D12\D3D12Adapter.cpp">
@@ -106,6 +118,15 @@
     </ClCompile>
     <ClCompile Include="Core\ISwapChain.cpp">
       <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Vulkan\VkRHI.cpp">
+      <Filter>Core\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Vulkan\VkDevice.cpp">
+      <Filter>Core\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\D3D12\D3D12RHI.cpp">
+      <Filter>Core\D3D12</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

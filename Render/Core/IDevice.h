@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "IAdapter.h"
-#include "IResourceCommandBuffer.h"
+#include "ICommandBuffer.h"
 
 namespace DuckLib
 {
@@ -22,11 +22,9 @@ public:
 		uint32_t bufferCount,
 		HWND windowHandle) = 0;
 	virtual ICommandBuffer* CreateCommandBuffer() = 0;
-	virtual IResourceCommandBuffer* CreateResourceCommandBuffer() = 0;
 
 	virtual void DestroySwapChain(ISwapChain* swapChain) = 0;
 	virtual void DestroyCommandBuffer(ICommandBuffer* commandBuffer) = 0;
-	virtual void DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer) = 0;
 
 	virtual void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
