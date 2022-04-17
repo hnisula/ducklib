@@ -29,5 +29,8 @@
     <ClCompile Include="Memory\Malloc.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
+    <ClCompile Include="Memory\IAlloc.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

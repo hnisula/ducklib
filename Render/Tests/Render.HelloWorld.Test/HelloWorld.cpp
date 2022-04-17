@@ -17,6 +17,9 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 {
 	swapChain = api->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
 	cmdBuffer = api->CreateCommandBuffer();
+
+	// Init resources
+	// api->CreateResourceCommandBuffer()
 }
 
 void RenderFrame()

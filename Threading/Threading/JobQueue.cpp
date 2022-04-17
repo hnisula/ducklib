@@ -255,11 +255,7 @@ void JobQueue::SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer
 		initPtrArrayBuffer[i] = (uintptr_t)&counters[i];
 	}
 
-	counterQueue = DL_NEW(DefAlloc(),
-		ConcurrentQueue<JobCounter*>,
-		numCounters,
-		(JobCounter**)initPtrArrayBuffer,
-		numCounters);
+	counterQueue = New<ConcurrentQueue<JobCounter*>>(numCounters, (JobCounter**)initPtrArrayBuffer, numCounters);
 }
 
 void JobQueue::SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer)

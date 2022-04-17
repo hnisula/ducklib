@@ -1,5 +1,6 @@
 #pragma once
-#include <new>
+#include <source_location>
+#include "AllocTracker.h"
 #include "MemoryInternal.h"
 
 namespace DuckLib
@@ -11,30 +12,61 @@ IAlloc& DefAlloc();
 class IAlloc
 {
 public:
-	virtual ~IAlloc() {};
+	virtual ~IAlloc() { }
 
-	virtual void* Allocate(uint64_t size, uint8_t align = DEFAULT_ALIGN) = 0;
-	virtual void* Reallocate(void* ptr, uint64_t size) = 0;
-	virtual void Free(void* ptr) = 0;
-
-	// Ugly stuff that can, hopefully, be removed soon (std::source_location)
-	virtual void* Allocate(uint64_t size,
-		uint8_t align,
-		const char* file,
-		const char* function,
-		uint32_t line) = 0;
-	virtual void* Reallocate(void* ptr,
+#ifdef DL_TRACK_ALLOCS
+	void* Allocate(
 		uint64_t size,
-		const char* file,
-		const char* function,
-		uint32_t line) = 0;
+		uint8_t align,
+		const std::source_location& sourceLocation);
+	void* Reallocate(
+		void* ptr,
+		uint64_t size,
+		const std::source_location& sourceLocation);
+#else
+	void* Allocate(uint64_t size, uint8_t align = DEFAULT_ALIGN);
+	void* Reallocate(void* ptr, uint64_t size);
+#endif
 
-	static const uint8_t DEFAULT_ALIGN = 4;
+	void Free(void* ptr);
+
+	static constexpr uint8_t DEFAULT_ALIGN = 4;
+
+protected:
+
+	virtual void* AllocateInternal(uint64_t size, uint8_t align) = 0;
+	virtual void* ReallocateInternal(void* ptr, uint64_t size) = 0;
+
+	virtual void FreeInternal(void* ptr) = 0;
 };
 
-namespace Internal
+template <typename T, typename... Args>
+T* NewA(
+	IAlloc& alloc = DefAlloc(),
+	Args&&... args,
+	const std::source_location& sourceLocation = std::source_location::current())
 {
-namespace Memory
+	T* ptr = new(alloc.Allocate(sizeof(T), alignof(T))) T{std::forward<Args>(args)...};
+
+#ifdef DL_TRACK_ALLOCS
+	Internal::Memory::GetAllocTracker().Track(
+		ptr,
+		sizeof(T),
+		sourceLocation.file_name(),
+		sourceLocation.function_name(),
+		sourceLocation.line());
+#endif
+
+	return ptr;
+}
+
+template <typename T, typename... Args>
+T* New(Args... args, const std::source_location& sourceLocation = std::source_location::current())
+{
+	return NewA<T>(DefAlloc(), std::forward<Args>(args)..., sourceLocation);
+}
+
+namespace Internal::Memory
 {
 #ifdef DL_TRACK_ALLOCS
 template <typename T>
@@ -77,8 +109,6 @@ void DeleteArray(IAlloc& alloc, T* ptr)
 		ptr[i].~T();
 
 	alloc.Free(ptr);
-}
-}
 }
 }
 
@@ -126,3 +156,4 @@ void DeleteArray(IAlloc& alloc, T* ptr)
 
 #define DL_FREE(alloc, ptr) \
 	((alloc).Free(ptr)
+}

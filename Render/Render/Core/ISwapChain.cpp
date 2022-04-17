@@ -28,7 +28,7 @@ uint64_t ISwapChain::GetSignalValue()
 
 	frameCounters[bufferIndex] = currentFrameIndex;
 
-	return frameCounters[bufferIndex];
+	return (uint32_t)frameCounters[bufferIndex];
 }
 }
 }

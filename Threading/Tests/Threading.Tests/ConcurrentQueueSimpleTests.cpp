@@ -4,7 +4,7 @@
 
 using namespace DuckLib;
 
-const uint32_t pushValue = 420;
+constexpr uint32_t pushValue = 420;
 
 uint32_t PushThread(void* data)
 {
