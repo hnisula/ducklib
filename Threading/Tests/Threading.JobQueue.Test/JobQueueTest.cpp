@@ -46,7 +46,7 @@ void ChildPauseJobFunc(void* data)
 void PauseJobFunc(void* data)
 {
 	PauseJobData* jobData = (PauseJobData*)data;
-	Job* jobs = DL_NEW_ARRAY(DefAlloc(), Job, NUM_CHILD_JOBS);
+	Job* jobs = DefAlloc()->Allocate<Job>(NUM_CHILD_JOBS);
 
 	for (uint32_t i = 0; i < NUM_CHILD_JOBS; ++i)
 	{
@@ -64,7 +64,7 @@ void PauseJobFunc(void* data)
 
 void InitJobData(uint32_t numJobs)
 {
-	jobItems = DL_NEW_ARRAY(DefAlloc(), uint32_t, numJobs);
+	jobItems = DefAlloc()->Allocate<uint32_t>(numJobs);
 	
 	for (uint32_t i = 0; i < numJobs; ++i)
 		jobItems[i] = i + 1;
@@ -72,7 +72,7 @@ void InitJobData(uint32_t numJobs)
 
 Job* GenerateJobs(uint32_t numJobs)
 {
-	Job* jobs = DL_NEW_ARRAY(DefAlloc(), Job, numJobs);
+	Job* jobs = DefAlloc()->Allocate<Job>(numJobs);
 
 	for (uint32_t i = 0; i < numJobs; ++i)
 		jobs[i] = {&JobFunc, &jobItems[i]};
@@ -100,7 +100,7 @@ bool CheckPauseJobResults(PauseJobData* jobData)
 
 void CleanupJobData(uint32_t numJobs)
 {
-	DL_DELETE_ARRAY(DefAlloc(), jobItems);
+	DefAlloc()->Free(jobItems);
 }
 
 void NoPauseTest()
@@ -125,8 +125,8 @@ void NoPauseTest()
 
 void PauseTest()
 {
-	PauseJobData* pauseJobData = DL_NEW_ARRAY(DefAlloc(), PauseJobData, NUM_PAUSE_JOBS);
-	Job* pauseJobs = DL_NEW_ARRAY(DefAlloc(), Job, NUM_PAUSE_JOBS);
+	PauseJobData* pauseJobData = DefAlloc()->Allocate<PauseJobData>(NUM_PAUSE_JOBS);
+	Job* pauseJobs = DefAlloc()->Allocate<Job>(NUM_PAUSE_JOBS);
 	
 	for (uint32_t i = 0; i < NUM_PAUSE_JOBS; ++i)
 		pauseJobs[i] = {&PauseJobFunc, &pauseJobData[i]};

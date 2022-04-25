@@ -9,24 +9,22 @@ namespace DuckLib
 {
 Job::Job()
 	: jobCounter(nullptr)
-, jobFunction(nullptr)
-, jobData(nullptr)
-{}
+	, jobFunction(nullptr)
+	, jobData(nullptr) {}
 
 Job::Job(void (*jobFunction)(void*), void* jobData)
 	: jobCounter(nullptr)
-, jobFunction(jobFunction)
-, jobData(jobData)
-{}
+	, jobFunction(jobFunction)
+	, jobData(jobData) {}
 
 namespace Internal
 {
 std::atomic<bool> runWorkers;
-thread_local Fiber workerThreadFiber {};
-thread_local bool isWorkerThread { false };
-thread_local Fiber* currentFiber {};
+thread_local Fiber workerThreadFiber{};
+thread_local bool isWorkerThread{ false };
+thread_local Fiber* currentFiber{};
 
-void SwitchFiber(Fiber* fiber)
+void SwitchFiber(const Fiber* fiber)
 {
 #ifdef _WIN32
 	SwitchToFiber(fiber->osFiber);
@@ -70,7 +68,7 @@ uint32_t _stdcall WorkerThreadJob(void* data)
 
 		if (!jobFiber->currentJob.jobFunction)
 			throw std::exception("Tried to start a fiber with a nullptr job");
-		
+
 		currentFiber = jobFiber;
 		SwitchFiber(currentFiber);
 		currentFiber = nullptr;
@@ -113,14 +111,14 @@ JobQueue::JobQueue(uint32_t size, uint32_t numFibers, uint32_t numWorkers)
 	this->numWorkers = numWorkers == MATCH_NUM_LOGICAL_CORES ? GetNumLogicalCores() : numWorkers;
 	queueSize = size;
 
-	uintptr_t* initPtrArrayBuffer = DL_NEW_ARRAY(alloc, uintptr_t, max(size, numFibers));
+	uintptr_t* initPtrArrayBuffer = (uintptr_t*)alloc->Allocate(max(size, numFibers) * sizeof(uintptr_t));
 
 	SetupCounters(size, initPtrArrayBuffer);
 	SetupFibers(numFibers, initPtrArrayBuffer);
 	SetupJobStorage(size);
 	SetupWorkers(this->numWorkers);
 
-	DL_DELETE_ARRAY(alloc, initPtrArrayBuffer);
+	alloc->Free(initPtrArrayBuffer);
 
 	workerThreadData.startFlag.store(true);
 }
@@ -179,7 +177,7 @@ Internal::Fiber* JobQueue::GetReadyJobAndFiber()
 	{
 		if (!fiberQueue->TryPop(&newJobFiber))
 			throw std::exception("Failed to acquire fiber for new job");
-		
+
 		newJobFiber->currentJob = newJob;
 		return newJobFiber;
 	}
@@ -192,7 +190,7 @@ void JobQueue::ReturnFiberIfJobCompleted(Internal::Fiber* completedFiber)
 	// jobFunction == nullptr -> completed, otherwise paused
 	if (completedFiber->currentJob.jobFunction)
 		return;
-	
+
 	if (!fiberQueue->TryPush(completedFiber))
 		throw std::exception("Failed to push used fiber back on fiber queue. Wtf?");
 }
@@ -214,8 +212,9 @@ Internal::Fiber JobQueue::CreateFiber(void* fiberData)
 
 	fiber.currentJob = {};
 #ifdef _WIN32
-	fiber.osFiber = ::CreateFiber((SIZE_T)Internal::Fiber::DEFAULT_STACK_SIZE,
-		(LPFIBER_START_ROUTINE)&Internal::FiberJobWrapper,
+	fiber.osFiber = ::CreateFiber(
+		Internal::Fiber::DEFAULT_STACK_SIZE,
+		&Internal::FiberJobWrapper,
 		fiberData);
 #endif
 
@@ -227,6 +226,7 @@ void JobQueue::DeleteFiber(Internal::Fiber* fiber)
 #ifdef _WIN32
 	::DeleteFiber(fiber->osFiber);
 #endif
+	fiber->~Fiber();
 }
 
 uint32_t JobQueue::GetNumLogicalCores() const
@@ -238,7 +238,7 @@ uint32_t JobQueue::GetNumLogicalCores() const
 #endif
 }
 
-void JobQueue::WaitIdle(JobCounter* counter)
+void JobQueue::WaitIdle(const JobCounter* counter)
 {
 	while (counter->counter.load() != 0)
 		Sleep(5);
@@ -247,30 +247,31 @@ void JobQueue::WaitIdle(JobCounter* counter)
 void JobQueue::SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer)
 {
 	this->numCounters = numCounters;
-	counters = DL_NEW_ARRAY(DefAlloc(), JobCounter, numCounters);
+	counters = alloc->Allocate<JobCounter>(numCounters);
 
 	for (uint32_t i = 0; i < numCounters; ++i)
 	{
+		new(&counters[i]) JobCounter();
 		counters[i].jobQueue = this;
 		initPtrArrayBuffer[i] = (uintptr_t)&counters[i];
 	}
 
-	counterQueue = New<ConcurrentQueue<JobCounter*>>(numCounters, (JobCounter**)initPtrArrayBuffer, numCounters);
+	counterQueue = alloc->New<ConcurrentQueue<JobCounter*>>(numCounters, (JobCounter**)initPtrArrayBuffer, numCounters);
 }
 
 void JobQueue::SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer)
 {
 	this->numFibers = numFibers;
-	fibers = DL_NEW_ARRAY(alloc, Internal::Fiber, numFibers);
+	fibers = alloc->Allocate<Internal::Fiber>(numFibers);
 
 	for (uint32_t i = 0; i < numFibers; ++i)
 	{
+		new(&fibers[i]) Internal::Fiber();
 		fibers[i] = CreateFiber(&fibers[i]);
 		initPtrArrayBuffer[i] = (uintptr_t)&fibers[i];
 	}
 
-	fiberQueue = DL_NEW(alloc,
-		ConcurrentQueue<Internal::Fiber*>,
+	fiberQueue = alloc->New<ConcurrentQueue<Internal::Fiber*>>(
 		numFibers,
 		(Internal::Fiber**)initPtrArrayBuffer,
 		numFibers);
@@ -278,23 +279,20 @@ void JobQueue::SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer)
 
 void JobQueue::SetupJobStorage(uint32_t size)
 {
-	readyPausedJobFiberQueue = DL_NEW(alloc, ConcurrentQueue<Internal::Fiber*>, size);
-	jobQueue = DL_NEW(alloc, ConcurrentQueue<Job>, size);
+	readyPausedJobFiberQueue = alloc->New<ConcurrentQueue<Internal::Fiber*>>(size);
+	jobQueue = alloc->New<ConcurrentQueue<Job>>(size);
 }
 
 void JobQueue::SetupWorkers(uint32_t numWorkers)
 {
-	workerThreads = DL_NEW_ARRAY(alloc, Thread*, numWorkers);
+	workerThreads = alloc->Allocate<Thread*>(numWorkers);
 
 	workerThreadData.jobQueue = this;
 	workerThreadData.runFlag.store(true);
 	workerThreadData.startFlag.store(false);
 
 	for (uint32_t i = 0; i < numWorkers; ++i)
-		workerThreads[i] = DL_NEW(alloc,
-			Thread,
-			Internal::WorkerThreadJob,
-			&workerThreadData);
+		workerThreads[i] = alloc->New<Thread>(Internal::WorkerThreadJob, &workerThreadData);
 }
 
 void JobQueue::TearDownWorkers()
@@ -304,17 +302,17 @@ void JobQueue::TearDownWorkers()
 	for (uint32_t i = 0; i < numWorkers; ++i)
 	{
 		workerThreads[i]->Join();
-		DL_DELETE(DefAlloc(), workerThreads[i]);
+		alloc->Delete(workerThreads[i]);
 	}
 
-	DL_DELETE_ARRAY(DefAlloc(), workerThreads);
+	alloc->Free(workerThreads);
 }
 
 void JobQueue::TearDownJobStorage()
 {
 	// TODO: Consider checking if all jobs have been completed before tearing down? Or quick exit?
-	DL_DELETE(DefAlloc(), jobQueue);
-	DL_DELETE(DefAlloc(), readyPausedJobFiberQueue);
+	alloc->Delete(jobQueue);
+	alloc->Delete(readyPausedJobFiberQueue);
 }
 
 void JobQueue::TearDownFibers()
@@ -322,13 +320,17 @@ void JobQueue::TearDownFibers()
 	for (uint32_t i = 0; i < numFibers; ++i)
 		DeleteFiber(&fibers[i]);
 
-	DL_DELETE(DefAlloc(), fiberQueue);
-	DL_DELETE_ARRAY(DefAlloc(), fibers);
+	alloc->Delete(fiberQueue);
+	alloc->Free(fibers);
 }
 
 void JobQueue::TearDownCounters()
 {
-	DL_DELETE(DefAlloc(), counterQueue);
-	DL_DELETE_ARRAY(DefAlloc(), counters);
+	alloc->Delete(counterQueue);
+
+	for (uint32_t i = 0; i < numCounters; ++i)
+		counters[i].~JobCounter();
+
+	alloc->Free(counters);
 }
 }

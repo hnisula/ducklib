@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include <Core/Memory/Malloc.h>
+#include <Core/Memory/HeapAllocator.h>
 
 class Foo
 {
@@ -23,25 +23,28 @@ public:
 
 TEST(AllocMacroTest, NewDelete)
 {
-	DuckLib::Malloc alloc;
+	DuckLib::HeapAllocator alloc;
 	uint32_t v = 2;
-	Foo* foo = DL_NEW(alloc, Foo);
+	Foo* foo = alloc.New<Foo>();
 	foo->p = &v;
 
 	EXPECT_EQ(16, foo->v1);
 	EXPECT_EQ(69, foo->v2);
 
-	DL_DELETE(alloc, foo);
+	alloc.Delete(foo);
 
 	EXPECT_EQ(32, v);
 }
 
 TEST(AllocMacroTest, NewDeleteArray)
 {
-	DuckLib::Malloc alloc;
+	DuckLib::HeapAllocator alloc;
 	uint32_t v = 2;
-	const uint32_t arraySize = 32;
-	Foo* foo = DL_NEW_ARRAY(alloc, Foo, arraySize);
+	constexpr uint32_t arraySize = 32;
+	Foo* foo = alloc.Allocate<Foo>(arraySize);
+
+	for (uint32_t i = 0; i < arraySize; ++i)
+		new(&foo[i]) Foo();
 
 	for (uint32_t i = 0; i < arraySize; ++i)
 		foo[i].p = &v;
@@ -52,7 +55,10 @@ TEST(AllocMacroTest, NewDeleteArray)
 		EXPECT_EQ(69, foo->v2);
 	}
 
-	DL_DELETE_ARRAY(alloc, foo);
+	for (uint32_t i = 0; i < arraySize; ++i)
+		foo[i].~Foo();
+
+	alloc.Free(foo);
 
 	EXPECT_EQ(32, v);
 }

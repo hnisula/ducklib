@@ -1,5 +1,5 @@
 #include "gtest/gtest.h"
-#include <Core/Memory/Malloc.h>
+#include <Core/Memory/HeapAllocator.h>
 
 using namespace DuckLib;
 
@@ -21,9 +21,9 @@ public:
 	uint32_t* p;
 };
 
-TEST(AllocFuncTest, New)
-{
-	char* t = New<char>();
-	*t = 'a';
-	int d = 43;
-}
+// TEST(AllocFuncTest, New)
+// {
+// 	char* t = New<char>();
+// 	*t = 'a';
+// 	int d = 43;
+// }

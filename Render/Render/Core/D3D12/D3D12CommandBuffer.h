@@ -37,7 +37,7 @@ protected:
 
 private:
 
-	static const uint32_t MAX_SET_VB_COUNT = 32;
+	static constexpr uint32_t MAX_SET_VB_COUNT = 32;
 
 	ID3D12GraphicsCommandList1* apiCommandList;
 	ID3D12CommandAllocator* apiCommandAllocator;
