@@ -4,7 +4,7 @@
 
 namespace DuckLib
 {
-const uint32_t CACHE_LINE_SIZE = 128;
+constexpr uint32_t CACHE_LINE_SIZE = 128;
 
 template <typename T>
 class ConcurrentQueue
@@ -37,10 +37,11 @@ template <typename T>
 ConcurrentQueue<T>::ConcurrentQueue(uint32_t size, T* initialItems, uint32_t numInitialItems)
 	: size(size)
 {
-	slots = DL_NEW_ARRAY(DefAlloc(), Slot, size);
+	slots = DefAlloc()->Allocate<Slot>(size);
 
 	for (uint32_t i = 0; i < numInitialItems; ++i)
 	{
+		new(&slots[i]) Slot();
 		slots[i].item = initialItems[i];
 		slots[i].gen.store(0);
 	}
@@ -55,7 +56,7 @@ ConcurrentQueue<T>::ConcurrentQueue(uint32_t size, T* initialItems, uint32_t num
 template <typename T>
 ConcurrentQueue<T>::~ConcurrentQueue()
 {
-	DL_DELETE_ARRAY(DefAlloc(), slots);
+	DefAlloc()->Free(slots);
 }
 
 template <typename T>

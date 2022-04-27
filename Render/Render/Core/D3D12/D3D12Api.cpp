@@ -79,7 +79,7 @@ ISwapChain* D3D12Api::CreateSwapChain(
 	swapChainDesc.Height = height;
 	swapChainDesc.Format = MapToD3D12Format(format);
 	swapChainDesc.Stereo = FALSE;
-	swapChainDesc.SampleDesc = {1, 0};
+	swapChainDesc.SampleDesc = { 1, 0 };
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 	swapChainDesc.BufferCount = bufferCount;
 	swapChainDesc.Scaling = DXGI_SCALING_NONE;
@@ -130,9 +130,7 @@ ISwapChain* D3D12Api::CreateSwapChain(
 		device->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
 		"Failed to create fence for frame syncing");
 
-	D3D12SwapChain* swapChain = DL_NEW(
-		DefAlloc(),
-		D3D12SwapChain,
+	D3D12SwapChain* swapChain = DefAlloc()->New<D3D12SwapChain>(
 		width,
 		height,
 		format,
@@ -171,7 +169,7 @@ ICommandBuffer* D3D12Api::CreateCommandBuffer()
 
 	apiCommandList->Close();
 
-	return DL_NEW(DefAlloc(), D3D12CommandBuffer, apiCommandList, apiCommandAllocator);
+	return new(DefAlloc()->Allocate<D3D12CommandBuffer>()) D3D12CommandBuffer(apiCommandList, apiCommandAllocator);
 }
 
 IResourceCommandBuffer* D3D12Api::CreateResourceCommandBuffer()
@@ -196,23 +194,21 @@ IResourceCommandBuffer* D3D12Api::CreateResourceCommandBuffer()
 	if (result != S_OK)
 		throw std::exception("Failed to create D3D12 command list");
 
-	return DL_NEW(DefAlloc(), D3D12ResourceCommandBuffer, apiCommandList, apiCommandAllocator);
+	return new(DefAlloc()->Allocate<D3D12ResourceCommandBuffer>()) D3D12ResourceCommandBuffer(
+		apiCommandList,
+		apiCommandAllocator);
 }
 
 void D3D12Api::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));
 
-	DL_DELETE(DefAlloc(), swapChain);
+	DefAlloc()->Delete(swapChain);
 }
 
-void D3D12Api::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
-{
-}
+void D3D12Api::DestroyCommandBuffer(ICommandBuffer* commandBuffer) {}
 
-void D3D12Api::DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer)
-{
-}
+void D3D12Api::DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer) {}
 
 void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
 {
@@ -228,7 +224,7 @@ void D3D12Api::SignalCompletion(ISwapChain* swapChain)
 {
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
 	uint64_t signalValue = swapChain->GetSignalValue();
-	
+
 	if (commandQueue->Signal(d3dSwapChain->apiFence, signalValue) != S_OK)
 		throw std::exception("Failed to signal completion in D3D12 rendering");
 }
@@ -256,9 +252,7 @@ void D3D12Api::EnumAndCreateAdapters()
 			_uuidof(ID3D12Device),
 			nullptr) == S_FALSE)
 		{
-			IAdapter* adapter = DL_NEW(
-				DefAlloc(),
-				D3D12Adapter,
+			IAdapter* adapter = DefAlloc()->New<D3D12Adapter>(
 				descriptionBuffer,
 				(desc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
 				apiAdapter);
@@ -311,9 +305,7 @@ ImageBuffer* D3D12Api::CreateImageBuffer(
 	ID3D12Resource* apiResource,
 	D3D12_CPU_DESCRIPTOR_HANDLE apiDescriptor)
 {
-	ImageBuffer* imageBuffer = DL_NEW(
-		DefAlloc(),
-		ImageBuffer,
+	ImageBuffer* imageBuffer = DefAlloc()->New<ImageBuffer>(
 		width,
 		height,
 		depth,
@@ -327,7 +319,7 @@ ImageBuffer* D3D12Api::CreateImageBuffer(
 void D3D12Api::DestroyAdapters()
 {
 	for (IAdapter* adapter : adapters)
-		DL_DELETE(DefAlloc(), adapter);
+		DefAlloc()->Delete(adapter);
 
 	adapters.clear();
 }

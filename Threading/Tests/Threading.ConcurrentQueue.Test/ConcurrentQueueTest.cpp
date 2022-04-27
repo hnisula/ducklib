@@ -24,7 +24,7 @@ uint32_t QueueWorker(void* configData)
 	WorkerConfig* config = (WorkerConfig*)configData;
 	bool queueIsEmpty = !config->pop;
 	uint32_t value {};
-	uint32_t* poppedItems = DL_NEW_ARRAY(DefAlloc(), uint32_t, config->numItems);
+	uint32_t* poppedItems = DefAlloc()->Allocate<uint32_t>(config->numItems);
 	uint32_t numPopped = 0;
 	uint64_t counter = config->pushCounter->load();
 	uint64_t pushReservation = config->push ? (*config->pushReservation)++ : (uint64_t)-1;
@@ -56,7 +56,7 @@ uint32_t QueueWorker(void* configData)
 	for (uint32_t i = 0; i < numPopped; ++i)
 		config->allPoppedItems[startTotalPoppedIndex + i] = poppedItems[i];
 
-	DL_DELETE_ARRAY(DefAlloc(), poppedItems);
+	DefAlloc()->Free(poppedItems);
 
 	return 0;
 }
@@ -123,17 +123,17 @@ int main()
 	};
 	
 	for (uint32_t i = 0; i < numPushers; ++i)
-		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker, &pusherConfig);
+		workers[numWorkers + i] = DefAlloc()->New<Thread>(&QueueWorker, &pusherConfig);
 
 	numWorkers += numPushers;
 
 	for (uint32_t i = 0; i < numPoppers; ++i)
-		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker, &popperConfig);
+		workers[numWorkers + i] = DefAlloc()->New<Thread>(&QueueWorker, &popperConfig);
 
 	numWorkers += numPoppers;
 
 	for (uint32_t i = 0; i < numHybrids; ++i)
-		workers[numWorkers + i] = DL_NEW(DefAlloc(), Thread, &QueueWorker, &hybridConfig);
+		workers[numWorkers + i] = DefAlloc()->New<Thread>(&QueueWorker, &hybridConfig);
 
 	numWorkers += numHybrids;
 
