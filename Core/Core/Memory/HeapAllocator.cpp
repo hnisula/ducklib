@@ -34,14 +34,14 @@ void* HeapAllocator::ReallocateInternal(void* ptr, uint64_t size)
 	uint64_t oldTotalSize = header->totalSize;
 	uint64_t oldAllocationSize = GetAllocationSize(header);
 	uint64_t newTotalSize = SizeWithHeaderAndAlignment(size, align);
-	Header* newHeaderPtr = (Header*)realloc(header, newTotalSize);
 
-	WriteAllocHeader(newHeaderPtr, newTotalSize, align);
+	header = (Header*)realloc(header, newTotalSize);
+	WriteAllocHeader(header, newTotalSize, align);
 
 	totalAllocatedSize += newTotalSize - oldTotalSize;
 	allocatedSize += size - oldAllocationSize;
 
-	return GetDataPtr(newHeaderPtr);
+	return GetDataPtr(header);
 }
 
 void HeapAllocator::FreeInternal(void* ptr)

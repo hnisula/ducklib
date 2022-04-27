@@ -13,14 +13,20 @@ public:
 	TArray(void* externalArray, uint64_t size, uint64_t capacity = size, IAlloc* alloc = nullptr);
 	~TArray();
 
-	void Append(const T&& item);
+	void Append(T&& item);
+	void Append(const T& item);
 
 	bool Contains(const T& item) const;
 
-	void Resize(uint64_t newCapacity);
+	uint32_t Size() const;
+	uint32_t Capacity() const;
+	void Resize(uint32_t newCapacity);
+
+	T& operator [](uint32_t i);
+	const T& operator [](uint32_t i) const;
 
 protected:
-	bool EnsureCapacity(uint64_t requiredCapacity);
+	bool EnsureCapacity(uint32_t requiredCapacity);
 
 	IAlloc* alloc;
 	T* array;
@@ -65,12 +71,21 @@ TArray<T>::~TArray()
 }
 
 template <typename T>
-void TArray<T>::Append(const T&& item)
+void TArray<T>::Append(T&& item)
 {
 	if (!EnsureCapacity(size + 1))
 		throw std::runtime_error("Failed to append in array because of limited capacity");
 
-	array[sizeof(T) * size++] = std::move(item);
+	array[size++] = std::move(item);
+}
+
+template <typename T>
+void TArray<T>::Append(const T& item)
+{
+	if (!EnsureCapacity(size + 1))
+		throw std::runtime_error("Failed to append in array because of limited capacity");
+
+	array[size++] = item;
 }
 
 template <typename T>
@@ -84,18 +99,42 @@ bool TArray<T>::Contains(const T& item) const
 }
 
 template <typename T>
-void TArray<T>::Resize(uint64_t newCapacity)
+uint32_t TArray<T>::Size() const
+{
+	return size;
+}
+
+template <typename T>
+uint32_t TArray<T>::Capacity() const
+{
+	return capacity;
+}
+
+template <typename T>
+void TArray<T>::Resize(uint32_t newCapacity)
 {
 	if (array)
-		alloc->Reallocate(array, newCapacity);
+		array = (T*)alloc->Reallocate(array, newCapacity * sizeof(T));
 	else
-		alloc->Allocate(newCapacity, alignof(T));
+		array = (T*)alloc->Allocate(newCapacity * sizeof(T), alignof(T));
 
 	capacity = newCapacity;
 }
 
 template <typename T>
-bool TArray<T>::EnsureCapacity(uint64_t requiredCapacity)
+T& TArray<T>::operator[](uint32_t i)
+{
+	return array[i];
+}
+
+template <typename T>
+const T& TArray<T>::operator[](uint32_t i) const
+{
+	return array[i];
+}
+
+template <typename T>
+bool TArray<T>::EnsureCapacity(uint32_t requiredCapacity)
 {
 	if (requiredCapacity <= capacity)
 		return true;
@@ -103,7 +142,7 @@ bool TArray<T>::EnsureCapacity(uint64_t requiredCapacity)
 	if (!alloc)
 		return false;
 
-	uint64_t exponentiallyIncreasedSize = capacity * 1.5f;
+	uint32_t exponentiallyIncreasedSize = (uint32_t)((float)(capacity == 0 ? 4 : capacity) * 1.5f);
 
 	Resize(requiredCapacity <= exponentiallyIncreasedSize ? exponentiallyIncreasedSize : requiredCapacity);
 

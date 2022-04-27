@@ -7,7 +7,7 @@ using namespace DuckLib;
 // TODO: Check if they've added support for x64 in the ASan support
 // Because ASan support for x64 is not added yet and the values checked for are only set in debug
 #ifndef NDEBUG
-TEST( MallocTest, AllocCheckBlockValues )
+TEST( HeapAllocatorTest, AllocCheckBlockValues )
 {
 	HeapAllocator malloc;
 	const uint32_t ALLOC_SIZE = 36;
@@ -23,7 +23,7 @@ TEST( MallocTest, AllocCheckBlockValues )
 }
 #endif
 
-TEST( MallocTest, AllocAndCheckHeader )
+TEST( HeapAllocatorTest, AllocAndCheckHeader )
 {
 	HeapAllocator malloc;
 	void* ptr = malloc.Allocate( 16 );

@@ -55,10 +55,10 @@
     <LibraryPath>../../../;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemGroup>
-    <ClCompile Include="Memory\AllocFuncTests.cpp" />
-    <ClCompile Include="Memory\AllocMacroTests.cpp" />
+    <ClCompile Include="Memory\AllocTests.cpp" />
     <ClCompile Include="Memory\AllocTrackerTests.cpp" />
-    <ClCompile Include="Memory\MallocTests.cpp" />
+    <ClCompile Include="Memory\HeapAllocatorTests.cpp" />
+    <ClCompile Include="Memory\TArrayTests.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

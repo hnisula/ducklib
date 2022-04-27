@@ -21,7 +21,7 @@ public:
 	uint32_t* p;
 };
 
-TEST(AllocMacroTest, NewDelete)
+TEST(AllocTest, NewDelete)
 {
 	DuckLib::HeapAllocator alloc;
 	uint32_t v = 2;
@@ -36,7 +36,7 @@ TEST(AllocMacroTest, NewDelete)
 	EXPECT_EQ(32, v);
 }
 
-TEST(AllocMacroTest, NewDeleteArray)
+TEST(AllocTest, NewDeleteArray)
 {
 	DuckLib::HeapAllocator alloc;
 	uint32_t v = 2;

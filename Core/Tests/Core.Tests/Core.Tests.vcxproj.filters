@@ -6,16 +6,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Memory\MallocTests.cpp">
+    <ClCompile Include="Memory\HeapAllocatorTests.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
     <ClCompile Include="Memory\AllocTrackerTests.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\AllocMacroTests.cpp">
+    <ClCompile Include="Memory\AllocTests.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\AllocFuncTests.cpp">
+    <ClCompile Include="Memory\TArrayTests.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
   </ItemGroup>
