@@ -8,8 +8,6 @@ namespace DuckLib
 {
 namespace Render
 {
-struct Buffer;
-
 D3D12CommandBuffer::D3D12CommandBuffer(
 	ID3D12GraphicsCommandList1* apiCommandList,
 	ID3D12CommandAllocator* apiCommandAllocator)
@@ -21,7 +19,7 @@ D3D12CommandBuffer::~D3D12CommandBuffer()
 	// TODO: do stuff?
 }
 
-const void* D3D12CommandBuffer::GetApiHandle() const
+void* D3D12CommandBuffer::GetApiHandle() const
 {
 	return apiCommandList;
 }
@@ -72,6 +70,28 @@ void D3D12CommandBuffer::SetRT(ISwapChain* swapChain)
 		&descriptorHandle,
 		FALSE,
 		nullptr);
+}
+
+void D3D12CommandBuffer::SetIndexBuffer(Buffer* buffer)
+{
+	apiCommandList->IASetIndexBuffer((D3D12_INDEX_BUFFER_VIEW*)buffer->apiResource);
+}
+
+void D3D12CommandBuffer::SetVertexBuffers(Buffer** buffer, uint32_t count, uint32_t startSlot)
+{
+	D3D12_VERTEX_BUFFER_VIEW apiViews[MAX_SET_VB_COUNT];
+
+	for (uint32_t i = 0; i < count; ++i)
+		apiViews[i] = *(D3D12_VERTEX_BUFFER_VIEW*)buffer[i]->apiResource;
+
+	apiCommandList->IASetVertexBuffers(startSlot, count, apiViews);
+}
+
+void D3D12CommandBuffer::SetInputDeclaration(InputDescription* inputDescription)
+{
+	D3D12_INPUT_ELEMENT_DESC desc;
+
+	
 }
 
 void D3D12CommandBuffer::Clear(ImageBuffer* rt, float* rgbaColor)

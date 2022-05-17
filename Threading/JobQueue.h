@@ -44,7 +44,7 @@ struct alignas(CACHE_LINE_SIZE) Fiber
 	static const uint32_t DEFAULT_STACK_SIZE = 65536;
 };
 
-void SwitchFiber(Fiber* fiber);
+void SwitchFiber(const Fiber* fiber);
 }
 
 struct alignas(CACHE_LINE_SIZE) JobCounter
@@ -98,7 +98,7 @@ private:
 	void DeleteFiber(Internal::Fiber* fiber);
 	uint32_t GetNumLogicalCores() const;
 
-	void WaitIdle(JobCounter* counter);
+	void WaitIdle(const JobCounter* counter);
 
 	void SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer);
 	void SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer);
@@ -110,7 +110,7 @@ private:
 	void TearDownFibers();
 	void TearDownCounters();
 
-	IAlloc& alloc;
+	IAlloc* alloc;
 
 	uint32_t numCounters;
 	JobCounter* counters;

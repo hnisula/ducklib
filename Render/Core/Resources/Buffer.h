@@ -10,7 +10,7 @@ struct Buffer
 {
 	uint32_t size;
 	Format format;
-	void* apiResources;
+	void* apiResource;
 	void* apiDescriptor;
 };
 }
