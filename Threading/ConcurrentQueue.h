@@ -1,6 +1,6 @@
 #pragma once
 #include <atomic>
-#include <Core/Memory/IAlloc.h>
+#include "Core/Memory/IAlloc.h"
 
 namespace DuckLib
 {

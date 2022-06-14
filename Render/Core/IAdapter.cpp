@@ -1,10 +1,8 @@
-#include <Core/Memory/IAlloc.h>
+#include "Core/Memory/IAlloc.h"
 #include <cstring>
 #include "IAdapter.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 IAdapter::IAdapter(const char* description, bool isHardware)
 {
@@ -22,6 +20,5 @@ IAdapter::~IAdapter() { }
 bool IAdapter::IsHardware() const
 {
 	return isHardware;
-}
 }
 }

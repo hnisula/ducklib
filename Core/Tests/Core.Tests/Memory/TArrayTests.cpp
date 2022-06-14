@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <Core/Memory/Containers/TArray.h>
+#include "Core/Memory/Containers/TArray.h"
 
 using namespace DuckLib;
 

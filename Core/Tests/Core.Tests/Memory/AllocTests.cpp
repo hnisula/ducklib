@@ -1,5 +1,5 @@
-#include "gtest/gtest.h"
-#include <Core/Memory/HeapAllocator.h>
+#include <gtest/gtest.h>
+#include "Core/Memory/HeapAllocator.h"
 
 class Foo
 {

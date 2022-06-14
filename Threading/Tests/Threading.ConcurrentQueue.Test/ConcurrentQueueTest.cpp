@@ -1,8 +1,8 @@
 #include <conio.h>
 #include <exception>
 #include <iostream>
-#include "../../Threading/ConcurrentQueue.h"
-#include "../../Threading/Thread.h"
+#include "../../ConcurrentQueue.h"
+#include "../../Thread.h"
 
 using namespace DuckLib;
 

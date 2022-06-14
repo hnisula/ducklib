@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <Core/Memory/HeapAllocator.h>
-#include <Core/Memory/MemoryInternal.h>
+#include "Core/Memory/HeapAllocator.h"
+#include "Core/Memory/MemoryInternal.h"
 
 using namespace DuckLib;
 
