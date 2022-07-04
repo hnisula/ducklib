@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Memory\AllocTracker.h" />
+    <ClInclude Include="Memory\Containers\TArray.h" />
     <ClInclude Include="Memory\IAlloc.h" />
     <ClInclude Include="Memory\Malloc.h" />
     <ClInclude Include="Memory\MemoryInternal.h" />

@@ -4,6 +4,9 @@
     <Filter Include="Memory">
       <UniqueIdentifier>{39517109-7a91-4472-b878-0d635d0d32df}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory\Containers">
+      <UniqueIdentifier>{8b30e216-77fe-46a8-aa16-15c768e68788}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Memory\IAlloc.h">
@@ -17,6 +20,9 @@
     </ClInclude>
     <ClInclude Include="Memory\Malloc.h">
       <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\Containers\TArray.h">
+      <Filter>Memory\Containers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
