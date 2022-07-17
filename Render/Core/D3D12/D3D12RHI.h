@@ -3,6 +3,7 @@
 #include "D3D12Adapter.h"
 #include "Lib/dxgi1_4.h"
 #include "../IRHI.h"
+#include "Core/Memory/Containers/TArray.h"
 
 namespace DuckLib
 {
@@ -15,7 +16,8 @@ public:
 
 	void Init();
 
-	const std::vector<IAdapter*>& GetAdapters() const override;
+	const IAdapter* Adapters() const override;
+	uint32_t AdapterCount() const override;
 
 protected:
 	D3D12RHI();
@@ -28,7 +30,9 @@ protected:
 
 	bool isInitialized;
 
+	// Unsure if this is the preferred way (compared to using TArray)
 	D3D12Adapter* adapters[MAX_NUM_ADAPTERS];
+	uint32_t adapterCount;
 };
 };
 }

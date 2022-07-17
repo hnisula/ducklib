@@ -9,7 +9,9 @@ namespace Render
 class IRHI
 {
 public:
-	virtual const std::vector<IAdapter*>& GetAdapters() const = 0;
+	virtual const IAdapter* Adapters() const = 0;
+	// TODO: Remove virtual?
+	virtual uint32_t AdapterCount() const = 0;
 };
 }
 }

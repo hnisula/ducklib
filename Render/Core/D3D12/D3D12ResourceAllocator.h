@@ -2,7 +2,6 @@
 #include <vector>
 #include "D3D12Adapter.h"
 #include "../Resources/ImageBuffer.h"
-#include "../Adapter.h"
 
 namespace DuckLib
 {

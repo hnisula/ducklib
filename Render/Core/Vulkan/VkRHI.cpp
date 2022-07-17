@@ -1,11 +1,13 @@
 #include "VkRHI.h"
-
+#include "Lib/glfw3.h"
 #include <stdexcept>
 
 namespace DuckLib
 {
 namespace Render
 {
+VkRHI::~VkRHI() {}
+
 IRHI* VkRHI::GetInstance()
 {
 	static VkRHI rhi;
@@ -36,6 +38,18 @@ void VkRHI::Init()
 		throw std::runtime_error("Failed to create Vulkan instance");
 
 	isInitialized = true;
+}
+
+const IAdapter* VkRHI::Adapters() const
+{
+	// TODO: Implement
+	return nullptr;
+}
+
+uint32_t VkRHI::AdapterCount() const
+{
+	// TODO: Implement
+	return 0;
 }
 
 VkRHI::VkRHI() : isInitialized(false) {}

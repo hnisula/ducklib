@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <stdexcept>
 #include "../IAlloc.h"
 
 namespace DuckLib
@@ -24,6 +25,8 @@ public:
 
 	T& operator [](uint32_t i);
 	const T& operator [](uint32_t i) const;
+
+	const T* Data() const;
 
 protected:
 	bool EnsureCapacity(uint32_t requiredCapacity);
@@ -54,7 +57,7 @@ template <typename T>
 TArray<T>::TArray(void* externalArray, uint64_t size, uint64_t capacity, IAlloc* alloc)
 {
 	this->alloc = alloc;
-	array = (uint32_t*)externalArray;
+	array = (T*)externalArray;
 	this->size = size;
 	this->capacity = capacity;
 	isExternalArray = true;
@@ -131,6 +134,12 @@ template <typename T>
 const T& TArray<T>::operator[](uint32_t i) const
 {
 	return array[i];
+}
+
+template <typename T>
+const T* TArray<T>::Data() const
+{
+	return array;
 }
 
 template <typename T>

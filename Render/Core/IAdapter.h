@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace DuckLib
 {
 namespace Render
@@ -10,7 +12,7 @@ public:
 	IAdapter(const char* description, bool isHardware);
 	virtual ~IAdapter() = 0;
 
-	// TODO: Premature and probably not the final thing needed
+	// TODO: Perhaps object to change
 	virtual void* GetApiHandle() const = 0;
 
 	uint32_t GetDeviceId() const;
