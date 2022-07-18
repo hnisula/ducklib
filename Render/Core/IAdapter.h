@@ -10,7 +10,7 @@ class IAdapter
 {
 public:
 	IAdapter(const char* description, bool isHardware);
-	virtual ~IAdapter() = 0;
+	virtual ~IAdapter();
 
 	// TODO: Perhaps object to change
 	virtual void* GetApiHandle() const = 0;

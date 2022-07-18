@@ -1,8 +1,9 @@
 #include <exception>
-#include "Lib/d3dx12.h"
-#include "Core/Memory/IAlloc.h"
-#include "D3D12Device.h"
+#include <Core/Memory/IAlloc.h>
+#include "d3dx12.h"
+#include "D3D12Api.h"
 #include "D3D12CommandBuffer.h"
+#include "D3D12ResourceCommandBuffer.h"
 #include "D3D12SwapChain.h"
 #include "D3D12Formats.h"
 
@@ -10,22 +11,22 @@ namespace DuckLib
 {
 namespace Render
 {
-D3D12Device::D3D12Device()
+D3D12Api::D3D12Api()
 	: factory(nullptr)
 	, device(nullptr)
 {
 #ifdef _DEBUG
-	DL_D3D12_CHECK(
+	DL_D3D12_THROW_FAIL(
 		CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory)),
 		"Failed to create DXGI factory");
 
-	DL_D3D12_CHECK(
+	DL_D3D12_THROW_FAIL(
 		D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)),
 		"Failed to get debugInterface interface");
 
 	debugInterface->EnableDebugLayer();
 #else
-	DL_D3D12_CHECK(
+	DL_D3D12_THROW_FAIL(
 		CreateDXGIFactory2(IID_PPV_ARGS(&factory)),
 		"Failed to create DXGI factory");
 #endif
@@ -42,7 +43,7 @@ D3D12Device::D3D12Device()
 	if (!adapter)
 		throw std::exception("Failed to retrieve compatible adapter");
 
-	DL_D3D12_CHECK(
+	DL_D3D12_THROW_FAIL(
 		D3D12CreateDevice((IUnknown*)adapter->GetApiHandle(), DL_D3D_FEATURE_LEVEL,IID_PPV_ARGS(
 			&device)),
 		"Failed to create D3D12 device");
@@ -50,7 +51,7 @@ D3D12Device::D3D12Device()
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
 }
 
-D3D12Device::~D3D12Device()
+D3D12Api::~D3D12Api()
 {
 	DestroyAdapters();
 
@@ -58,12 +59,12 @@ D3D12Device::~D3D12Device()
 		DestroySwapChain(swapChain);
 }
 
-const std::vector<IAdapter*>& D3D12Device::GetAdapters() const
+const std::vector<IAdapter*>& D3D12Api::GetAdapters() const
 {
 	return adapters;
 }
 
-ISwapChain* D3D12Device::CreateSwapChain(
+ISwapChain* D3D12Api::CreateSwapChain(
 	uint32_t width,
 	uint32_t height,
 	Format format,
@@ -86,8 +87,9 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 	swapChainDesc.Flags = 0;
 
-	DL_D3D12_CHECK(
-		factory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &apiSwapChain),
+	DL_D3D12_THROW_FAIL(
+		factory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr,
+			&apiSwapChain),
 		"Failed to create swap chain");
 
 	uint32_t descriptorSize = device->GetDescriptorHandleIncrementSize(
@@ -101,7 +103,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 
 	for (uint32_t i = 0; i < bufferCount; ++i)
 	{
-		DL_D3D12_CHECK(
+		DL_D3D12_THROW_FAIL(
 			apiSwapChain->GetBuffer(i, IID_PPV_ARGS(&apiBuffer)),
 			"Failed to get buffer from D3D12 swap chain");
 
@@ -124,7 +126,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 
 	ID3D12Fence* apiFence;
 
-	DL_D3D12_CHECK(
+	DL_D3D12_THROW_FAIL(
 		device->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
 		"Failed to create fence for frame syncing");
 
@@ -143,7 +145,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	return swapChain;
 }
 
-ICommandBuffer* D3D12Device::CreateCommandBuffer()
+ICommandBuffer* D3D12Api::CreateCommandBuffer()
 {
 	ID3D12CommandAllocator* apiCommandAllocator;
 	ID3D12GraphicsCommandList1* apiCommandList;
@@ -170,18 +172,45 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 	return new(DefAlloc()->Allocate<D3D12CommandBuffer>()) D3D12CommandBuffer(apiCommandList, apiCommandAllocator);
 }
 
-void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
+IResourceCommandBuffer* D3D12Api::CreateResourceCommandBuffer()
+{
+	ID3D12CommandAllocator* apiCommandAllocator;
+	ID3D12GraphicsCommandList1* apiCommandList;
+
+	HRESULT result = device->CreateCommandAllocator(
+		D3D12_COMMAND_LIST_TYPE_COPY,
+		IID_PPV_ARGS(&apiCommandAllocator));
+
+	if (result != S_OK)
+		throw std::exception("Failed to create D3D12 command allocator");
+
+	result = device->CreateCommandList(
+		0,
+		D3D12_COMMAND_LIST_TYPE_COPY,
+		apiCommandAllocator,
+		nullptr,
+		IID_PPV_ARGS(&apiCommandList));
+
+	if (result != S_OK)
+		throw std::exception("Failed to create D3D12 command list");
+
+	return new(DefAlloc()->Allocate<D3D12ResourceCommandBuffer>()) D3D12ResourceCommandBuffer(
+		apiCommandList,
+		apiCommandAllocator);
+}
+
+void D3D12Api::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));
 
 	DefAlloc()->Delete(swapChain);
 }
 
-void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
-{
-}
+void D3D12Api::DestroyCommandBuffer(ICommandBuffer* commandBuffer) {}
 
-void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
+void D3D12Api::DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer) {}
+
+void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
 {
 	ID3D12CommandList* apiLists[128];
 
@@ -191,7 +220,7 @@ void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_
 	commandQueue->ExecuteCommandLists(numCommandBuffers, apiLists);
 }
 
-void D3D12Device::SignalCompletion(ISwapChain* swapChain)
+void D3D12Api::SignalCompletion(ISwapChain* swapChain)
 {
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
 	uint64_t signalValue = swapChain->GetSignalValue();
@@ -200,7 +229,7 @@ void D3D12Device::SignalCompletion(ISwapChain* swapChain)
 		throw std::exception("Failed to signal completion in D3D12 rendering");
 }
 
-void D3D12Device::EnumAndCreateAdapters()
+void D3D12Api::EnumAndCreateAdapters()
 {
 	if (!factory)
 		throw std::exception("Factory not initialized");
@@ -232,7 +261,7 @@ void D3D12Device::EnumAndCreateAdapters()
 	}
 }
 
-ID3D12CommandQueue* D3D12Device::CreateQueue(
+ID3D12CommandQueue* D3D12Api::CreateQueue(
 	D3D12_COMMAND_LIST_TYPE type,
 	D3D12_COMMAND_QUEUE_FLAGS flags)
 {
@@ -250,7 +279,7 @@ ID3D12CommandQueue* D3D12Device::CreateQueue(
 	return queue;
 }
 
-ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
+ID3D12DescriptorHeap* D3D12Api::CreateDescriptorHeap(
 	uint32_t numDescriptors,
 	D3D12_DESCRIPTOR_HEAP_TYPE type)
 {
@@ -261,14 +290,14 @@ ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
 	heapDesc.Type = type;
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
-	DL_D3D12_CHECK(
+	DL_D3D12_THROW_FAIL(
 		device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&apiDescriptorHeap)),
 		"Failed to create D3D12 descriptor heap");
 
 	return apiDescriptorHeap;
 }
 
-ImageBuffer* D3D12Device::CreateImageBuffer(
+ImageBuffer* D3D12Api::CreateImageBuffer(
 	uint32_t width,
 	uint32_t height,
 	uint32_t depth,
@@ -287,7 +316,7 @@ ImageBuffer* D3D12Device::CreateImageBuffer(
 	return imageBuffer;
 }
 
-void D3D12Device::DestroyAdapters()
+void D3D12Api::DestroyAdapters()
 {
 	for (IAdapter* adapter : adapters)
 		DefAlloc()->Delete(adapter);

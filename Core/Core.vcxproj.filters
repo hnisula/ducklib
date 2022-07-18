@@ -5,7 +5,7 @@
       <UniqueIdentifier>{39517109-7a91-4472-b878-0d635d0d32df}</UniqueIdentifier>
     </Filter>
     <Filter Include="Memory\Containers">
-      <UniqueIdentifier>{8b30e216-77fe-46a8-aa16-15c768e68788}</UniqueIdentifier>
+      <UniqueIdentifier>{5f687c46-7b37-400f-972e-4fa1a9f33fdd}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -18,12 +18,13 @@
     <ClInclude Include="Memory\AllocTracker.h">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="Memory\Malloc.h">
+    <ClInclude Include="Memory\HeapAllocator.h">
       <Filter>Memory</Filter>
     </ClInclude>
     <ClInclude Include="Memory\Containers\TArray.h">
       <Filter>Memory\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\MemoryInternal.cpp">
@@ -32,7 +33,11 @@
     <ClCompile Include="Memory\AllocTracker.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\Malloc.cpp">
+    <ClCompile Include="Memory\HeapAllocator.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="Memory\IAlloc.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
   </ItemGroup>

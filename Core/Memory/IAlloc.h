@@ -1,128 +1,83 @@
 #pragma once
-#include <new>
-#include "MemoryInternal.h"
+#include "AllocTracker.h"
 
 namespace DuckLib
 {
 class IAlloc;
 
-IAlloc& DefAlloc();
+IAlloc* DefAlloc();
 
 class IAlloc
 {
 public:
-	virtual ~IAlloc() {};
+	IAlloc();
+	virtual ~IAlloc() { }
 
-	virtual void* Allocate(uint64_t size, uint8_t align = DEFAULT_ALIGN) = 0;
-	virtual void* Reallocate(void* ptr, uint64_t size) = 0;
-	virtual void Free(void* ptr) = 0;
+	void* Allocate(uint64_t size, uint8_t align = DEFAULT_ALIGN);
+	void* Reallocate(void* ptr, uint64_t size);
+	void Free(void* ptr);
 
-	// Ugly stuff that can, hopefully, be removed soon (std::source_location)
-	virtual void* Allocate(uint64_t size,
-		uint8_t align,
-		const char* file,
-		const char* function,
-		uint32_t line) = 0;
-	virtual void* Reallocate(void* ptr,
-		uint64_t size,
-		const char* file,
-		const char* function,
-		uint32_t line) = 0;
+	template <typename T>
+	T* Allocate(uint32_t count = 1);
 
-	static const uint8_t DEFAULT_ALIGN = 4;
+	template <typename T, typename... TArgs>
+	T* New(TArgs&&... args);
+	template <typename T>
+	void Delete(T* ptr);
+
+	// TODO: Come up with a good way to support this. Do all implementations then require a header to keep track of count or total size?
+	// template <typename T>
+	// T* NewArray(uint64_t count);
+	// template <typename T>
+	// void DeleteArray(T* ptr);
+
+	static constexpr uint8_t DEFAULT_ALIGN = 4;
+
+protected:
+	virtual void* AllocateInternal(uint64_t size, uint8_t align = DEFAULT_ALIGN) = 0;
+	virtual void* ReallocateInternal(void* ptr, uint64_t newSize) = 0;
+	virtual void FreeInternal(void* ptr) = 0;
+
+	// totalSize includes possible headers, alignment and similar extra data
+	uint64_t totalAllocatedSize;
+	uint64_t allocatedSize;
+	uint32_t allocationCount;
 };
 
-namespace Internal
-{
-namespace Memory
-{
-#ifdef DL_TRACK_ALLOCS
 template <typename T>
-T* NewArray(IAlloc& alloc, uint32_t size, const char* file, const char* function, uint32_t line)
+T* IAlloc::Allocate(uint32_t count)
 {
-	T* ptr = (T*)alloc.Allocate(sizeof(T) * size, alignof(T), file, function, line);
-
-	for (uint32_t i = 0; i < size; ++i)
-		new(&ptr[i]) T();
-
-	return ptr;
+	return (T*)Allocate(sizeof(T) * count, alignof(T));
 }
-#else
-template < typename T >
-T* NewArray(IAlloc& alloc, uint32_t size)
+
+template <typename T, typename ... TArgs>
+T* IAlloc::New(TArgs&&... args)
 {
-	T* ptr = (T*)alloc.Allocate(sizeof(T) * size, alignof(T));
-
-	for (uint32_t i = 0; i < size; ++i)
-		new (&ptr[i]) T();
-
-	return ptr;
+	return new (Allocate(sizeof(T), alignof(T))) T(std::forward<TArgs>(args)...);
 }
-#endif
 
 template <typename T>
-void Delete(IAlloc& alloc, T* ptr)
+void IAlloc::Delete(T* ptr)
 {
 	ptr->~T();
-	alloc.Free(ptr);
+	Free(ptr);
 }
 
-template <typename T>
-void DeleteArray(IAlloc& alloc, T* ptr)
-{
-	Header* header = GetHeader(ptr);
-	uint64_t arrayLength = GetTotalAllocSize(header) / sizeof(T);
+// template <typename T>
+// T* IAlloc::NewArray(uint64_t count)
+// {
+// 	T* array = Allocate(sizeof(T) * count, alignof(T));
+//
+// 	for (uint64_t i = 0; i < count; ++i)
+// 		new (&array[i]) T();
+//
+// 	return array;
+// }
+//
+// template <typename T>
+// void IAlloc::DeleteArray(T* ptr)
+// {
+// 	for
+// }
 
-	for (uint64_t i = 0; i < arrayLength; ++i)
-		ptr[i].~T();
-
-	alloc.Free(ptr);
 }
-}
-}
-}
-
-// While std::source_location (C++20:Library Fundamentals, Version 2) is not supported, we need this
-#ifdef DL_TRACK_ALLOCS
-#define DL_NEW(alloc, type, ...) \
-	new ((alloc).Allocate(sizeof(type), alignof(type), __FILE__, __FUNCTION__, __LINE__)) type{__VA_ARGS__}
-
-#define DL_NEW_ARRAY(alloc, type, size) \
-	(::DuckLib::Internal::Memory::NewArray<type>((alloc), (size), __FILE__, __FUNCTION__, __LINE__))
-
-#define DL_ALLOC(alloc, size) \
-	((alloc).Allocate(size, IAlloc::DEFAULT_ALIGN, __FILE__, __FUNCTION__, __LINE__))
-
-#define DL_ALLOC_A(alloc, size, align) \
-	((alloc).Allocate(size, align, __FILE__, __FUNCTION__, __LINE__))
-
-#define DL_REALLOC(alloc, ptr, size) \
-	((alloc).Reallocate(ptr, size, __FILE__, __FUNCTION__, __LINE__))
-#else
-#define DL_NEW(alloc, type, ...) \
-	new ((alloc).Allocate(sizeof(type), alignof(type))) type{__VA_ARGS__}
-
-#define DL_NEW_ARRAY(alloc, type, size) \
-	(::DuckLib::Internal::Memory::NewArray<type>((alloc), (size)))
-
-#define DL_ALLOC(alloc, size) \
-	((alloc).Allocate( size, IAlloc::DEFAULT_ALIGN))
-
-#define DL_ALLOC_A(alloc, size, align) \
-	((alloc).Allocate(size, align))
-
-#define DL_REALLOC(alloc, ptr, size) \
-	((alloc).Reallocate(ptr, size))
-#endif
-
-#define DL_PLACE_NEW(ptr, type, ...) \
-	(new (ptr) type(__VA_ARGS__)
-
-#define DL_DELETE(alloc, ptr) \
-	(::DuckLib::Internal::Memory::Delete((alloc), (ptr)))
-
-#define DL_DELETE_ARRAY(alloc, ptr) \
-	(::DuckLib::Internal::Memory::DeleteArray((alloc), (ptr)))
-
-#define DL_FREE(alloc, ptr) \
-	((alloc).Free(ptr))

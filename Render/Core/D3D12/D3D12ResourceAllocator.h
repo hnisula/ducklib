@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
 #include "D3D12Adapter.h"
 #include "../Resources/ImageBuffer.h"
+#include "Core/Memory/Containers/TArray.h"
 
 namespace DuckLib
 {
@@ -11,6 +11,8 @@ class D3D12ResourceAllocator
 {
 public:
 
+	D3D12ResourceAllocator();
+
 	ImageBuffer* AllocatorImageBuffer();
 	D3D12Adapter* AllocateAdapter();
 
@@ -19,7 +21,9 @@ public:
 	
 private:
 
-	std::vector<D3D12Adapter*> adapters;
+	IAlloc* alloc;
+
+	TArray<D3D12Adapter*> adapters;
 };
 }
 }

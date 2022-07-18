@@ -44,14 +44,13 @@ const IAdapter* D3D12RHI::Adapters() const
 			_uuidof(ID3D12Device),
 			nullptr) == S_FALSE)
 		{
-			IAdapter* adapter = DL_NEW(
-				DefAlloc(),
-				D3D12Adapter,
+			IAdapter* adapter = DefAlloc()->New<D3D12Adapter>(
 				descriptionBuffer,
 				(adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
 				adapterIt);
-			TArray<D3D12Adapter*> adaptersArr = TArray<D3D12Adapter*>((void*)adapters, i + 1, MAX_NUM_ADAPTERS);
 
+			adapters[adapterCount++] = adapter;
+			// TArray<D3D12Adapter*> adaptersArr = TArray<D3D12Adapter*>((void*)adapters, i + 1, MAX_NUM_ADAPTERS);
 			// adaptersArr.Append(adapter);
 		}
 	}

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include <Memory/AllocTracker.h>
+#include "Core/Memory/AllocTracker.h"
 
 using namespace DuckLib::Internal::Memory;
 
