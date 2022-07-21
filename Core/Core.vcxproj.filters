@@ -12,9 +12,6 @@
     <ClInclude Include="Memory\IAlloc.h">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="Memory\MemoryInternal.h">
-      <Filter>Memory</Filter>
-    </ClInclude>
     <ClInclude Include="Memory\AllocTracker.h">
       <Filter>Memory</Filter>
     </ClInclude>
@@ -25,11 +22,11 @@
       <Filter>Memory\Containers</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="Memory\Containers\Iterators.h">
+      <Filter>Memory\Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Memory\MemoryInternal.cpp">
-      <Filter>Memory</Filter>
-    </ClCompile>
     <ClCompile Include="Memory\AllocTracker.cpp">
       <Filter>Memory</Filter>
     </ClCompile>

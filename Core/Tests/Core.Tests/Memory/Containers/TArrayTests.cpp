@@ -9,7 +9,7 @@ TEST(TArrayTests, Simple)
 
 	a.Append(1);
 
-	EXPECT_EQ(1u, a.Size());
+	EXPECT_EQ(1u, a.Length());
 	EXPECT_EQ(1u, a[0]);
 	EXPECT_LE(1u, a.Capacity());
 }
@@ -22,7 +22,7 @@ TEST(TArrayTests, MultipleSizeIncreases)
 	for (uint32_t i = 0; i < count; ++i)
 		a.Append(i);
 
-	EXPECT_EQ(count, a.Size());
+	EXPECT_EQ(count, a.Length());
 	EXPECT_LE(count, a.Capacity());
 
 	for (uint32_t i = 0; i < count; ++i)

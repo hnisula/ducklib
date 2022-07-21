@@ -1,7 +1,14 @@
-#include "IAlloc.h"
+#include "HeapAllocator.h"
 
 namespace DuckLib
 {
+IAlloc* DefAlloc()
+{
+	static HeapAllocator defaultHeapAllocator;
+
+	return &defaultHeapAllocator;
+}
+
 IAlloc::IAlloc()
 	: totalAllocatedSize(0)
 	, allocatedSize(0)
