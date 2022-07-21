@@ -12,7 +12,6 @@ public:
 	uint32_t* p;
 };
 
-// TODO: Try to find way to replicate the allocation issue caused here and put it in HeapAllocatorTests.cpp
 TEST(IteratorsTest, TArrayRangedLoop)
 {
 	// TODO: Support for braced initialization list would be handy here

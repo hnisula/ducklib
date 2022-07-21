@@ -12,9 +12,6 @@
     <ClInclude Include="Memory\IAlloc.h">
       <Filter>Memory</Filter>
     </ClInclude>
-    <ClInclude Include="Memory\MemoryInternal.h">
-      <Filter>Memory</Filter>
-    </ClInclude>
     <ClInclude Include="Memory\AllocTracker.h">
       <Filter>Memory</Filter>
     </ClInclude>
@@ -30,9 +27,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Memory\MemoryInternal.cpp">
-      <Filter>Memory</Filter>
-    </ClCompile>
     <ClCompile Include="Memory\AllocTracker.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
