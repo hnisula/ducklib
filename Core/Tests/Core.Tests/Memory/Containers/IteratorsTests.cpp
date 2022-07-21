@@ -25,3 +25,11 @@ TEST(IteratorsTest, TArrayRangedLoop)
 	for (uint32_t i : a)
 		EXPECT_EQ(n++, i);
 }
+
+TEST(IteratorsTest, TArrayRangedLoopEmpty)
+{
+	TArray<uint32_t> a;
+
+	for (uint32_t i : a)
+		EXPECT_TRUE(false);
+}

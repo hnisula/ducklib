@@ -51,6 +51,9 @@ TArrayIt<T> begin(TArray<T>& array)
 template <typename T>
 TArrayIt<T> end(TArray<T>& array)
 {
-	return TArrayIt(&array.Data()[array.Length() - 1]);
+	T* dataPtr = array.Data();
+	T* itPtr = dataPtr != nullptr ? &dataPtr[array.Length() - 1] : nullptr;
+
+	return TArrayIt(itPtr);
 }
 }
