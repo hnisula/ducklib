@@ -18,10 +18,10 @@
     <ClCompile Include="Memory\AllocTests.cpp">
       <Filter>Memory</Filter>
     </ClCompile>
-    <ClCompile Include="Memory\TArrayTests.cpp">
-      <Filter>Memory</Filter>
-    </ClCompile>
     <ClCompile Include="Memory\Containers\IteratorsTests.cpp">
+      <Filter>Memory\Containers</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\Containers\TArrayTests.cpp">
       <Filter>Memory\Containers</Filter>
     </ClCompile>
   </ItemGroup>
