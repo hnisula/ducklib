@@ -3,7 +3,6 @@
 
 namespace DuckLib
 {
-// TODO: Rename?
 class HeapAllocator final : public IAlloc
 {
 public:

@@ -10,9 +10,7 @@ IAlloc* DefAlloc()
 	return &defaultHeapAllocator;
 }
 
-namespace Internal
-{
-namespace Memory
+namespace Internal::Memory
 {
 // TODO: Move to HeapAllcoator? Aren't these only used in the HeapAllocator?
 
@@ -52,21 +50,16 @@ uint64_t GetAllocationSize(const Header* header)
 
 void* GetDataPtr(Header* headerPtr)
 {
-	uintptr_t iterator = (uintptr_t)headerPtr + sizeof(Header);
+	void* iterator = headerPtr + sizeof(Header);
 
-	return NextAlign((void*)iterator, headerPtr->align);
+	return NextAlign(iterator, headerPtr->align);
 }
 
 void* NextAlign(void* ptr, uint8_t align)
 {
-	uintptr_t typedPtr = (uintptr_t)ptr;
-	uintptr_t error = typedPtr % align;
+	uintptr_t error = (uintptr_t)ptr % align;
 
-	if (error)
-		typedPtr += align - error;
-
-	return (void*)typedPtr;	// TODO: Look up warning to see if it has anything to with performance (there's a clang warning about 
-}
+	return (char*)ptr + align - error;
 }
 }
 }

@@ -18,12 +18,15 @@ public:
 
 	bool Contains(const T& item) const;
 
-	uint32_t Size() const;
+	uint32_t Length() const;
 	uint32_t Capacity() const;
 	void Resize(uint32_t newCapacity);
 
 	T& operator [](uint32_t i);
 	const T& operator [](uint32_t i) const;
+
+	T* Data();
+	const T* Data() const;
 
 protected:
 	bool EnsureCapacity(uint32_t requiredCapacity);
@@ -99,7 +102,7 @@ bool TArray<T>::Contains(const T& item) const
 }
 
 template <typename T>
-uint32_t TArray<T>::Size() const
+uint32_t TArray<T>::Length() const
 {
 	return size;
 }
@@ -131,6 +134,18 @@ template <typename T>
 const T& TArray<T>::operator[](uint32_t i) const
 {
 	return array[i];
+}
+
+template <typename T>
+T* TArray<T>::Data()
+{
+	return array;
+}
+
+template <typename T>
+const T* TArray<T>::Data() const
+{
+	return array;
 }
 
 template <typename T>

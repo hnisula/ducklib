@@ -15,12 +15,12 @@ struct Header
 	static const uint8_t PAD_VALUE = 0xff;
 };
 
-uint64_t SizeWithHeaderAndAlignment( uint64_t sizeWithoutHeader, uint8_t align );
-void WriteAllocHeader( void* headerPtr, uint64_t sizeWithHeader, uint8_t align );
-Header* GetHeader( void* dataPtr );
-uint64_t GetAllocationSize( const Header* header );
-void* GetDataPtr( Header* headerPtr );
-void* NextAlign( void* ptr, uint8_t align );
+uint64_t SizeWithHeaderAndAlignment(uint64_t sizeWithoutHeader, uint8_t align);
+void WriteAllocHeader(void* headerPtr, uint64_t sizeWithHeader, uint8_t align);
+Header* GetHeader(void* dataPtr);
+uint64_t GetAllocationSize(const Header* header);
+void* GetDataPtr(Header* headerPtr);
+void* NextAlign(void* ptr, uint8_t align);
 }
 }
 }

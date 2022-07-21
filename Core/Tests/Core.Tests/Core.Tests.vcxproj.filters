@@ -4,6 +4,9 @@
     <Filter Include="Memory">
       <UniqueIdentifier>{7f777fe9-9de2-4ae7-8418-5f35a0ea5d73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Memory\Containers">
+      <UniqueIdentifier>{bbf0c5d2-fdb8-4edd-8c2e-525db144697d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\HeapAllocatorTests.cpp">
@@ -17,6 +20,9 @@
     </ClCompile>
     <ClCompile Include="Memory\TArrayTests.cpp">
       <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="Memory\Containers\IteratorsTests.cpp">
+      <Filter>Memory\Containers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

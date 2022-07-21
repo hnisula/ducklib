@@ -25,6 +25,9 @@
       <Filter>Memory\Containers</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="Memory\Containers\Iterators.h">
+      <Filter>Memory\Containers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\MemoryInternal.cpp">
