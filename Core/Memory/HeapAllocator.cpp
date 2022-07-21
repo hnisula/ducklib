@@ -1,6 +1,5 @@
 #include <cstdlib>
 #include "HeapAllocator.h"
-#include "MemoryInternal.h"
 #include "../Utility.h"
 
 namespace DuckLib
@@ -54,5 +53,58 @@ void HeapAllocator::FreeInternal(void* ptr)
 	--allocationCount;
 
 	free(header);
+}
+
+namespace Internal::Memory
+{
+uint64_t SizeWithHeaderAndAlignment(uint64_t sizeWithoutHeader, uint8_t align)
+{
+	return sizeWithoutHeader + sizeof(Header) + align;
+}
+
+void WriteAllocHeader(void* headerPtr, uint64_t sizeWithHeader, uint8_t align)
+{
+	Header* header = (Header*)headerPtr;
+	char* iterator = (char*)header + sizeof(Header);
+
+	header->totalSize = sizeWithHeader;
+	header->align = align;
+
+	while ((uintptr_t)iterator % align)
+	{
+		*iterator = Header::PAD_VALUE;
+		++iterator;
+	}
+}
+
+Header* GetHeader(void* dataPtr)
+{
+	char* iterator = (char*)dataPtr;
+
+	while (*(iterator - 1) == Header::PAD_VALUE)
+		--iterator;
+
+	return (Header*)(iterator - sizeof(Header));
+}
+
+uint64_t GetAllocationSize(const Header* header)
+{
+	return header->totalSize - header->align - sizeof(Header);
+}
+
+void* GetDataPtr(Header* headerPtr)
+{
+	void* ptrStart = (char*)headerPtr + sizeof(Header);
+
+	return NextAlign(ptrStart, headerPtr->align);
+}
+
+void* NextAlign(void* ptr, uint8_t align)
+{
+	uintptr_t alignError = (uintptr_t)ptr % align;
+	uintptr_t offset = alignError ? align - alignError : 0;
+
+	return (char*)ptr + offset;
+}
 }
 }

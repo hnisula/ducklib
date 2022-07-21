@@ -20,17 +20,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Memory\AllocTracker.h" />
+    <ClInclude Include="Memory\Containers\Iterators.h" />
     <ClInclude Include="Memory\Containers\TArray.h" />
     <ClInclude Include="Memory\IAlloc.h" />
     <ClInclude Include="Memory\HeapAllocator.h" />
-    <ClInclude Include="Memory\MemoryInternal.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\AllocTracker.cpp" />
     <ClCompile Include="Memory\HeapAllocator.cpp" />
     <ClCompile Include="Memory\IAlloc.cpp" />
-    <ClCompile Include="Memory\MemoryInternal.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
