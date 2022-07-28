@@ -23,7 +23,5 @@ protected:
 
 	IDXGIFactory4* apiFactory;
 	IDXGIAdapter1* apiAdapter;
-
-	D3D12Device* device;
 };
 }

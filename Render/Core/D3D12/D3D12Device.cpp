@@ -11,7 +11,7 @@ namespace DuckLib::Render
 {
 D3D12Device::D3D12Device()
 	: factory(nullptr)
-	, device(nullptr)
+	, apiDevice(nullptr)
 {
 #ifdef _DEBUG
 	DL_D3D12_CHECK(
@@ -43,7 +43,7 @@ D3D12Device::D3D12Device()
 
 	DL_D3D12_CHECK(
 		D3D12CreateDevice((IUnknown*)adapter->GetApiHandle(), DL_D3D_FEATURE_LEVEL,IID_PPV_ARGS(
-			&device)),
+			&apiDevice)),
 		"Failed to create D3D12 device");
 
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
@@ -89,7 +89,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 		factory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &apiSwapChain),
 		"Failed to create swap chain");
 
-	uint32_t descriptorSize = device->GetDescriptorHandleIncrementSize(
+	uint32_t descriptorSize = apiDevice->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	ID3D12DescriptorHeap* descriptorHeap = CreateDescriptorHeap(
 		bufferCount,
@@ -104,7 +104,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 			apiSwapChain->GetBuffer(i, IID_PPV_ARGS(&apiBuffer)),
 			"Failed to get buffer from D3D12 swap chain");
 
-		device->CreateRenderTargetView(apiBuffer, nullptr, descriptorIterator);
+		apiDevice->CreateRenderTargetView(apiBuffer, nullptr, descriptorIterator);
 
 		rtvHandles[i].width = width;
 		rtvHandles[i].height = height;
@@ -124,7 +124,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	ID3D12Fence* apiFence;
 
 	DL_D3D12_CHECK(
-		device->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
+		apiDevice->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
 		"Failed to create fence for frame syncing");
 
 	D3D12SwapChain* swapChain = DefAlloc()->New<D3D12SwapChain>(
@@ -147,14 +147,14 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 	ID3D12CommandAllocator* apiCommandAllocator;
 	ID3D12GraphicsCommandList1* apiCommandList;
 
-	HRESULT result = device->CreateCommandAllocator(
+	HRESULT result = apiDevice->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		IID_PPV_ARGS(&apiCommandAllocator));
 
 	if (result != S_OK)
 		throw std::exception("Failed to create D3D12 command allocator");
 
-	result = device->CreateCommandList(
+	result = apiDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		apiCommandAllocator,
@@ -241,7 +241,7 @@ ID3D12CommandQueue* D3D12Device::CreateQueue(
 	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 
-	HRESULT result = device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&queue));
+	HRESULT result = apiDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&queue));
 
 	if (result != S_OK)
 		throw std::exception("Failed to create D3D12 queue");
@@ -261,7 +261,7 @@ ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	DL_D3D12_CHECK(
-		device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&apiDescriptorHeap)),
+		apiDevice->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&apiDescriptorHeap)),
 		"Failed to create D3D12 descriptor heap");
 
 	return apiDescriptorHeap;

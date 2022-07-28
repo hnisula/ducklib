@@ -32,11 +32,5 @@ D3D12Adapter::~D3D12Adapter()
 {
 	if (apiAdapter)
 		apiAdapter->Release();
-
-	if (device)
-	{
-		device->~D3D12Device();
-		alloc->Free(device);
-	}
 }
 }

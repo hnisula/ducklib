@@ -61,8 +61,8 @@ private:
 #ifdef _DEBUG
 	ID3D12Debug* debugInterface;
 #endif
-	IDXGIFactory4* factory;
-	ID3D12Device* device;
+	IDXGIFactory4* factory;	// TODO: Rename to indicate API-specific? Any API-specific names at all?
+	ID3D12Device* apiDevice;
 
 	ID3D12CommandQueue* commandQueue;
 
@@ -70,6 +70,7 @@ private:
 
 	// TODO: Replace this temporary store with an allocation object
 	// TODO: Move adapters out of this as they are a lever above, not below, of devices?
+	// TODO: ALSO use TArray instead of vector
 	std::vector<IAdapter*> adapters;
 	std::vector<ISwapChain*> swapChains;
 };

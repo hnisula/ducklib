@@ -6,17 +6,17 @@
 
 namespace DuckLib::Render
 {
-class VkRHI : IRHI
+class VulkanRHI : IRHI
 {
 public:
 	static IRHI* GetInstance();
 
-	~VkRHI() override;
+	~VulkanRHI() override;
 	
 	const TArray<IAdapter*>& GetAdapters() const override;
 
 protected:
-	VkRHI();
+	VulkanRHI();
 
 	void CreateInstance();
 	void EnumerateAdapters();
