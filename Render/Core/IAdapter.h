@@ -1,15 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include "IDevice.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class IAdapter
 {
 public:
-	IAdapter(const char* description, bool isHardware);
 	virtual ~IAdapter();
 
 	// TODO: Perhaps object to change
@@ -19,10 +17,13 @@ public:
 	const char* GetDescription() const;
 	bool IsHardware() const;
 
+	virtual IDevice* CreateDevice() = 0;
+
 protected:
+	IAdapter(const char* description, bool isHardware);
+
 	char* description;
 	uint32_t deviceId;
 	bool isHardware;
 };
-}
 }

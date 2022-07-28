@@ -2,9 +2,7 @@
 #include <cstdint>
 #include "Format.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct Buffer
 {
@@ -13,5 +11,4 @@ struct Buffer
 	void* apiResource;
 	void* apiDescriptor;
 };
-}
 }

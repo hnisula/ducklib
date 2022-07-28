@@ -1,9 +1,7 @@
 #pragma once
 #include "Resources/Buffer.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class IResourceCommandBuffer
 {
@@ -14,5 +12,4 @@ public:
 
 private:
 };
-}
 }

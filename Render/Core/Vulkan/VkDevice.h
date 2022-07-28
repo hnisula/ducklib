@@ -1,9 +1,7 @@
 #pragma once
 #include "../IDevice.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class VkDevice : IDevice
 {
@@ -15,5 +13,4 @@ class VkDevice : IDevice
 		ICommandBuffer** commandBuffers,
 		uint32_t numCommandBuffers) override;
 };
-}
 }

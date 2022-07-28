@@ -1,28 +1,33 @@
 #pragma once
 #include <dxgi.h>
+#include "D3D12Device.h"
 #include "../IAdapter.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12Adapter : public IAdapter
 {
 public:
 
 	// TODO: Reconsider this whole split of allocation and creation!
-	// This does not work, as it is IAlloc::Delete() that does the deletion!
 	friend class D3D12ResourceAllocator;
 
-	D3D12Adapter(const char* description, bool isHardware, IDXGIAdapter1* apiAdapter);
+	friend class D3D12RHI;
 
 	void* GetApiHandle() const override;
 
-protected:
+	IDevice* CreateDevice() override;
 
+protected:
+	D3D12Adapter(const char* description, bool isHardware, IDXGIAdapter1* apiAdapter);
 	~D3D12Adapter() override;
 
+	IDXGIFactory4* apiFactory;
+#ifdef _DEBUG
+	ID3D12Debug* debugInterface;
+#endif
 	IDXGIAdapter1* apiAdapter;
+
+	D3D12Device* device;
 };
-}
 }

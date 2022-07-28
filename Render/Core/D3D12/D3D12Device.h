@@ -10,9 +10,7 @@
 #include "../IDevice.h"
 #include "../Resources/Format.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 
@@ -71,8 +69,8 @@ private:
 	ID3D12DescriptorHeap* descriptorHeap;
 
 	// TODO: Replace this temporary store with an allocation object
+	// TODO: Move adapters out of this as they are a lever above, not below, of devices?
 	std::vector<IAdapter*> adapters;
 	std::vector<ISwapChain*> swapChains;
 };
-}
 }

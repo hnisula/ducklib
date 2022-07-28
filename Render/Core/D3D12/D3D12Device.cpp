@@ -5,10 +5,9 @@
 #include "D3D12CommandBuffer.h"
 #include "D3D12SwapChain.h"
 #include "D3D12Formats.h"
+#include "Core/Utility.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 D3D12Device::D3D12Device()
 	: factory(nullptr)
@@ -214,9 +213,9 @@ void D3D12Device::EnumAndCreateAdapters()
 		char descriptionBuffer[128];
 		size_t dummy;
 
-		wcstombs_s(&dummy, descriptionBuffer, desc.Description, 128);
+		WideToMultiByteText(desc.Description, descriptionBuffer, 128);
 
-		// S_FALSE because apparently that's what it's supposed to do on success with null device
+		// S_FALSE == success with null device
 		if (D3D12CreateDevice(
 			apiAdapter,
 			DL_D3D_FEATURE_LEVEL,
@@ -293,6 +292,5 @@ void D3D12Device::DestroyAdapters()
 		DefAlloc()->Delete(adapter);
 
 	adapters.clear();
-}
 }
 }

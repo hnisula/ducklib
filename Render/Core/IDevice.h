@@ -1,12 +1,8 @@
 #pragma once
 
-#include <vector>
-#include "IAdapter.h"
 #include "ICommandBuffer.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class IDevice
 {
@@ -14,7 +10,6 @@ public:
 
 	virtual ~IDevice() {}
 	
-	virtual const std::vector<IAdapter*>& GetAdapters() const = 0;
 	virtual ISwapChain* CreateSwapChain(
 		uint32_t width,
 		uint32_t height,
@@ -32,5 +27,4 @@ public:
 
 	virtual void SignalCompletion(ISwapChain* swapChain) = 0;
 };
-}
 }

@@ -1,9 +1,7 @@
 #include "D3D12ResourceAllocator.h"
 #include "Core/Memory/IAlloc.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 D3D12ResourceAllocator::D3D12ResourceAllocator()
 {
@@ -41,6 +39,5 @@ void D3D12ResourceAllocator::FreeAdapter(D3D12Adapter* adapter)
 
 	// TODO: Lots of work to be done for render resource allocation!
 	// alloc->Delete(adapter);
-}
 }
 }

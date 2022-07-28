@@ -2,9 +2,7 @@
 #include "Lib/glfw3.h"
 #include <stdexcept>
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 VkRHI::~VkRHI() {}
 
@@ -40,7 +38,7 @@ void VkRHI::Init()
 	isInitialized = true;
 }
 
-const IAdapter* VkRHI::Adapters() const
+const IAdapter* VkRHI::LoadAdapters() const
 {
 	// TODO: Implement
 	return nullptr;
@@ -53,5 +51,4 @@ uint32_t VkRHI::AdapterCount() const
 }
 
 VkRHI::VkRHI() : isInitialized(false) {}
-}
 }

@@ -3,9 +3,7 @@
 
 #include "../IResourceCommandBuffer.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12ResourceCommandBuffer : public IResourceCommandBuffer
 {
@@ -25,5 +23,4 @@ protected:
 	ID3D12CommandList* apiCommandList;
 	ID3D12CommandAllocator* apiCommandAllocator;
 };
-}
 }

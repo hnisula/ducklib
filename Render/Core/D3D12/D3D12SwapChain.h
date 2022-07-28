@@ -3,9 +3,7 @@
 #include <dxgi1_2.h>
 #include "../ISwapChain.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12SwapChain : public ISwapChain
 {
@@ -44,5 +42,4 @@ private:
 	HANDLE fenceEventHandle;
 	uint32_t descriptorSize;
 };
-}
 }

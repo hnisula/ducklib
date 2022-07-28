@@ -2,9 +2,7 @@
 #include <d3d12.h>
 #include "../ICommandBuffer.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12CommandBuffer : public ICommandBuffer
 {
@@ -48,5 +46,4 @@ private:
 	ID3D12GraphicsCommandList1* apiCommandList;
 	ID3D12CommandAllocator* apiCommandAllocator;
 };
-}
 }

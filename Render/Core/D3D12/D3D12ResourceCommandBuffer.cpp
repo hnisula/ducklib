@@ -1,8 +1,6 @@
 #include "D3D12ResourceCommandBuffer.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 Buffer* D3D12ResourceCommandBuffer::CreateBuffer()
 {
@@ -26,6 +24,5 @@ D3D12ResourceCommandBuffer::~D3D12ResourceCommandBuffer()
 {
 	apiCommandList->Release();
 	apiCommandAllocator->Release();
-}
 }
 }

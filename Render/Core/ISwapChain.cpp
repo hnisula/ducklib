@@ -1,8 +1,6 @@
 #include "ISwapChain.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 ISwapChain::ISwapChain()
 	: currentFrameIndex(0)
@@ -28,6 +26,5 @@ uint64_t ISwapChain::GetSignalValue()
 	frameCounters[bufferIndex] = currentFrameIndex;
 
 	return (uint32_t)frameCounters[bufferIndex];
-}
 }
 }

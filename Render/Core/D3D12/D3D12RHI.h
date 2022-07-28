@@ -5,9 +5,7 @@
 #include "../IRHI.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12RHI : IRHI
 {
@@ -16,23 +14,21 @@ public:
 
 	void Init();
 
-	const IAdapter* Adapters() const override;
-	uint32_t AdapterCount() const override;
+	~D3D12RHI() override;
+	const TArray<IAdapter*>& GetAdapters() const override;
 
 protected:
 	D3D12RHI();
 
+	// Only run when creating the RHI
 	void EnumerateAdapters();
 
 	static constexpr uint32_t MAX_NUM_ADAPTERS = 16;
+	static constexpr uint32_t ADAPTER_DESCRIPTION_BUFFER_SIZE = 256;
 
+	IAlloc* alloc;
 	IDXGIFactory4* factory;
-
 	bool isInitialized;
-
-	// Unsure if this is the preferred way (compared to using TArray)
-	D3D12Adapter* adapters[MAX_NUM_ADAPTERS];
-	uint32_t adapterCount;
-};
+	TArray<IAdapter*> adapters;
 };
 }

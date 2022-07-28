@@ -4,20 +4,18 @@
 #include "../IRHI.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class VkRHI : IRHI
 {
 public:
-	virtual ~VkRHI();
+	~VkRHI() override;
 
 	static IRHI* GetInstance();
 
 	void Init();
 
-	const IAdapter* Adapters() const override;
+	const IAdapter* LoadAdapters() const override;
 	uint32_t AdapterCount() const override;
 
 protected:
@@ -27,5 +25,4 @@ protected:
 
 	bool isInitialized;
 };
-}
 }

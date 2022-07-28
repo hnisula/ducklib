@@ -1,9 +1,7 @@
 #pragma once
 #include <dxgiformat.h>
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 // The order of these must match the one in the Format enum
 static DXGI_FORMAT dxgiFormatMap[] = {
@@ -112,6 +110,5 @@ static DXGI_FORMAT dxgiFormatMap[] = {
 inline DXGI_FORMAT MapToD3D12Format(Format format)
 {
 	return dxgiFormatMap[(uint32_t)format];
-}
 }
 }

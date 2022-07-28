@@ -4,9 +4,7 @@
 #include "D3D12ResourceStates.h"
 #include "D3D12SwapChain.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct Buffer;
 
@@ -140,6 +138,5 @@ void D3D12CommandBuffer::SetVertexBuffer(uint32_t startIndex, uint32_t numViews,
 void D3D12CommandBuffer::Draw()
 {
 	
-}
 }
 }

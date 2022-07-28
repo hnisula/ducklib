@@ -2,9 +2,7 @@
 #include <cstdint>
 #include "Format.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct InputComponent
 {
@@ -22,5 +20,4 @@ struct InputDescription
 	InputComponent* inputComponents;
 	uint32_t numInputComponents;
 };
-}
 }

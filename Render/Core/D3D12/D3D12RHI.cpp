@@ -1,11 +1,10 @@
 #include <stdexcept>
 #include "D3D12RHI.h"
 #include "D3D12Device.h"
+#include "Core/Utility.h"
 #include "Core/Memory/IAlloc.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 IRHI* D3D12RHI::GetInstance()
 {
@@ -16,67 +15,54 @@ IRHI* D3D12RHI::GetInstance()
 
 	return &rhi;
 }
+
 void D3D12RHI::Init()
 {
-	
+	EnumerateAdapters();
 }
 
-const IAdapter* D3D12RHI::Adapters() const
+D3D12RHI::~D3D12RHI()
 {
-	if (!isInitialized)
-		throw std::runtime_error("D3D12 RHI not initialized when trying to get adapters");
-
-	IDXGIAdapter1* adapterIt;
-	DXGI_ADAPTER_DESC1 adapterDesc;
-
-	for (uint32_t i = 0; factory->EnumAdapters1(i, &adapterIt); ++i)
+	for (D3D12Adapter* adapter : adapters)
 	{
-		adapterIt->GetDesc1(&adapterDesc);
-		char descriptionBuffer[128];
-		size_t dummy;
-
-		wcstombs_s(&dummy, descriptionBuffer, adapterDesc.Description, 128);
-
-		// S_FALSE because apparently that's what it's supposed to do on success with null device
-		if (D3D12CreateDevice(
-			adapterIt,
-			DL_D3D_FEATURE_LEVEL,
-			_uuidof(ID3D12Device),
-			nullptr) == S_FALSE)
-		{
-			IAdapter* adapter = DefAlloc()->New<D3D12Adapter>(
-				descriptionBuffer,
-				(adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
-				adapterIt);
-
-			adapters[adapterCount++] = adapter;
-			// TArray<D3D12Adapter*> adaptersArr = TArray<D3D12Adapter*>((void*)adapters, i + 1, MAX_NUM_ADAPTERS);
-			// adaptersArr.Append(adapter);
-		}
+		adapter->~D3D12Adapter();
+		alloc->Free(adapter);
 	}
 }
 
-uint32_t D3D12RHI::AdapterCount() const
+const TArray<IAdapter*>& D3D12RHI::GetAdapters() const
 {
-	return adapterCount;
+	return adapters;
 }
 
+D3D12RHI::D3D12RHI()
+	: isInitialized{ false } {}
 
 void D3D12RHI::EnumerateAdapters()
 {
 	IDXGIAdapter1* adapterIt;
-	DXGI_ADAPTER_DESC1 adapterDescs[MAX_NUM_ADAPTERS];
-	uint32_t newAdapterCount = 0;
+	uint32_t adapterCounter = 0;
 
-	for (; factory->EnumAdapters1(newAdapterCount, &adapterIt); ++newAdapterCount)
+	for (; factory->EnumAdapters1(adapterCounter, &adapterIt); ++adapterCounter)
 	{
-		adapterIt->GetDesc1(&adapterDescs[newAdapterCount]);
+		DXGI_ADAPTER_DESC1 adapterDesc;
+		char descriptionBuffer[ADAPTER_DESCRIPTION_BUFFER_SIZE];
 
+		adapterIt->GetDesc1(&adapterDesc);
+		Utility::WideToMultiByteText(adapterDesc.Description, descriptionBuffer, ADAPTER_DESCRIPTION_BUFFER_SIZE);
+
+		// S_FALSE when testing device (nullptr) == success
 		if (D3D12CreateDevice(adapterIt, DL_D3D_FEATURE_LEVEL, _uuidof(ID3D12Device), nullptr) == S_FALSE)
 		{
+			D3D12Adapter* adapter = alloc->Allocate<D3D12Adapter>();
 
+			new(adapter) D3D12Adapter(
+				descriptionBuffer,
+				(adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
+				adapterIt);
+
+			adapters.Append(adapter);
 		}
 	}
-}
 }
 }

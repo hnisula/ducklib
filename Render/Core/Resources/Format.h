@@ -1,8 +1,6 @@
 #pragma once
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 enum class Format : uint32_t
 {
@@ -108,5 +106,4 @@ enum class Format : uint32_t
 	R10G10B10_XR_BIAS_A2_UNORM,
 	ENTRY_COUNT					// what else can you do? :'(
 };
-}
 }

@@ -3,9 +3,7 @@
 #include "Resources/Format.h"
 #include "Resources/ImageBuffer.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class ISwapChain
 {
@@ -38,5 +36,4 @@ protected:
 	uint64_t currentFrameIndex;
 	uint64_t frameCounters[MAX_BUFFERS];
 };
-}
 }

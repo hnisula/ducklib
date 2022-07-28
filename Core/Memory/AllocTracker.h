@@ -4,11 +4,7 @@
 #include <mutex>
 #include <cstdint>
 
-namespace DuckLib
-{
-namespace Internal
-{
-namespace Memory
+namespace DuckLib::Internal::Memory
 {
 class AllocTracker;
 
@@ -51,7 +47,5 @@ protected:
 	uint32_t length;
 	uint32_t capacity;
 };
-}
-}
 }
 #endif

@@ -8,9 +8,7 @@
 	if ((statement) != S_OK) \
 		throw std::exception((text))
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 inline D3D12_PRIMITIVE_TOPOLOGY MapPrimitiveTopology(PrimitiveTopology topology)
 {
@@ -23,6 +21,5 @@ inline D3D12_PRIMITIVE_TOPOLOGY MapPrimitiveTopology(PrimitiveTopology topology)
 	case PrimitiveTopology::TRIANGLE_STRIP: return D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP;
 	default: return D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
 	}
-}
 }
 }

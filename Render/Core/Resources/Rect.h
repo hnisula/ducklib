@@ -1,9 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct Rect
 {
@@ -12,5 +10,4 @@ struct Rect
 	int32_t right;
 	int32_t bottom;
 };
-}
 }

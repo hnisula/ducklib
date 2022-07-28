@@ -30,6 +30,6 @@ TEST(IteratorsTest, TArrayRangedLoopEmpty)
 {
 	TArray<uint32_t> a;
 
-	for (uint32_t i : a)
+	for (uint32_t _ : a)
 		EXPECT_TRUE(false);
 }

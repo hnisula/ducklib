@@ -3,9 +3,7 @@
 #include "../Resources/ImageBuffer.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12ResourceAllocator
 {
@@ -25,5 +23,4 @@ private:
 
 	TArray<D3D12Adapter*> adapters;
 };
-}
 }

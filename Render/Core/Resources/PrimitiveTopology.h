@@ -2,9 +2,7 @@
 
 #include <d3d12.h>
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 enum class PrimitiveTopology
 {
@@ -14,5 +12,4 @@ enum class PrimitiveTopology
 	TRIANGLE_LIST,
 	TRIANGLE_STRIP
 };
-}
 }

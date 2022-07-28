@@ -1,9 +1,7 @@
 #include "Lib/d3dx12.h"
 #include "D3D12SwapChain.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 D3D12SwapChain::D3D12SwapChain(
 	uint32_t width,
@@ -75,6 +73,5 @@ D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentCpuDescriptorHandle()
 		rtDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
 		(uint32_t)this->currentFrameIndex,
 		descriptorSize);
-}
 }
 }

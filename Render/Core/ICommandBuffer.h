@@ -8,9 +8,7 @@
 #include "Resources/Viewport.h"
 #include "Resources/Rect.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class ICommandBuffer
 {
@@ -43,5 +41,4 @@ public:
 private:
 	
 };
-}
 }

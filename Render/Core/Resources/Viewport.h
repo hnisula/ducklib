@@ -1,8 +1,6 @@
 #pragma once
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct Viewport
 {
@@ -13,5 +11,4 @@ struct Viewport
 	float minDepth;
 	float maxDepth;
 };
-}
 }

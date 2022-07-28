@@ -1,8 +1,6 @@
 #include "VkDevice.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 ICommandBuffer* VkDevice::CreateCommandBuffer()
 {
@@ -17,6 +15,5 @@ void VkDevice::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 void VkDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
 {
 	// TODO: Implement
-}
 }
 }

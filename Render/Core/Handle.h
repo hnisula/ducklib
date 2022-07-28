@@ -1,9 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct Handle
 {
@@ -11,5 +9,4 @@ struct Handle
 	uint32_t index : 25;
 	// TODO: Consider adding a generation value to detect outdated handles being reused
 };
-}
 }

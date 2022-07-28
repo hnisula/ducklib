@@ -1,17 +1,13 @@
 #pragma once
-#include <vector>
+#include "Core/Memory/Containers/TArray.h"
 #include "IAdapter.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class IRHI
 {
 public:
-	virtual const IAdapter* Adapters() const = 0;
-	// TODO: Remove virtual?
-	virtual uint32_t AdapterCount() const = 0;
+	virtual ~IRHI() = default;
+	virtual const TArray<IAdapter*>& GetAdapters() const;
 };
-}
 }
