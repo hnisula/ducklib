@@ -9,7 +9,7 @@ using namespace Internal::Memory;
 HeapAllocator::~HeapAllocator()
 {
 	if (totalAllocatedSize > 0 || allocatedSize > 0)
-		DebugOutput("Not all allocations freed in heap allocator");
+		Utility::DebugOutput("Not all allocations freed in heap allocator");
 }
 
 void* HeapAllocator::AllocateInternal(uint64_t size, uint8_t align)

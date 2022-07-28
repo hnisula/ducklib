@@ -10,15 +10,7 @@ IRHI* D3D12RHI::GetInstance()
 {
 	static D3D12RHI rhi;
 
-	if (!rhi.isInitialized)
-		rhi.Init();
-
 	return &rhi;
-}
-
-void D3D12RHI::Init()
-{
-	EnumerateAdapters();
 }
 
 D3D12RHI::~D3D12RHI()
@@ -36,7 +28,32 @@ const TArray<IAdapter*>& D3D12RHI::GetAdapters() const
 }
 
 D3D12RHI::D3D12RHI()
-	: isInitialized{ false } {}
+	: alloc(nullptr)
+	, factory(nullptr)
+{
+	alloc = DefAlloc();
+	InitFactory();
+	EnumerateAdapters();
+}
+
+void D3D12RHI::InitFactory()
+{
+#ifdef _DEBUG
+	DL_D3D12_CHECK(
+		CreateDXGIFactory2(DXGI_CREATE_FACTORY_DEBUG, IID_PPV_ARGS(&factory)),
+		"Failed to create DXGI factory");
+
+	DL_D3D12_CHECK(
+		D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)),
+		"Failed to get debugInterface interface");
+
+	debugInterface->EnableDebugLayer();
+#else
+	DL_D3D12_THROW_FAIL(
+		CreateDXGIFactory2(IID_PPV_ARGS(&factory)),
+		"Failed to create DXGI factory");
+#endif
+}
 
 void D3D12RHI::EnumerateAdapters()
 {

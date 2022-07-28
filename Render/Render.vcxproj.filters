@@ -82,6 +82,9 @@
     <ClInclude Include="Core\Resources\InputDescription.h">
       <Filter>Core\Resources</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Vulkan\VkAdapter.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -130,6 +133,9 @@
     </ClCompile>
     <ClCompile Include="Core\D3D12\D3D12RHI.cpp">
       <Filter>Core\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Vulkan\VkAdapter.cpp">
+      <Filter>Core\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

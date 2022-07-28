@@ -1,22 +1,35 @@
 #include "VkRHI.h"
 #include "Lib/glfw3.h"
 #include <stdexcept>
+#include "VkAdapter.h"
 
 namespace DuckLib::Render
 {
 VkRHI::~VkRHI() {}
 
+const TArray<IAdapter*>& VkRHI::GetAdapters() const
+{
+	return adapters;
+}
+
 IRHI* VkRHI::GetInstance()
 {
 	static VkRHI rhi;
 
-	if (!rhi.isInitialized)
-		rhi.Init();
-
 	return &rhi;
 }
 
-void VkRHI::Init()
+VkRHI::VkRHI()
+	: alloc(nullptr)
+	, instance(nullptr)
+{
+	alloc = DefAlloc();
+
+	CreateInstance();
+	EnumerateAdapters();
+}
+
+void VkRHI::CreateInstance()
 {
 	VkApplicationInfo appInfo{};
 	VkInstanceCreateInfo createInfo{};
@@ -34,21 +47,37 @@ void VkRHI::Init()
 
 	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS)
 		throw std::runtime_error("Failed to create Vulkan instance");
-
-	isInitialized = true;
 }
 
-const IAdapter* VkRHI::LoadAdapters() const
+void VkRHI::EnumerateAdapters()
 {
-	// TODO: Implement
-	return nullptr;
-}
+	uint32_t deviceCount;
 
-uint32_t VkRHI::AdapterCount() const
-{
-	// TODO: Implement
-	return 0;
-}
+	vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
 
-VkRHI::VkRHI() : isInitialized(false) {}
+	if (deviceCount == 0)
+		throw std::exception("No Vulkan compatible adapters found");
+
+	VkPhysicalDevice* devices = alloc->Allocate<VkPhysicalDevice>(deviceCount);
+
+	vkEnumeratePhysicalDevices(instance, &deviceCount, devices);
+
+	for (uint32_t i = 0; i < deviceCount; ++i)
+	{
+		VkPhysicalDeviceProperties deviceProperties;
+		VkPhysicalDeviceFeatures deviceFeatures;
+
+		vkGetPhysicalDeviceProperties(devices[i], &deviceProperties);
+		vkGetPhysicalDeviceFeatures(devices[i], &deviceFeatures);
+
+		VkAdapter* adapter = alloc->Allocate<VkAdapter>();
+
+		new(adapter) VkAdapter(
+			deviceProperties.deviceName,
+			deviceProperties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU,
+			devices[i]);
+
+		adapters.Append(adapter);
+	}
+}
 }

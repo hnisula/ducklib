@@ -9,20 +9,24 @@ namespace DuckLib::Render
 class VkRHI : IRHI
 {
 public:
-	~VkRHI() override;
-
 	static IRHI* GetInstance();
 
-	void Init();
-
-	const IAdapter* LoadAdapters() const override;
-	uint32_t AdapterCount() const override;
+	~VkRHI() override;
+	
+	const TArray<IAdapter*>& GetAdapters() const override;
 
 protected:
 	VkRHI();
 
+	void CreateInstance();
+	void EnumerateAdapters();
+
+	static constexpr uint32_t DEVICE_DESCRIPTION_BUFFER_SIZE = 256;
+
+	IAlloc* alloc;
+
 	VkInstance instance;
 
-	bool isInitialized;
+	TArray<IAdapter*> adapters;
 };
 }
