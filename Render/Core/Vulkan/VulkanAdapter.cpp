@@ -17,7 +17,7 @@ IDevice* VulkanAdapter::CreateDevice()
 	VkDeviceQueueCreateInfo queueCreationInfo{};
 	VkDeviceCreateInfo creationInfo{};
 	VkPhysicalDeviceFeatures physicalDeviceFeatures{};
-	VkDevice apiDevice;
+	VkDevice vkDevice;
 
 	queueCreationInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
 	queueCreationInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
@@ -33,12 +33,15 @@ IDevice* VulkanAdapter::CreateDevice()
 
 	// TODO: Implement validation layer stuff here
 
-	if (vkCreateDevice(physicalDevice, &creationInfo, nullptr, &apiDevice) != VK_SUCCESS)
+	if (vkCreateDevice(physicalDevice, &creationInfo, nullptr, &vkDevice) != VK_SUCCESS)
 		throw std::exception("Failed to create Vulkan device");
 
+	VkQueue commandQueue;
 	VulkanDevice* device = alloc->Allocate<VulkanDevice>();
 
-	new(device) VulkanDevice(apiDevice);
+	vkGetDeviceQueue(vkDevice, graphicsQueueFamilyIndex, 0, &commandQueue);
+
+	new(device) VulkanDevice(vkDevice, commandQueue);
 
 	return device;
 }

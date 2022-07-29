@@ -6,7 +6,6 @@
 #include "D3D12Common.h"
 #include "D3D12Adapter.h"
 #include "../ICommandBuffer.h"
-#include "../IResourceCommandBuffer.h"
 #include "../IDevice.h"
 #include "../Resources/Format.h"
 
@@ -37,7 +36,7 @@ public:
 	void SignalCompletion(ISwapChain* swapChain) override;
 
 private:
-	D3D12Device(ID3D12Device* apiDevice);
+	D3D12Device(ID3D12Device* device, IDXGIFactory4* factory);
 
 	ID3D12CommandQueue* CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags);
 	ID3D12DescriptorHeap* CreateDescriptorHeap(uint32_t numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
@@ -54,20 +53,15 @@ private:
 
 	static constexpr uint32_t NUM_FRAME_BUFFERS = 4;
 
-#ifdef _DEBUG
-	ID3D12Debug* debugInterface;
-#endif
-	IDXGIFactory4* factory;	// TODO: Rename to indicate API-specific? Any API-specific names at all?
-	ID3D12Device* apiDevice;
+	IDXGIFactory4* factory;
+	ID3D12Device* device;
 
 	ID3D12CommandQueue* commandQueue;
 
 	ID3D12DescriptorHeap* descriptorHeap;
 
 	// TODO: Replace this temporary store with an allocation object
-	// TODO: Move adapters out of this as they are a lever above, not below, of devices?
 	// TODO: ALSO use TArray instead of vector
-	std::vector<IAdapter*> adapters;
 	std::vector<ISwapChain*> swapChains;
 };
 }

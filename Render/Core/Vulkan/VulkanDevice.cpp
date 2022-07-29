@@ -4,7 +4,7 @@ namespace DuckLib::Render
 {
 VulkanDevice::~VulkanDevice()
 {
-	vkDestroyDevice(apiDevice, nullptr);
+	vkDestroyDevice(device, nullptr);
 }
 
 ICommandBuffer* VulkanDevice::CreateCommandBuffer()
@@ -22,8 +22,9 @@ void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32
 	// TODO: Implement
 }
 
-VulkanDevice::VulkanDevice(VkDevice apiDevice)
+VulkanDevice::VulkanDevice(VkDevice apiDevice, VkQueue commandQueue)
 {
-	this->apiDevice = apiDevice;
+	this->device = apiDevice;
+	this->commandQueue = commandQueue;
 }
 }
