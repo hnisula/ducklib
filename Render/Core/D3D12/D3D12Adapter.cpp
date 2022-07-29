@@ -19,7 +19,9 @@ IDevice* D3D12Adapter::CreateDevice()
 		D3D12CreateDevice(apiAdapter, DL_D3D_FEATURE_LEVEL, IID_PPV_ARGS(&apiDevice)),
 		"Failed to create D3D12 device");
 
-	// TODO: Implement lol
+	D3D12Device* device = alloc->Allocate<D3D12Device>();
+
+	new(device) D3D12Device(apiDevice);
 
 	return device;
 }

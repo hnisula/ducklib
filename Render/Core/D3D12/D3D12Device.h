@@ -17,11 +17,9 @@ constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 class D3D12Device : public IDevice
 {
 public:
+	friend class D3D12Adapter;
 
-	D3D12Device();
 	~D3D12Device() override;
-
-	const std::vector<IAdapter*>& GetAdapters() const override;
 
 	ISwapChain* CreateSwapChain(
 		uint32_t width,
@@ -39,8 +37,8 @@ public:
 	void SignalCompletion(ISwapChain* swapChain) override;
 
 private:
+	D3D12Device(ID3D12Device* apiDevice);
 
-	void EnumAndCreateAdapters();
 	ID3D12CommandQueue* CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags);
 	ID3D12DescriptorHeap* CreateDescriptorHeap(uint32_t numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
 	ImageBuffer* CreateImageBuffer(
@@ -53,8 +51,6 @@ private:
 
 	void DestroyQueue(ID3D12CommandQueue* queue);
 	void DestroyDescriptorHeap(ID3D12DescriptorHeap* descriptorHeap);
-
-	void DestroyAdapters();
 
 	static constexpr uint32_t NUM_FRAME_BUFFERS = 4;
 
