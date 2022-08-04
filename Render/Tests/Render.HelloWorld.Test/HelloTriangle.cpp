@@ -1,10 +1,11 @@
 #include <cstdint>
 #include <exception>
 #include <Windows.h>
-#include "Core/ICommandBuffer.h"
-#include "Core/IDevice.h"
-#include "Core/ISwapChain.h"
-#include "Core/D3D12/D3D12Device.h"
+#include "Render/Core/ICommandBuffer.h"
+#include "Render/Core/IDevice.h"
+#include "Render/Core/D3D12/D3D12RHI.h"
+#include "Render/Core/ISwapChain.h"
+#include "Render/Core/D3D12/D3D12Device.h"
 
 using namespace DuckLib;
 using namespace Render;
@@ -15,14 +16,23 @@ constexpr int WND_HEIGHT = 600;
 bool runTest = true;
 HWND window;
 
-IDevice* adapter = new D3D12Device();
+IRHI* rhi = D3D12RHI::GetInstance();
+IAdapter* adapter;
+IDevice* device;
 ISwapChain* swapChain;
 ICommandBuffer* cmdBuffer;
 
 void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 {
-	swapChain = adapter->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
-	cmdBuffer = adapter->CreateCommandBuffer();
+	const TArray<IAdapter*>& adapters = rhi->GetAdapters();
+
+	if (adapters.IsEmpty())
+		throw std::exception("No adapters found");
+
+	adapter = adapters[0];
+	device = adapter->CreateDevice(); // No parameters? Seems odd
+	swapChain = device->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
+	cmdBuffer = device->CreateCommandBuffer();
 }
 
 void RenderFrame()
@@ -49,11 +59,11 @@ void RenderFrame()
 
 	cmdBuffer->Close();
 
-	adapter->ExecuteCommandBuffers(&cmdBuffer, 1);
+	device->ExecuteCommandBuffers(&cmdBuffer, 1);
 
 	swapChain->Present();
 
-	adapter->SignalCompletion(swapChain);
+	device->SignalCompletion(swapChain);
 	swapChain->WaitForFrame();
 
 	Sleep(20);
@@ -61,7 +71,7 @@ void RenderFrame()
 
 void DestroyRender()
 {
-	adapter->DestroySwapChain(swapChain);
+	device->DestroySwapChain(swapChain);
 }
 
 LRESULT __stdcall WndProc(HWND hwnd, uint32_t msg, WPARAM wParam, LPARAM lParam)

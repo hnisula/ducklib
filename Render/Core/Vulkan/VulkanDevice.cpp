@@ -22,6 +22,20 @@ void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32
 	// TODO: Implement
 }
 
+ISwapChain* VulkanDevice::CreateSwapChain(
+	uint32_t width,
+	uint32_t height,
+	Format format,
+	uint32_t bufferCount,
+	HWND windowHandle)
+{
+	// TODO: Implement
+	return nullptr;
+}
+
+void VulkanDevice::DestroySwapChain(ISwapChain* swapChain) {}
+void VulkanDevice::SignalCompletion(ISwapChain* swapChain) {}
+
 VulkanDevice::VulkanDevice(VkDevice apiDevice, VkQueue commandQueue)
 {
 	this->device = apiDevice;

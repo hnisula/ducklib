@@ -3,6 +3,7 @@
 #include "D3D12Device.h"
 #include "Core/Utility.h"
 #include "Core/Memory/IAlloc.h"
+#include "Core/Memory/Containers/Iterators.h"
 
 namespace DuckLib::Render
 {
@@ -15,9 +16,9 @@ IRHI* D3D12RHI::GetInstance()
 
 D3D12RHI::~D3D12RHI()
 {
-	for (D3D12Adapter* adapter : adapters)
+	for (IAdapter* adapter : adapters)
 	{
-		adapter->~D3D12Adapter();
+		((D3D12Adapter*)adapter)->~D3D12Adapter();
 		alloc->Free(adapter);
 	}
 }
@@ -60,7 +61,7 @@ void D3D12RHI::EnumerateAdapters()
 	IDXGIAdapter1* adapterIt;
 	uint32_t adapterCounter = 0;
 
-	for (; factory->EnumAdapters1(adapterCounter, &adapterIt); ++adapterCounter)
+	for (; factory->EnumAdapters1(adapterCounter, &adapterIt) != DXGI_ERROR_NOT_FOUND; ++adapterCounter)
 	{
 		DXGI_ADAPTER_DESC1 adapterDesc;
 		char descriptionBuffer[ADAPTER_DESCRIPTION_BUFFER_SIZE];
@@ -76,7 +77,8 @@ void D3D12RHI::EnumerateAdapters()
 			new(adapter) D3D12Adapter(
 				descriptionBuffer,
 				(adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
-				adapterIt);
+				adapterIt,
+				factory);
 
 			adapters.Append(adapter);
 		}

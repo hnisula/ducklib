@@ -20,7 +20,7 @@ protected:
 	D3D12RHI();
 
 	void InitFactory();
-	// Only run when creating the RHI
+	// Currently only run when creating the RHI
 	void EnumerateAdapters();
 
 	static constexpr uint32_t MAX_NUM_ADAPTERS = 16;

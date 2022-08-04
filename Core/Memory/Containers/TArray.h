@@ -10,8 +10,8 @@ class TArray
 {
 public:
 	TArray();
-	TArray(uint64_t initialCapacity);
-	TArray(void* externalArray, uint64_t size, uint64_t capacity = size, IAlloc* alloc = nullptr);
+	TArray(uint32_t initialCapacity);
+	TArray(void* externalArray, uint32_t size, uint32_t capacity = size, IAlloc* alloc = nullptr);
 	~TArray();
 
 	void Append(T&& item);
@@ -21,6 +21,7 @@ public:
 
 	uint32_t Length() const;
 	uint32_t Capacity() const;
+	bool IsEmpty() const;
 	void Resize(uint32_t newCapacity);
 
 	T& operator [](uint32_t i);
@@ -34,7 +35,7 @@ protected:
 
 	IAlloc* alloc;
 	T* array;
-	uint32_t size;
+	uint32_t length;
 	uint32_t capacity;
 	bool isExternalArray;
 };
@@ -43,23 +44,23 @@ template <typename T>
 TArray<T>::TArray()
 	: alloc(DefAlloc())
 	, array(nullptr)
-	, size(0)
+	, length(0)
 	, capacity(0)
 	, isExternalArray(false) {}
 
 template <typename T>
-TArray<T>::TArray(uint64_t initialCapacity)
+TArray<T>::TArray(uint32_t initialCapacity)
 	: TArray()
 {
 	EnsureCapacity(initialCapacity);
 }
 
 template <typename T>
-TArray<T>::TArray(void* externalArray, uint64_t size, uint64_t capacity, IAlloc* alloc)
+TArray<T>::TArray(void* externalArray, uint32_t size, uint32_t capacity, IAlloc* alloc)
 {
 	this->alloc = alloc;
 	array = (T*)externalArray;
-	this->size = size;
+	this->length = size;
 	this->capacity = capacity;
 	isExternalArray = true;
 }
@@ -77,25 +78,25 @@ TArray<T>::~TArray()
 template <typename T>
 void TArray<T>::Append(T&& item)
 {
-	if (!EnsureCapacity(size + 1))
+	if (!EnsureCapacity(length + 1))
 		throw std::runtime_error("Failed to append in array because of limited capacity");
 
-	array[size++] = std::move(item);
+	array[length++] = std::move(item);
 }
 
 template <typename T>
 void TArray<T>::Append(const T& item)
 {
-	if (!EnsureCapacity(size + 1))
+	if (!EnsureCapacity(length + 1))
 		throw std::runtime_error("Failed to append in array because of limited capacity");
 
-	array[size++] = item;
+	array[length++] = item;
 }
 
 template <typename T>
 bool TArray<T>::Contains(const T& item) const
 {
-	for (uint32_t i = 0; i < size; ++i)
+	for (uint32_t i = 0; i < length; ++i)
 		if (array[i] == item)
 			return true;
 
@@ -105,13 +106,19 @@ bool TArray<T>::Contains(const T& item) const
 template <typename T>
 uint32_t TArray<T>::Length() const
 {
-	return size;
+	return length;
 }
 
 template <typename T>
 uint32_t TArray<T>::Capacity() const
 {
 	return capacity;
+}
+
+template <typename T>
+bool TArray<T>::IsEmpty() const
+{
+	return length == 0;
 }
 
 template <typename T>

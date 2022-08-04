@@ -8,6 +8,6 @@ class IRHI
 {
 public:
 	virtual ~IRHI() = default;
-	virtual const TArray<IAdapter*>& GetAdapters() const;
+	virtual const TArray<IAdapter*>& GetAdapters() const = 0;
 };
 }
