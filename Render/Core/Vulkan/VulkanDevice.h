@@ -30,10 +30,14 @@ public:
 	void SignalCompletion(ISwapChain* swapChain) override;
 
 protected:
-	VulkanDevice(VkDevice apiDevice, VkQueue commandQueue);
+	VulkanDevice(VkDevice vkDevice, VkQueue commandQueue, VkPhysicalDevice physicalDevice, VkInstance vkInstance);
+
+	VkSurfaceKHR CreateWindowSurface(HWND windowHandle);
 
 	IAlloc* alloc;
 
+	VkInstance vkInstance;
+	VkPhysicalDevice physicalDevice;
 	VkDevice device;
 	VkQueue commandQueue;
 };

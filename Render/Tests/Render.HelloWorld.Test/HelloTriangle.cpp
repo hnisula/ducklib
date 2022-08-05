@@ -6,6 +6,7 @@
 #include "Render/Core/D3D12/D3D12RHI.h"
 #include "Render/Core/ISwapChain.h"
 #include "Render/Core/D3D12/D3D12Device.h"
+#include "Render/Core/Vulkan/VulkanRHI.h"
 
 using namespace DuckLib;
 using namespace Render;
@@ -16,7 +17,15 @@ constexpr int WND_HEIGHT = 600;
 bool runTest = true;
 HWND window;
 
+#define DL_D3D_API 0
+#define DL_VK_API 1
+#define DL_TEST_API DL_VK_API
+
+#if DL_TEST_API == DL_D3D_API
 IRHI* rhi = D3D12RHI::GetInstance();
+#elif DL_TEST_API == DL_VK_API
+IRHI* rhi = VulkanRHI::GetInstance();
+#endif
 IAdapter* adapter;
 IDevice* device;
 ISwapChain* swapChain;
@@ -27,7 +36,7 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 	const TArray<IAdapter*>& adapters = rhi->GetAdapters();
 
 	if (adapters.IsEmpty())
-		throw std::exception("No adapters found");
+		throw std::runtime_error("No adapters found");
 
 	adapter = adapters[0];
 	device = adapter->CreateDevice(); // No parameters? Seems odd
@@ -135,7 +144,7 @@ HWND InitWindow(uint32_t width, uint32_t height, HINSTANCE hInstance)
 	);
 
 	if (newWindow == nullptr)
-		throw std::exception("maddafakka");
+		throw std::runtime_error("maddafakka");
 
 	return newWindow;
 }

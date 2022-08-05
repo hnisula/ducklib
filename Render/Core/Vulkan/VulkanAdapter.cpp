@@ -12,6 +12,9 @@ void* VulkanAdapter::GetApiHandle() const
 
 IDevice* VulkanAdapter::CreateDevice()
 {
+	constexpr const char* const enabledExtensions[] = {
+		VK_KHR_SWAPCHAIN_EXTENSION_NAME
+	};
 	uint32_t graphicsQueueFamilyIndex = GetGraphicsQueueFamilyIndex();
 	float dummyQueuePriority = 1.0f;
 	VkDeviceQueueCreateInfo queueCreationInfo{};
@@ -28,30 +31,34 @@ IDevice* VulkanAdapter::CreateDevice()
 	creationInfo.pQueueCreateInfos = &queueCreationInfo;
 	creationInfo.queueCreateInfoCount = 1;
 	creationInfo.pEnabledFeatures = &physicalDeviceFeatures;
-	creationInfo.enabledExtensionCount = 0;
+	creationInfo.enabledExtensionCount = 1;
+	creationInfo.ppEnabledExtensionNames = enabledExtensions;
 	creationInfo.enabledLayerCount = 0;
 
 	// TODO: Implement validation layer stuff here
 
 	if (vkCreateDevice(physicalDevice, &creationInfo, nullptr, &vkDevice) != VK_SUCCESS)
-		throw std::exception("Failed to create Vulkan device");
+		throw std::runtime_error("Failed to create Vulkan device");
 
 	VkQueue commandQueue;
 	VulkanDevice* device = alloc->Allocate<VulkanDevice>();
 
 	vkGetDeviceQueue(vkDevice, graphicsQueueFamilyIndex, 0, &commandQueue);
 
-	new(device) VulkanDevice(vkDevice, commandQueue);
+	new(device) VulkanDevice(vkDevice, commandQueue, physicalDevice, vkInstance);
 
 	return device;
 }
 
-VulkanAdapter::VulkanAdapter(const char* description, bool isHardware, VkPhysicalDevice apiAdapter)
+VulkanAdapter::VulkanAdapter(
+	const char* description,
+	bool isHardware,
+	VkPhysicalDevice apiAdapter,
+	VkInstance vkInstance)
 	: IAdapter(description, isHardware)
-	, physicalDevice(apiAdapter)
-{
-	alloc = DefAlloc();
-}
+	, alloc(DefAlloc())
+	, vkInstance(vkInstance)
+	, physicalDevice(apiAdapter) {}
 
 VulkanAdapter::~VulkanAdapter() {}
 
@@ -62,7 +69,7 @@ uint32_t VulkanAdapter::GetGraphicsQueueFamilyIndex()
 	vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &familyCount, nullptr);
 
 	if (familyCount == 0)
-		throw std::exception("No Vulkan queues found");
+		throw std::runtime_error("No Vulkan queues found");
 
 	TArray<VkQueueFamilyProperties> families(familyCount);
 
@@ -74,6 +81,6 @@ uint32_t VulkanAdapter::GetGraphicsQueueFamilyIndex()
 			return i;
 	}
 
-	throw std::exception("No Vulkan graphics queue family found");
+	throw std::runtime_error("No Vulkan graphics queue family found");
 }
 }

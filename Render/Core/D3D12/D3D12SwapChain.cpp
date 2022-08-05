@@ -1,6 +1,8 @@
 #include "Lib/d3dx12.h"
 #include "D3D12SwapChain.h"
 
+#include <stdexcept>
+
 namespace DuckLib::Render
 {
 D3D12SwapChain::D3D12SwapChain(
@@ -29,7 +31,7 @@ D3D12SwapChain::D3D12SwapChain(
 	fenceEventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
 	if (fenceEventHandle == nullptr)
-		throw std::exception("Failed to create D3D12 frame fence event");
+		throw std::runtime_error("Failed to create D3D12 frame fence event");
 }
 
 D3D12SwapChain::~D3D12SwapChain()
@@ -47,7 +49,7 @@ void D3D12SwapChain::Present()
 {
 	if (apiSwapChain->Present(0, 0) != S_OK)
 	{
-		throw std::exception("Failed to present");
+		throw std::runtime_error("Failed to present");
 	}
 }
 
@@ -60,7 +62,7 @@ void D3D12SwapChain::WaitForFrame()
 	if (latestCompletedFrame - expectedFrame < UINT32_MAX / 2)
 	{
 		if (FAILED(apiFence->SetEventOnCompletion(frameCounters[bufferIndex], fenceEventHandle)))
-			throw std::exception("Failed to set completion event on D3D12 frame fence");
+			throw std::runtime_error("Failed to set completion event on D3D12 frame fence");
 		WaitForSingleObjectEx(fenceEventHandle, INFINITE, FALSE);
 	}
 

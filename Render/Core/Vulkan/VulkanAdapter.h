@@ -16,13 +16,14 @@ public:
 	IDevice* CreateDevice() override;
 
 private:
-	VulkanAdapter(const char* description, bool isHardware, VkPhysicalDevice apiAdapter);
+	VulkanAdapter(const char* description, bool isHardware, VkPhysicalDevice apiAdapter, VkInstance vkInstance);
 	~VulkanAdapter() override;
 
 	uint32_t GetGraphicsQueueFamilyIndex();
 
 	IAlloc* alloc;
 
+	VkInstance vkInstance;
 	VkPhysicalDevice physicalDevice;
 };
 }

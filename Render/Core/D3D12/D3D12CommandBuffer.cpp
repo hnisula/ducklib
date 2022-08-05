@@ -27,9 +27,9 @@ const void* D3D12CommandBuffer::GetApiHandle() const
 void D3D12CommandBuffer::Reset()
 {
 	if (apiCommandAllocator->Reset() != S_OK)
-		throw std::exception("Failed to reset D3D12 command allocator");
+		throw std::runtime_error("Failed to reset D3D12 command allocator");
 	if (apiCommandList->Reset(apiCommandAllocator, nullptr) != S_OK)
-		throw std::exception("Failed to reset D3D12 command list");
+		throw std::runtime_error("Failed to reset D3D12 command list");
 }
 
 void D3D12CommandBuffer::Close()

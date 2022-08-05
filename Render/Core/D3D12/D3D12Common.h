@@ -1,12 +1,12 @@
 #pragma once
 
 #include <d3d12.h>
-#include <exception>
+#include <stdexcept>
 #include "../Resources/PrimitiveTopology.h"
 
-#define DL_D3D12_CHECK(statement, text) \
+#define DL_D3D12_CHECK(statement, errorText) \
 	if ((statement) != S_OK) \
-		throw std::exception((text))
+		throw std::runtime_error((errorText))
 
 namespace DuckLib::Render
 {

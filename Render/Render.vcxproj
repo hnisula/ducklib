@@ -29,6 +29,7 @@
     <ClCompile Include="Core\Vulkan\VulkanAdapter.cpp" />
     <ClCompile Include="Core\Vulkan\VulkanDevice.cpp" />
     <ClCompile Include="Core\Vulkan\VulkanRHI.cpp" />
+    <ClCompile Include="Core\Vulkan\VulkanSwapChain.cpp" />
     <ClInclude Include="Core\D3D12\D3D12CommandBuffer.h" />
     <ClInclude Include="Core\D3D12\D3D12Common.h" />
     <ClInclude Include="Core\D3D12\D3D12Formats.h" />
@@ -57,8 +58,10 @@
     <ClInclude Include="Core\Resources\ResourceStates.h" />
     <ClInclude Include="Core\Resources\Viewport.h" />
     <ClInclude Include="Core\Vulkan\VulkanAdapter.h" />
+    <ClInclude Include="Core\Vulkan\VulkanCommon.h" />
     <ClInclude Include="Core\Vulkan\VulkanDevice.h" />
     <ClInclude Include="Core\Vulkan\VulkanRHI.h" />
+    <ClInclude Include="Core\Vulkan\VulkanSwapChain.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

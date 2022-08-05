@@ -38,7 +38,7 @@ public:
 
 protected:
 
-	uint32_t FindAlloc( void* ptr );
+	uint32_t FindAlloc(const void* ptr );
 
 	const uint32_t START_CAPACITY = 16;
 

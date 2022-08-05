@@ -98,7 +98,7 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 		IID_PPV_ARGS(&apiCommandAllocator));
 
 	if (result != S_OK)
-		throw std::exception("Failed to create D3D12 command allocator");
+		throw std::runtime_error("Failed to create D3D12 command allocator");
 
 	result = device->CreateCommandList(
 		0,
@@ -108,7 +108,7 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 		IID_PPV_ARGS(&apiCommandList));
 
 	if (result != S_OK)
-		throw std::exception("Failed to create D3D12 command list");
+		throw std::runtime_error("Failed to create D3D12 command list");
 
 	apiCommandList->Close();
 
@@ -142,7 +142,7 @@ void D3D12Device::SignalCompletion(ISwapChain* swapChain)
 	uint64_t signalValue = swapChain->GetSignalValue();
 
 	if (commandQueue->Signal(d3dSwapChain->apiFence, signalValue) != S_OK)
-		throw std::exception("Failed to signal completion in D3D12 rendering");
+		throw std::runtime_error("Failed to signal completion in D3D12 rendering");
 }
 
 D3D12Device::D3D12Device(ID3D12Device* device, IDXGIFactory4* factory)
@@ -165,7 +165,7 @@ ID3D12CommandQueue* D3D12Device::CreateQueue(
 	HRESULT result = device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&queue));
 
 	if (result != S_OK)
-		throw std::exception("Failed to create D3D12 queue");
+		throw std::runtime_error("Failed to create D3D12 queue");
 
 	return queue;
 }

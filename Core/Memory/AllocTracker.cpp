@@ -97,13 +97,13 @@ void AllocTracker::Clear()
 	length = 0;
 }
 
-uint32_t AllocTracker::FindAlloc(void* ptr)
+uint32_t AllocTracker::FindAlloc(const void* ptr)
 {
 	for (uint32_t i = 0; i < length; ++i)
 		if (entries[i].ptr == ptr)
 			return i;
 
-	throw std::exception("Alloc not found in tracker");
+	throw std::runtime_error("Alloc not found in tracker");
 }
 }
 #endif

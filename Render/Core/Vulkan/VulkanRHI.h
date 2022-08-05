@@ -12,7 +12,7 @@ public:
 	static IRHI* GetInstance();
 
 	~VulkanRHI() override;
-	
+
 	const TArray<IAdapter*>& GetAdapters() const override;
 
 protected:
@@ -20,6 +20,10 @@ protected:
 
 	void CreateInstance();
 	void EnumerateAdapters();
+	bool PhysicalDeviceIsUsable(
+		const VkPhysicalDeviceProperties& deviceProperties,
+		const VkPhysicalDeviceFeatures& deviceFeatures);
+	TArray<const char*> GetInstanceExtensions();
 
 	static constexpr uint32_t DEVICE_DESCRIPTION_BUFFER_SIZE = 256;
 

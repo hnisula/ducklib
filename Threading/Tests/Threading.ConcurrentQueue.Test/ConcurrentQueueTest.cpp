@@ -158,7 +158,7 @@ int main()
 			}
 
 		if (matchedIndex == (uint32_t)-1)
-			throw std::exception("ERROR: Item missing!");
+			throw std::runtime_error("ERROR: Item missing!");
 	}
 
 	std::cout << "Test completed successfully" << std::endl;
