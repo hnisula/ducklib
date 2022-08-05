@@ -76,3 +76,56 @@ TEST(TArrayTests, ContainsNotFound)
 	EXPECT_FALSE(a.Contains(123));
 	EXPECT_FALSE(a.Contains(0));
 }
+
+TEST(TArrayTests, CopyConstructor)
+{
+	TArray<uint32_t> a;
+
+	a.Append(2);
+	a.Append(4);
+	a.Append(8);
+	a.Append(16);
+
+	TArray b(a);
+
+	EXPECT_EQ(4, b.Length());
+	EXPECT_LE((uint32_t)4, b.Capacity());
+	EXPECT_EQ(2, b[0]);
+	EXPECT_EQ(4, b[1]);
+	EXPECT_EQ(8, b[2]);
+	EXPECT_EQ(16, b[3]);
+}
+
+TEST(TArrayTests, CopyConstructorEmpty)
+{
+	TArray<uint32_t> a;
+	TArray b(a);
+
+	EXPECT_EQ(0, b.Length());
+}
+
+TEST(TArrayTests, MoveConstructor)
+{
+	TArray<uint32_t> a;
+
+	a.Append(2);
+	a.Append(4);
+	a.Append(8);
+
+	TArray b(std::move(a));
+
+	EXPECT_EQ(3, b.Length());
+	EXPECT_LE((uint32_t)3, b.Capacity());
+	EXPECT_EQ(2, b[0]);
+	EXPECT_EQ(4, b[1]);
+	EXPECT_EQ(8, b[2]);
+}
+
+TEST(TArrayTests, MoveConstructorEmpty)
+{
+	TArray<uint32_t> a;
+	TArray b(a);
+
+	EXPECT_EQ(0, b.Length());
+	EXPECT_LE((uint32_t)0, b.Capacity());
+}
