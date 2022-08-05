@@ -12,6 +12,8 @@ public:
 	TArray();
 	TArray(uint32_t initialCapacity);
 	TArray(void* externalArray, uint32_t size, uint32_t capacity = size, IAlloc* alloc = nullptr);
+	TArray(const TArray<T>& source);
+	TArray(TArray<T>&& source) noexcept;
 	~TArray();
 
 	void Append(T&& item);
@@ -32,6 +34,7 @@ public:
 
 protected:
 	bool EnsureCapacity(uint32_t requiredCapacity);
+	void Destroy();
 
 	IAlloc* alloc;
 	T* array;
@@ -66,13 +69,47 @@ TArray<T>::TArray(void* externalArray, uint32_t size, uint32_t capacity, IAlloc*
 }
 
 template <typename T>
+TArray<T>::TArray(const TArray<T>& source)
+	: TArray()
+{
+	if (source.isExternalArray)
+	{
+		alloc = source.alloc;
+		array = source.array;
+		length = source.length;
+		capacity = source.capacity;
+		isExternalArray = true;
+	}
+	else
+	{
+		EnsureCapacity(source.length);
+		length = source.length;
+		memcpy(array, source.array, sizeof(T) * source.length);
+		isExternalArray = false;
+	}
+}
+
+template <typename T>
+TArray<T>::TArray(TArray<T>&& source) noexcept
+	: TArray()
+{
+	alloc = source.alloc;
+	array = source.array;
+	length = source.length;
+	capacity = source.capacity;
+	isExternalArray = source.isExternalArray;
+
+	source.alloc = DefAlloc();
+	source.array = nullptr;
+	source.length = 0;
+	source.capacity = 0;
+	source.isExternalArray = false;
+}
+
+template <typename T>
 TArray<T>::~TArray()
 {
-	if (isExternalArray)
-		return;
-
-	if (array)
-		alloc->Free(array);
+	Destroy();
 }
 
 template <typename T>
@@ -170,5 +207,15 @@ bool TArray<T>::EnsureCapacity(uint32_t requiredCapacity)
 	Resize(requiredCapacity <= exponentiallyIncreasedSize ? exponentiallyIncreasedSize : requiredCapacity);
 
 	return true;
+}
+
+template <typename T>
+void TArray<T>::Destroy()
+{
+	if (isExternalArray)
+		return;
+
+	if (array)
+		alloc->Free(array);
 }
 }
