@@ -16,10 +16,10 @@ public:
 	
 	virtual const std::vector<IAdapter*>& GetAdapters() const = 0;
 	virtual ISwapChain* CreateSwapChain(
-		uint32_t width,
-		uint32_t height,
+		uint32 width,
+		uint32 height,
 		Format format,
-		uint32_t bufferCount,
+		uint32 bufferCount,
 		HWND windowHandle) = 0;
 	virtual ICommandBuffer* CreateCommandBuffer() = 0;
 
@@ -28,7 +28,7 @@ public:
 
 	virtual void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
-		uint32_t numCommandBuffers) = 0;
+		uint32 numCommandBuffers) = 0;
 
 	virtual void SignalCompletion(ISwapChain* swapChain) = 0;
 };

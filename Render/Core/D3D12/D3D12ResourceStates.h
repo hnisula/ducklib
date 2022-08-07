@@ -12,6 +12,6 @@ static D3D12_RESOURCE_STATES d3d12ResourceStates[] =
 
 inline D3D12_RESOURCE_STATES MapToD3D12ResourceState(ResourceState resourceState)
 {
-	return d3d12ResourceStates[(uint32_t)resourceState];
+	return d3d12ResourceStates[(uint32)resourceState];
 }
 }

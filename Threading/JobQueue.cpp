@@ -44,7 +44,7 @@ void InitWorkerThread()
 #endif
 }
 
-uint32_t _stdcall WorkerThreadJob(void* data)
+uint32 _stdcall WorkerThreadJob(void* data)
 {
 	JobQueue::WorkerThreadData* workerThreadData = (JobQueue::WorkerThreadData*)data;
 	std::atomic<bool>& runFlag = workerThreadData->runFlag;
@@ -105,7 +105,7 @@ void JobCounter::Decrement()
 		jobQueue->FinalizeCompletedJobCounter(this);
 }
 
-JobQueue::JobQueue(uint32_t size, uint32_t numFibers, uint32_t numWorkers)
+JobQueue::JobQueue(uint32 size, uint32 numFibers, uint32 numWorkers)
 	: alloc(DefAlloc())
 {
 	this->numWorkers = numWorkers == MATCH_NUM_LOGICAL_CORES ? GetNumLogicalCores() : numWorkers;
@@ -131,17 +131,17 @@ JobQueue::~JobQueue()
 	TearDownCounters();
 }
 
-JobCounter* JobQueue::Push(Job* jobs, uint32_t numJobs)
+JobCounter* JobQueue::Push(Job* jobs, uint32 numJobs)
 {
 	JobCounter* jobCounter;
 
 	if (!counterQueue->TryPop(&jobCounter))
 		throw std::runtime_error("Failed to acquire job counter");
 
-	for (uint32_t i = 0; i < numJobs; ++i)
+	for (uint32 i = 0; i < numJobs; ++i)
 		jobs[i].jobCounter = jobCounter;
 
-	uint32_t jobsQueued = jobQueue->TryPush(jobs, numJobs);
+	uint32 jobsQueued = jobQueue->TryPush(jobs, numJobs);
 
 	if (jobsQueued != numJobs)
 		throw std::runtime_error("Failed to push jobs to queue");
@@ -229,7 +229,7 @@ void JobQueue::DeleteFiber(Internal::Fiber* fiber)
 	fiber->~Fiber();
 }
 
-uint32_t JobQueue::GetNumLogicalCores() const
+uint32 JobQueue::GetNumLogicalCores() const
 {
 #ifdef _WIN32
 	SYSTEM_INFO sysInfo;
@@ -244,12 +244,12 @@ void JobQueue::WaitIdle(const JobCounter* counter)
 		Sleep(5);
 }
 
-void JobQueue::SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer)
+void JobQueue::SetupCounters(uint32 numCounters, uintptr_t* initPtrArrayBuffer)
 {
 	this->numCounters = numCounters;
 	counters = alloc->Allocate<JobCounter>(numCounters);
 
-	for (uint32_t i = 0; i < numCounters; ++i)
+	for (uint32 i = 0; i < numCounters; ++i)
 	{
 		new(&counters[i]) JobCounter();
 		counters[i].jobQueue = this;
@@ -259,12 +259,12 @@ void JobQueue::SetupCounters(uint32_t numCounters, uintptr_t* initPtrArrayBuffer
 	counterQueue = alloc->New<ConcurrentQueue<JobCounter*>>(numCounters, (JobCounter**)initPtrArrayBuffer, numCounters);
 }
 
-void JobQueue::SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer)
+void JobQueue::SetupFibers(uint32 numFibers, uintptr_t* initPtrArrayBuffer)
 {
 	this->numFibers = numFibers;
 	fibers = alloc->Allocate<Internal::Fiber>(numFibers);
 
-	for (uint32_t i = 0; i < numFibers; ++i)
+	for (uint32 i = 0; i < numFibers; ++i)
 	{
 		new(&fibers[i]) Internal::Fiber();
 		fibers[i] = CreateFiber(&fibers[i]);
@@ -277,13 +277,13 @@ void JobQueue::SetupFibers(uint32_t numFibers, uintptr_t* initPtrArrayBuffer)
 		numFibers);
 }
 
-void JobQueue::SetupJobStorage(uint32_t size)
+void JobQueue::SetupJobStorage(uint32 size)
 {
 	readyPausedJobFiberQueue = alloc->New<ConcurrentQueue<Internal::Fiber*>>(size);
 	jobQueue = alloc->New<ConcurrentQueue<Job>>(size);
 }
 
-void JobQueue::SetupWorkers(uint32_t numWorkers)
+void JobQueue::SetupWorkers(uint32 numWorkers)
 {
 	workerThreads = alloc->Allocate<Thread*>(numWorkers);
 
@@ -291,7 +291,7 @@ void JobQueue::SetupWorkers(uint32_t numWorkers)
 	workerThreadData.runFlag.store(true);
 	workerThreadData.startFlag.store(false);
 
-	for (uint32_t i = 0; i < numWorkers; ++i)
+	for (uint32 i = 0; i < numWorkers; ++i)
 		workerThreads[i] = alloc->New<Thread>(Internal::WorkerThreadJob, &workerThreadData);
 }
 
@@ -299,7 +299,7 @@ void JobQueue::TearDownWorkers()
 {
 	workerThreadData.runFlag.store(false);
 
-	for (uint32_t i = 0; i < numWorkers; ++i)
+	for (uint32 i = 0; i < numWorkers; ++i)
 	{
 		workerThreads[i]->Join();
 		alloc->Delete(workerThreads[i]);
@@ -317,7 +317,7 @@ void JobQueue::TearDownJobStorage()
 
 void JobQueue::TearDownFibers()
 {
-	for (uint32_t i = 0; i < numFibers; ++i)
+	for (uint32 i = 0; i < numFibers; ++i)
 		DeleteFiber(&fibers[i]);
 
 	alloc->Delete(fiberQueue);
@@ -328,7 +328,7 @@ void JobQueue::TearDownCounters()
 {
 	alloc->Delete(counterQueue);
 
-	for (uint32_t i = 0; i < numCounters; ++i)
+	for (uint32 i = 0; i < numCounters; ++i)
 		counters[i].~JobCounter();
 
 	alloc->Free(counters);

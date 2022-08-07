@@ -12,15 +12,15 @@ public:
 
 	// TODO: Move to protected
 	D3D12SwapChain(
-		uint32_t width,
-		uint32_t height,
+		uint32 width,
+		uint32 height,
 		Format format,
 		IDXGISwapChain1* apiSwapChain,
-		uint32_t bufferCount,
+		uint32 bufferCount,
 		ImageBuffer* rts,
 		ID3D12Fence* apiFence,
 		ID3D12DescriptorHeap* descriptorHeap,
-		uint32_t descriptorSize); // TODO: Please change this to take factory and device and create everything here!
+		uint32 descriptorSize);	// TODO: Please change this to take factory and device and create everything here!
 	~D3D12SwapChain() override;
 
 	void* GetApiHandle() const override;
@@ -32,13 +32,13 @@ public:
 
 protected:
 	// TODO: Huh?
-	void A(uint32_t newFrameIndex); // TODO: Return next value to signal and put this func in interface
+	void A(uint32 newFrameIndex); // TODO: Return next value to signal and put this func in interface
 
 private:
 	IDXGISwapChain1* apiSwapChain;
 	ID3D12Fence* apiFence;
 	ID3D12DescriptorHeap* rtDescriptorHeap;
 	HANDLE fenceEventHandle;
-	uint32_t descriptorSize;
+	uint32 descriptorSize;
 };
 }

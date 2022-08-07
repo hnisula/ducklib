@@ -8,26 +8,26 @@ using namespace DuckLib;
 
 struct WorkerConfig
 {
-	ConcurrentQueue<uint32_t>* queue;
-	std::atomic<uint32_t>* pushCounter;
-	std::atomic<uint32_t>* pushReservation;
-	uint32_t* items;
-	uint32_t* allPoppedItems;
-	uint32_t numItems;
-	std::atomic<uint32_t>* numAllPoppedItems;
+	ConcurrentQueue<uint32>* queue;
+	std::atomic<uint32>* pushCounter;
+	std::atomic<uint32>* pushReservation;
+	uint32* items;
+	uint32* allPoppedItems;
+	uint32 numItems;
+	std::atomic<uint32>* numAllPoppedItems;
 	bool push;
 	bool pop;
 };
 
-uint32_t QueueWorker(void* configData)
+uint32 QueueWorker(void* configData)
 {
 	WorkerConfig* config = (WorkerConfig*)configData;
 	bool queueIsEmpty = !config->pop;
-	uint32_t value {};
-	uint32_t* poppedItems = DefAlloc()->Allocate<uint32_t>(config->numItems);
-	uint32_t numPopped = 0;
-	uint64_t counter = config->pushCounter->load();
-	uint64_t pushReservation = config->push ? (*config->pushReservation)++ : (uint64_t)-1;
+	uint32 value {};
+	uint32* poppedItems = DefAlloc()->Allocate<uint32>(config->numItems);
+	uint32 numPopped = 0;
+	uint64 counter = config->pushCounter->load();
+	uint64 pushReservation = config->push ? (*config->pushReservation)++ : (uint64)-1;
 
 	while (counter < config->numItems || pushReservation < config->numItems || !queueIsEmpty)
 	{
@@ -51,9 +51,9 @@ uint32_t QueueWorker(void* configData)
 		counter = config->pushCounter->load();
 	}
 
-	uint32_t startTotalPoppedIndex = config->numAllPoppedItems->fetch_add(numPopped);
+	uint32 startTotalPoppedIndex = config->numAllPoppedItems->fetch_add(numPopped);
 
-	for (uint32_t i = 0; i < numPopped; ++i)
+	for (uint32 i = 0; i < numPopped; ++i)
 		config->allPoppedItems[startTotalPoppedIndex + i] = poppedItems[i];
 
 	DefAlloc()->Free(poppedItems);
@@ -64,24 +64,24 @@ uint32_t QueueWorker(void* configData)
 int main()
 {
 	// TODO: Get these from console input or at least print them when running
-	const uint32_t numPushers = 8;
-	const uint32_t numPoppers = 8;
-	const uint32_t numHybrids = 4;
-	const uint32_t queueSize = 2;
-	const uint32_t numItems = 256;
+	const uint32 numPushers = 8;
+	const uint32 numPoppers = 8;
+	const uint32 numHybrids = 4;
+	const uint32 queueSize = 2;
+	const uint32 numItems = 256;
 
-	static_assert(numItems < (uint32_t)-1, "numItems must be at least 1 less");
+	static_assert(numItems < (uint32)-1, "numItems must be at least 1 less");
 
-	ConcurrentQueue<uint32_t> queue(queueSize);
-	std::atomic<uint32_t> pushCounter {0};
-	std::atomic<uint32_t> pushReservation {0};
-	uint32_t items[numItems];
-	uint32_t allPoppedItems[numItems];
-	std::atomic<uint32_t> numAllPoppedItems {0};
+	ConcurrentQueue<uint32> queue(queueSize);
+	std::atomic<uint32> pushCounter {0};
+	std::atomic<uint32> pushReservation {0};
+	uint32 items[numItems];
+	uint32 allPoppedItems[numItems];
+	std::atomic<uint32> numAllPoppedItems {0};
 	Thread* workers[numPushers + numPoppers + numHybrids];
-	uint32_t numWorkers = 0;
+	uint32 numWorkers = 0;
 
-	for (uint32_t i = 0; i < numItems; ++i)
+	for (uint32 i = 0; i < numItems; ++i)
 		items[i] = numItems - i;
 
 	// TODO: Fix temp object ptr being passed as arg
@@ -122,34 +122,34 @@ int main()
 		true
 	};
 	
-	for (uint32_t i = 0; i < numPushers; ++i)
+	for (uint32 i = 0; i < numPushers; ++i)
 		workers[numWorkers + i] = DefAlloc()->New<Thread>(&QueueWorker, &pusherConfig);
 
 	numWorkers += numPushers;
 
-	for (uint32_t i = 0; i < numPoppers; ++i)
+	for (uint32 i = 0; i < numPoppers; ++i)
 		workers[numWorkers + i] = DefAlloc()->New<Thread>(&QueueWorker, &popperConfig);
 
 	numWorkers += numPoppers;
 
-	for (uint32_t i = 0; i < numHybrids; ++i)
+	for (uint32 i = 0; i < numHybrids; ++i)
 		workers[numWorkers + i] = DefAlloc()->New<Thread>(&QueueWorker, &hybridConfig);
 
 	numWorkers += numHybrids;
 
-	for (uint32_t i = 0; i < numWorkers; ++i)
+	for (uint32 i = 0; i < numWorkers; ++i)
 		workers[i]->Join();
 
 	bool itemIsUsed[numItems];
 
-	for (uint32_t i = 0; i < numItems; ++i)
+	for (uint32 i = 0; i < numItems; ++i)
 		itemIsUsed[i] = false;
 
-	for (uint32_t i = 0; i < numItems; ++i)
+	for (uint32 i = 0; i < numItems; ++i)
 	{
-		uint32_t matchedIndex = (uint32_t)-1;
+		uint32 matchedIndex = (uint32)-1;
 
-		for (uint32_t u = 0; u < numItems; ++u)
+		for (uint32 u = 0; u < numItems; ++u)
 			if (!itemIsUsed[u] && items[i] == allPoppedItems[u])
 			{
 				matchedIndex = u;
@@ -157,7 +157,7 @@ int main()
 				break;
 			}
 
-		if (matchedIndex == (uint32_t)-1)
+		if (matchedIndex == (uint32)-1)
 			throw std::runtime_error("ERROR: Item missing!");
 	}
 

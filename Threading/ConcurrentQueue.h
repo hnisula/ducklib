@@ -4,49 +4,49 @@
 
 namespace DuckLib
 {
-constexpr uint32_t CACHE_LINE_SIZE = 128;
+constexpr uint32 CACHE_LINE_SIZE = 128;
 
 template <typename T>
 class ConcurrentQueue
 {
 public:
 
-	ConcurrentQueue(uint32_t size, T* initialItems = nullptr, uint32_t numInitialItems = 0);
+	ConcurrentQueue(uint32 size, T* initialItems = nullptr, uint32 numInitialItems = 0);
 	~ConcurrentQueue();
 	
-	uint32_t TryPush(T item);
-	uint32_t TryPush(T* items, uint32_t numItems);
+	uint32 TryPush(T item);
+	uint32 TryPush(T* items, uint32 numItems);
 	bool TryPop(T* item);
 
 private:
 
 	struct alignas(CACHE_LINE_SIZE) Slot
 	{
-		std::atomic<uint64_t> gen;
+		std::atomic<uint64> gen;
 		T item;
 	};
 
-	alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> head;
-	alignas(CACHE_LINE_SIZE) std::atomic<uint64_t> tail;
+	alignas(CACHE_LINE_SIZE) std::atomic<uint64> head;
+	alignas(CACHE_LINE_SIZE) std::atomic<uint64> tail;
 
 	Slot* slots;
-	const uint32_t size;
+	const uint32 size;
 };
 
 template <typename T>
-ConcurrentQueue<T>::ConcurrentQueue(uint32_t size, T* initialItems, uint32_t numInitialItems)
+ConcurrentQueue<T>::ConcurrentQueue(uint32 size, T* initialItems, uint32 numInitialItems)
 	: size(size)
 {
 	slots = DefAlloc()->Allocate<Slot>(size);
 
-	for (uint32_t i = 0; i < numInitialItems; ++i)
+	for (uint32 i = 0; i < numInitialItems; ++i)
 	{
 		new(&slots[i]) Slot();
 		slots[i].item = initialItems[i];
 		slots[i].gen.store(0);
 	}
 	
-	for (uint32_t i = numInitialItems; i < size; ++i)
+	for (uint32 i = numInitialItems; i < size; ++i)
 		slots[i].gen.store(1);
 	
 	head.store(0);
@@ -60,19 +60,19 @@ ConcurrentQueue<T>::~ConcurrentQueue()
 }
 
 template <typename T>
-uint32_t ConcurrentQueue<T>::TryPush(T item)
+uint32 ConcurrentQueue<T>::TryPush(T item)
 {
 	while (true)
 	{
-		uint64_t cachedTail = tail.load();
-		uint64_t index = cachedTail % size;
-		uint64_t tailItemGen = slots[index].gen.load();
-		uint64_t tailGen = cachedTail / size;
-		uint64_t shiftedTailGen = tailGen << 1;
+		uint64 cachedTail = tail.load();
+		uint64 index = cachedTail % size;
+		uint64 tailItemGen = slots[index].gen.load();
+		uint64 tailGen = cachedTail / size;
+		uint64 shiftedTailGen = tailGen << 1;
 
 		if (shiftedTailGen + 1 == tailItemGen)
 		{
-			uint64_t newTail = cachedTail + 1;
+			uint64 newTail = cachedTail + 1;
 
 			if (tail.compare_exchange_strong(cachedTail, newTail))
 			{
@@ -86,7 +86,7 @@ uint32_t ConcurrentQueue<T>::TryPush(T item)
 		}
 		else
 		{
-			uint64_t oldCachedTail = cachedTail;
+			uint64 oldCachedTail = cachedTail;
 			cachedTail = tail.load();
 
 			if (cachedTail == oldCachedTail)
@@ -96,9 +96,9 @@ uint32_t ConcurrentQueue<T>::TryPush(T item)
 }
 
 template < typename T>
-uint32_t ConcurrentQueue<T>::TryPush(T* items, uint32_t numItems)
+uint32 ConcurrentQueue<T>::TryPush(T* items, uint32 numItems)
 {
-	uint32_t i = 0;
+	uint32 i = 0;
 	
 	while (i < numItems && TryPush(items[i]))
 	{
@@ -113,14 +113,14 @@ bool ConcurrentQueue<T>::TryPop(T* item)
 {
 	while (true)
 	{
-		uint64_t cachedHead = head.load();
-		uint64_t index = cachedHead % size;
-		uint64_t headItemGen = slots[index].gen;
-		uint64_t headGen = cachedHead / size;
+		uint64 cachedHead = head.load();
+		uint64 index = cachedHead % size;
+		uint64 headItemGen = slots[index].gen;
+		uint64 headGen = cachedHead / size;
 
 		if (headGen << 1 == headItemGen)
 		{
-			uint64_t newHead = cachedHead + 1;
+			uint64 newHead = cachedHead + 1;
 
 			if (head.compare_exchange_strong(cachedHead, newHead))
 			{
@@ -134,7 +134,7 @@ bool ConcurrentQueue<T>::TryPop(T* item)
 		}
 		else
 		{
-			uint64_t oldCachedHead = cachedHead;
+			uint64 oldCachedHead = cachedHead;
 			cachedHead = head.load();
 
 			if (cachedHead == oldCachedHead)

@@ -12,9 +12,9 @@ HeapAllocator::~HeapAllocator()
 		Utility::DebugOutput("Not all allocations freed in heap allocator");
 }
 
-void* HeapAllocator::AllocateInternal(uint64_t size, uint8_t align)
+void* HeapAllocator::AllocateInternal(uint64 size, uint8_t align)
 {
-	uint64_t totalSize = SizeWithHeaderAndAlignment(size, align);
+	uint64 totalSize = SizeWithHeaderAndAlignment(size, align);
 	Header* header = (Header*)malloc(totalSize);
 
 	WriteAllocHeader(header, totalSize, align);
@@ -26,13 +26,13 @@ void* HeapAllocator::AllocateInternal(uint64_t size, uint8_t align)
 	return GetDataPtr(header);
 }
 
-void* HeapAllocator::ReallocateInternal(void* ptr, uint64_t size)
+void* HeapAllocator::ReallocateInternal(void* ptr, uint64 size)
 {
 	Header* header = GetHeader(ptr);
 	uint8_t align = header->align;
-	uint64_t oldTotalSize = header->totalSize;
-	uint64_t oldAllocationSize = GetAllocationSize(header);
-	uint64_t newTotalSize = SizeWithHeaderAndAlignment(size, align);
+	uint64 oldTotalSize = header->totalSize;
+	uint64 oldAllocationSize = GetAllocationSize(header);
+	uint64 newTotalSize = SizeWithHeaderAndAlignment(size, align);
 
 	header = (Header*)realloc(header, newTotalSize);
 	WriteAllocHeader(header, newTotalSize, align);
@@ -46,7 +46,7 @@ void* HeapAllocator::ReallocateInternal(void* ptr, uint64_t size)
 void HeapAllocator::FreeInternal(void* ptr)
 {
 	Header* header = GetHeader(ptr);
-	uint64_t allocationSize = GetAllocationSize(header);
+	uint64 allocationSize = GetAllocationSize(header);
 
 	totalAllocatedSize -= header->totalSize;
 	allocatedSize -= allocationSize;
@@ -57,12 +57,12 @@ void HeapAllocator::FreeInternal(void* ptr)
 
 namespace Internal::Memory
 {
-uint64_t SizeWithHeaderAndAlignment(uint64_t sizeWithoutHeader, uint8_t align)
+uint64 SizeWithHeaderAndAlignment(uint64 sizeWithoutHeader, uint8_t align)
 {
 	return sizeWithoutHeader + sizeof(Header) + align;
 }
 
-void WriteAllocHeader(void* headerPtr, uint64_t sizeWithHeader, uint8_t align)
+void WriteAllocHeader(void* headerPtr, uint64 sizeWithHeader, uint8_t align)
 {
 	Header* header = (Header*)headerPtr;
 	char* iterator = (char*)header + sizeof(Header);
@@ -87,7 +87,7 @@ Header* GetHeader(void* dataPtr)
 	return (Header*)(iterator - sizeof(Header));
 }
 
-uint64_t GetAllocationSize(const Header* header)
+uint64 GetAllocationSize(const Header* header)
 {
 	return header->totalSize - header->align - sizeof(Header);
 }

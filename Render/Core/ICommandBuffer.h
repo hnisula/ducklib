@@ -25,7 +25,7 @@ public:
 	virtual void SetRT(ImageBuffer* rt) = 0;
 	virtual void SetRT(ISwapChain* swapChain) = 0;
 	virtual void SetIndexBuffer(Buffer* buffer) = 0;
-	virtual void SetVertexBuffers(Buffer** buffer, uint32_t count, uint32_t startSlot) = 0;
+	virtual void SetVertexBuffers(Buffer** buffer, uint32 count, uint32 startSlot) = 0;
 	virtual void SetInputDeclaration(InputDescription* inputDescription) = 0;
 
 	virtual void Clear(ImageBuffer* rt, float* rgbaColor) = 0;

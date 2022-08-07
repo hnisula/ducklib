@@ -9,9 +9,9 @@ class TArray
 {
 public:
 	TArray();
-	TArray(uint32_t initialCapacity);
-	TArray(const T* other, uint32_t otherLength);
-	TArray(const T* other, uint32_t otherLength, uint32_t startCapacity);
+	TArray(uint32 initialCapacity);
+	TArray(const T* other, uint32 otherLength);
+	TArray(const T* other, uint32 otherLength, uint32 startCapacity);
 	TArray(const TArray<T>& other);
 	TArray(TArray<T>&& other) noexcept;
 	~TArray();
@@ -21,28 +21,28 @@ public:
 
 	bool Contains(const T& item) const;
 
-	uint32_t Length() const;
-	uint32_t Capacity() const;
+	uint32 Length() const;
+	uint32 Capacity() const;
 	bool IsEmpty() const;
-	void Resize(uint32_t newCapacity);
+	void Resize(uint32 newCapacity);
 
-	T& operator [](uint32_t i);
-	const T& operator [](uint32_t i) const;
+	T& operator [](uint32 i);
+	const T& operator [](uint32 i) const;
 
 	T* Data();
 	const T* Data() const;
 
-	static TArray<T> Attach(T* externalArray, uint32_t size, IAlloc* alloc = nullptr);
-	static TArray<T> Attach(T* externalArray, uint32_t size, uint32_t capacity, IAlloc* alloc = nullptr);
+	static TArray<T> Attach(T* externalArray, uint32 size, IAlloc* alloc = nullptr);
+	static TArray<T> Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc = nullptr);
 
 protected:
-	bool EnsureCapacity(uint32_t requiredCapacity);
+	bool EnsureCapacity(uint32 requiredCapacity);
 	void Destroy();
 
 	IAlloc* alloc;
 	T* array;
-	uint32_t length;
-	uint32_t capacity;
+	uint32 length;
+	uint32 capacity;
 	bool isExternalArray;
 };
 
@@ -55,18 +55,18 @@ TArray<T>::TArray()
 	, isExternalArray(false) {}
 
 template <typename T>
-TArray<T>::TArray(uint32_t initialCapacity)
+TArray<T>::TArray(uint32 initialCapacity)
 	: TArray()
 {
 	EnsureCapacity(initialCapacity);
 }
 
 template <typename T>
-TArray<T>::TArray(const T* other, uint32_t otherLength)
+TArray<T>::TArray(const T* other, uint32 otherLength)
 	: TArray(other, otherLength, otherLength) {}
 
 template <typename T>
-TArray<T>::TArray(const T* other, uint32_t otherLength, uint32_t startCapacity)
+TArray<T>::TArray(const T* other, uint32 otherLength, uint32 startCapacity)
 	: TArray()
 {
 	EnsureCapacity(startCapacity);
@@ -139,7 +139,7 @@ void TArray<T>::Append(const T& item)
 template <typename T>
 bool TArray<T>::Contains(const T& item) const
 {
-	for (uint32_t i = 0; i < length; ++i)
+	for (uint32 i = 0; i < length; ++i)
 		if (array[i] == item)
 			return true;
 
@@ -147,13 +147,13 @@ bool TArray<T>::Contains(const T& item) const
 }
 
 template <typename T>
-uint32_t TArray<T>::Length() const
+uint32 TArray<T>::Length() const
 {
 	return length;
 }
 
 template <typename T>
-uint32_t TArray<T>::Capacity() const
+uint32 TArray<T>::Capacity() const
 {
 	return capacity;
 }
@@ -165,7 +165,7 @@ bool TArray<T>::IsEmpty() const
 }
 
 template <typename T>
-void TArray<T>::Resize(uint32_t newCapacity)
+void TArray<T>::Resize(uint32 newCapacity)
 {
 	if (array)
 		array = (T*)alloc->Reallocate(array, newCapacity * sizeof(T));
@@ -176,13 +176,13 @@ void TArray<T>::Resize(uint32_t newCapacity)
 }
 
 template <typename T>
-T& TArray<T>::operator[](uint32_t i)
+T& TArray<T>::operator[](uint32 i)
 {
 	return array[i];
 }
 
 template <typename T>
-const T& TArray<T>::operator[](uint32_t i) const
+const T& TArray<T>::operator[](uint32 i) const
 {
 	return array[i];
 }
@@ -200,18 +200,18 @@ const T* TArray<T>::Data() const
 }
 
 template <typename T>
-TArray<T> TArray<T>::Attach(T* externalArray, uint32_t size, IAlloc* alloc)
+TArray<T> TArray<T>::Attach(T* externalArray, uint32 size, IAlloc* alloc)
 {
 	return Attach(externalArray, size, size, alloc);
 }
 
 template <typename T>
-TArray<T> TArray<T>::Attach(T* externalArray, uint32_t size, uint32_t capacity, IAlloc* alloc)
+TArray<T> TArray<T>::Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc)
 {
 	TArray tarray;
 
 	tarray.alloc = alloc;
-	tarray.array = (uint32_t*)externalArray;
+	tarray.array = (uint32*)externalArray;
 	tarray.length = size;
 	tarray.capacity = capacity;
 	tarray.isExternalArray = true;
@@ -220,7 +220,7 @@ TArray<T> TArray<T>::Attach(T* externalArray, uint32_t size, uint32_t capacity, 
 }
 
 template <typename T>
-bool TArray<T>::EnsureCapacity(uint32_t requiredCapacity)
+bool TArray<T>::EnsureCapacity(uint32 requiredCapacity)
 {
 	if (requiredCapacity <= capacity)
 		return true;
@@ -228,7 +228,7 @@ bool TArray<T>::EnsureCapacity(uint32_t requiredCapacity)
 	if (!alloc)
 		return false;
 
-	uint32_t exponentiallyIncreasedSize = (uint32_t)((float)(capacity == 0 ? 4 : capacity) * 1.5f);
+	uint32 exponentiallyIncreasedSize = (uint32)((float)(capacity == 0 ? 4 : capacity) * 1.5f);
 
 	Resize(requiredCapacity <= exponentiallyIncreasedSize ? exponentiallyIncreasedSize : requiredCapacity);
 

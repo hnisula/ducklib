@@ -65,10 +65,10 @@ const std::vector<IAdapter*>& D3D12Api::GetAdapters() const
 }
 
 ISwapChain* D3D12Api::CreateSwapChain(
-	uint32_t width,
-	uint32_t height,
+	uint32 width,
+	uint32 height,
 	Format format,
-	uint32_t bufferCount,
+	uint32 bufferCount,
 	HWND windowHandle)
 {
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
@@ -92,7 +92,7 @@ ISwapChain* D3D12Api::CreateSwapChain(
 			&apiSwapChain),
 		"Failed to create swap chain");
 
-	uint32_t descriptorSize = device->GetDescriptorHandleIncrementSize(
+	uint32 descriptorSize = device->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	ID3D12DescriptorHeap* descriptorHeap = CreateDescriptorHeap(
 		bufferCount,
@@ -101,7 +101,7 @@ ISwapChain* D3D12Api::CreateSwapChain(
 		descriptorHeap->GetCPUDescriptorHandleForHeapStart());
 	ImageBuffer rtvHandles[ISwapChain::MAX_BUFFERS];
 
-	for (uint32_t i = 0; i < bufferCount; ++i)
+	for (uint32 i = 0; i < bufferCount; ++i)
 	{
 		DL_D3D12_THROW_FAIL(
 			apiSwapChain->GetBuffer(i, IID_PPV_ARGS(&apiBuffer)),
@@ -210,11 +210,11 @@ void D3D12Api::DestroyCommandBuffer(ICommandBuffer* commandBuffer) {}
 
 void D3D12Api::DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer) {}
 
-void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
+void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32 numCommandBuffers)
 {
 	ID3D12CommandList* apiLists[128];
 
-	for (uint32_t i = 0; i < numCommandBuffers; ++i)
+	for (uint32 i = 0; i < numCommandBuffers; ++i)
 		apiLists[i] = (ID3D12CommandList*)commandBuffers[i]->GetApiHandle();
 
 	commandQueue->ExecuteCommandLists(numCommandBuffers, apiLists);
@@ -223,7 +223,7 @@ void D3D12Api::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t n
 void D3D12Api::SignalCompletion(ISwapChain* swapChain)
 {
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
-	uint64_t signalValue = swapChain->GetSignalValue();
+	uint64 signalValue = swapChain->GetSignalValue();
 
 	if (commandQueue->Signal(d3dSwapChain->apiFence, signalValue) != S_OK)
 		throw std::exception("Failed to signal completion in D3D12 rendering");
@@ -237,7 +237,7 @@ void D3D12Api::EnumAndCreateAdapters()
 	IDXGIAdapter1* apiAdapter;
 	DXGI_ADAPTER_DESC1 desc;
 
-	for (uint32_t i = 0; factory->EnumAdapters1(i, &apiAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
+	for (uint32 i = 0; factory->EnumAdapters1(i, &apiAdapter) != DXGI_ERROR_NOT_FOUND; ++i)
 	{
 		apiAdapter->GetDesc1(&desc);
 		char descriptionBuffer[128];
@@ -280,7 +280,7 @@ ID3D12CommandQueue* D3D12Api::CreateQueue(
 }
 
 ID3D12DescriptorHeap* D3D12Api::CreateDescriptorHeap(
-	uint32_t numDescriptors,
+	uint32 numDescriptors,
 	D3D12_DESCRIPTOR_HEAP_TYPE type)
 {
 	ID3D12DescriptorHeap* apiDescriptorHeap;
@@ -298,9 +298,9 @@ ID3D12DescriptorHeap* D3D12Api::CreateDescriptorHeap(
 }
 
 ImageBuffer* D3D12Api::CreateImageBuffer(
-	uint32_t width,
-	uint32_t height,
-	uint32_t depth,
+	uint32 width,
+	uint32 height,
+	uint32 depth,
 	Format format,
 	ID3D12Resource* apiResource,
 	D3D12_CPU_DESCRIPTOR_HANDLE apiDescriptor)

@@ -109,6 +109,6 @@ static DXGI_FORMAT dxgiFormatMap[] = {
 
 inline DXGI_FORMAT MapToD3D12Format(Format format)
 {
-	return dxgiFormatMap[(uint32_t)format];
+	return dxgiFormatMap[(uint32)format];
 }
 }

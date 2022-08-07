@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cstdint>
+#include "../../Core/Types.h"
 #include "IDevice.h"
 
 namespace DuckLib::Render
@@ -23,7 +23,7 @@ protected:
 	IAdapter(const char* description, bool isHardware);
 
 	char* description;
-	uint32_t deviceId;
+	uint32 deviceId;
 	bool isHardware;
 };
 }

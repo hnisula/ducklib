@@ -7,29 +7,29 @@ class Foo
 {
 public:
 
-	uint32_t v1;
-	uint32_t v2;
-	uint32_t* p;
+	uint32 v1;
+	uint32 v2;
+	uint32* p;
 };
 
 TEST(IteratorsTest, TArrayRangedLoop)
 {
 	// TODO: Support for braced initialization list would be handy here
-	TArray<uint32_t> a;
+	TArray<uint32> a;
 
-	for (uint32_t i = 0; i < 10; ++i)
+	for (uint32 i = 0; i < 10; ++i)
 		a.Append(i);
 
-	uint32_t n = 0;
+	uint32 n = 0;
 
-	for (uint32_t i : a)
+	for (uint32 i : a)
 		EXPECT_EQ(n++, i);
 }
 
 TEST(IteratorsTest, TArrayRangedLoopEmpty)
 {
-	TArray<uint32_t> a;
+	TArray<uint32> a;
 
-	for (uint32_t _ : a)
+	for (uint32 _ : a)
 		EXPECT_TRUE(false);
 }

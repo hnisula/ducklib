@@ -1,7 +1,8 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/AllocTracker.h"
 
-using namespace DuckLib::Internal::Memory;
+using namespace DuckLib;
+using namespace Internal::Memory;
 
 TEST( TestAllocTest, Track )
 {
@@ -10,7 +11,7 @@ TEST( TestAllocTest, Track )
 	allocTracker.Clear();
 	allocTracker.Track( (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
 	const AllocTracker::Entry* entries = allocTracker.GetEntries();
-	uint32_t entryCount = allocTracker.GetEntryCount();
+	uint32 entryCount = allocTracker.GetEntryCount();
 
 	EXPECT_EQ( 1, entryCount );
 	EXPECT_EQ( (void*)0x1337, entries[0].ptr );
@@ -28,7 +29,7 @@ TEST( TestAllocTest, TrackModify )
 	allocTracker.Track( (void*)0x16, 16, "dummer.cpp", "DoDummer", 20 );
 	allocTracker.Modify( (void*)0x16, (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
 	const AllocTracker::Entry* entries = allocTracker.GetEntries();
-	uint32_t entryCount = allocTracker.GetEntryCount();
+	uint32 entryCount = allocTracker.GetEntryCount();
 
 	EXPECT_EQ( 1, entryCount );
 	EXPECT_EQ( (void*)0x1337, entries[0].ptr );
@@ -45,7 +46,7 @@ TEST( TestAllocTest, TrackDelete )
 	allocTracker.Clear();
 	allocTracker.Track( (void*)0x1337, 420, "dummy.cpp", "DoDummy", 200 );
 	allocTracker.Remove( (void*)0x1337 );
-	uint32_t entryCount = allocTracker.GetEntryCount();
+	uint32 entryCount = allocTracker.GetEntryCount();
 
 	EXPECT_EQ( 0, entryCount );
 }

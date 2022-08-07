@@ -6,15 +6,15 @@
 namespace DuckLib::Render
 {
 D3D12SwapChain::D3D12SwapChain(
-	uint32_t width,
-	uint32_t height,
+	uint32 width,
+	uint32 height,
 	Format format,
 	IDXGISwapChain1* apiSwapChain,
-	uint32_t bufferCount,
+	uint32 bufferCount,
 	ImageBuffer* rts,
 	ID3D12Fence* apiFence,
 	ID3D12DescriptorHeap* descriptorHeap,
-	uint32_t descriptorSize)
+	uint32 descriptorSize)
 {
 	this->width = width;
 	this->height = height;
@@ -25,7 +25,7 @@ D3D12SwapChain::D3D12SwapChain(
 	this->rtDescriptorHeap = descriptorHeap;
 	this->descriptorSize = descriptorSize;
 
-	for (uint32_t i = 0; i < bufferCount; ++i)
+	for (uint32 i = 0; i < bufferCount; ++i)
 		this->buffers[i] = rts[i];
 
 	fenceEventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
@@ -55,9 +55,9 @@ void D3D12SwapChain::Present()
 
 void D3D12SwapChain::WaitForFrame()
 {
-	uint32_t bufferIndex = currentFrameIndex % numBuffers;
-	uint64_t latestCompletedFrame = apiFence->GetCompletedValue();
-	uint64_t expectedFrame = frameCounters[bufferIndex];
+	uint32 bufferIndex = currentFrameIndex % numBuffers;
+	uint64 latestCompletedFrame = apiFence->GetCompletedValue();
+	uint64 expectedFrame = frameCounters[bufferIndex];
 
 	if (latestCompletedFrame - expectedFrame < UINT32_MAX / 2)
 	{
@@ -73,7 +73,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentCpuDescriptorHandle()
 {
 	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
 		rtDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		(uint32_t)this->currentFrameIndex,
+		(uint32)this->currentFrameIndex,
 		descriptorSize);
 }
 }

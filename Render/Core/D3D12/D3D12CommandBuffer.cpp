@@ -77,11 +77,11 @@ void D3D12CommandBuffer::SetIndexBuffer(Buffer* buffer)
 	apiCommandList->IASetIndexBuffer((D3D12_INDEX_BUFFER_VIEW*)buffer->apiResource);
 }
 
-void D3D12CommandBuffer::SetVertexBuffers(Buffer** buffer, uint32_t count, uint32_t startSlot)
+void D3D12CommandBuffer::SetVertexBuffers(Buffer** buffer, uint32 count, uint32 startSlot)
 {
 	D3D12_VERTEX_BUFFER_VIEW apiViews[MAX_SET_VB_COUNT];
 
-	for (uint32_t i = 0; i < count; ++i)
+	for (uint32 i = 0; i < count; ++i)
 		apiViews[i] = *(D3D12_VERTEX_BUFFER_VIEW*)buffer[i]->apiResource;
 
 	apiCommandList->IASetVertexBuffers(startSlot, count, apiViews);
