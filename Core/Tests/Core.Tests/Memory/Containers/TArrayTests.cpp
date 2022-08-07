@@ -129,3 +129,93 @@ TEST(TArrayTests, MoveConstructorEmpty)
 	EXPECT_EQ(0, b.Length());
 	EXPECT_LE((uint32_t)0, b.Capacity());
 }
+
+TEST(TArrayTests, ConstructorCopyBasicArray)
+{
+	uint32_t n[] = { 2, 4, 8 };
+	TArray a(n, 3);
+
+	EXPECT_EQ(3, a.Length());
+	EXPECT_LE((uint32_t)3, a.Capacity());
+	EXPECT_EQ(2, a[0]);
+	EXPECT_EQ(4, a[1]);
+	EXPECT_EQ(8, a[2]);
+}
+
+TEST(TArrayTests, ConstructorCopyBasicArrayCapacity)
+{
+	uint32_t n[] = { 2, 4, 8 };
+	TArray a(n, 3, 12);
+
+	EXPECT_EQ(3, a.Length());
+	EXPECT_LE((uint32_t)12, a.Capacity());
+	EXPECT_EQ(2, a[0]);
+	EXPECT_EQ(4, a[1]);
+	EXPECT_EQ(8, a[2]);
+}
+
+TEST(TArrayTests, AttachSimple)
+{
+	uint32_t n[] = { 2, 4, 8, 0, 0, 0 };
+	TArray a = TArray<uint32_t>::Attach(n, 6);
+
+	EXPECT_EQ(6, a.Length());
+	EXPECT_LE((uint32_t)6, a.Capacity());
+	EXPECT_EQ(2, a[0]);
+	EXPECT_EQ(4, a[1]);
+	EXPECT_EQ(8, a[2]);
+	EXPECT_EQ(0, a[3]);
+	EXPECT_EQ(0, a[4]);
+	EXPECT_EQ(0, a[5]);
+}
+
+TEST(TArrayTests, AttachSimpleSubset)
+{
+	uint32_t n[] = {2, 4, 8, 0, 0, 0};
+	TArray a = TArray<uint32_t>::Attach(n, 3, 6);
+
+	EXPECT_EQ(3, a.Length());
+	EXPECT_LE((uint32_t)6, a.Capacity());
+
+	a.Append(16);
+	a.Append(32);
+	a.Append(64);
+
+	EXPECT_EQ(2, a[0]);
+	EXPECT_EQ(4, a[1]);
+	EXPECT_EQ(8, a[2]);
+	EXPECT_EQ(16, a[3]);
+	EXPECT_EQ(32, a[4]);
+	EXPECT_EQ(64, a[5]);
+
+	EXPECT_ANY_THROW(a.Append(128));
+}
+
+TEST(TArrayTests, AttachWithAlloc)
+{
+	uint32_t* n = DefAlloc()->Allocate<uint32_t>(4);
+
+	n[0] = 2;
+	n[1] = 4;
+	n[2] = 8;
+	n[3] = 16;
+
+	TArray a = TArray<uint32_t>::Attach(n, 4, DefAlloc());
+
+	EXPECT_EQ(4, a.Length());
+	EXPECT_LE((uint32_t)4, a.Capacity());
+	EXPECT_EQ(2, a[0]);
+	EXPECT_EQ(4, a[1]);
+	EXPECT_EQ(8, a[2]);
+	EXPECT_EQ(16, a[3]);
+
+	a.Append(32);
+	a.Append(64);
+	a.Append(128);
+
+	EXPECT_EQ(7, a.Length());
+	EXPECT_LE((uint32_t)7, a.Capacity());
+	EXPECT_EQ(32, a[4]);
+	EXPECT_EQ(64, a[5]);
+	EXPECT_EQ(128, a[6]);
+}

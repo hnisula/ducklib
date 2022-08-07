@@ -1,6 +1,5 @@
 #pragma once
 #include <cstdint>
-#include <stdexcept>
 #include "../IAlloc.h"
 
 namespace DuckLib
@@ -11,9 +10,10 @@ class TArray
 public:
 	TArray();
 	TArray(uint32_t initialCapacity);
-	TArray(void* externalArray, uint32_t size, uint32_t capacity = size, IAlloc* alloc = nullptr);
-	TArray(const TArray<T>& source);
-	TArray(TArray<T>&& source) noexcept;
+	TArray(const T* other, uint32_t otherLength);
+	TArray(const T* other, uint32_t otherLength, uint32_t startCapacity);
+	TArray(const TArray<T>& other);
+	TArray(TArray<T>&& other) noexcept;
 	~TArray();
 
 	void Append(T&& item);
@@ -31,6 +31,9 @@ public:
 
 	T* Data();
 	const T* Data() const;
+
+	static TArray<T> Attach(T* externalArray, uint32_t size, IAlloc* alloc = nullptr);
+	static TArray<T> Attach(T* externalArray, uint32_t size, uint32_t capacity, IAlloc* alloc = nullptr);
 
 protected:
 	bool EnsureCapacity(uint32_t requiredCapacity);
@@ -59,51 +62,54 @@ TArray<T>::TArray(uint32_t initialCapacity)
 }
 
 template <typename T>
-TArray<T>::TArray(void* externalArray, uint32_t size, uint32_t capacity, IAlloc* alloc)
+TArray<T>::TArray(const T* other, uint32_t otherLength)
+	: TArray(other, otherLength, otherLength) {}
+
+template <typename T>
+TArray<T>::TArray(const T* other, uint32_t otherLength, uint32_t startCapacity)
+	: TArray()
 {
-	this->alloc = alloc;
-	array = (T*)externalArray;
-	this->length = size;
-	this->capacity = capacity;
-	isExternalArray = true;
+	EnsureCapacity(startCapacity);
+	memcpy(array, other, sizeof(T) * otherLength);
+	length = otherLength;
 }
 
 template <typename T>
-TArray<T>::TArray(const TArray<T>& source)
+TArray<T>::TArray(const TArray<T>& other)
 	: TArray()
 {
-	if (source.isExternalArray)
+	if (other.isExternalArray)
 	{
-		alloc = source.alloc;
-		array = source.array;
-		length = source.length;
-		capacity = source.capacity;
+		alloc = other.alloc;
+		array = other.array;
+		length = other.length;
+		capacity = other.capacity;
 		isExternalArray = true;
 	}
 	else
 	{
-		EnsureCapacity(source.length);
-		length = source.length;
-		memcpy(array, source.array, sizeof(T) * source.length);
+		EnsureCapacity(other.length);
+		length = other.length;
+		memcpy(array, other.array, sizeof(T) * other.length);
 		isExternalArray = false;
 	}
 }
 
 template <typename T>
-TArray<T>::TArray(TArray<T>&& source) noexcept
+TArray<T>::TArray(TArray<T>&& other) noexcept
 	: TArray()
 {
-	alloc = source.alloc;
-	array = source.array;
-	length = source.length;
-	capacity = source.capacity;
-	isExternalArray = source.isExternalArray;
+	alloc = other.alloc;
+	array = other.array;
+	length = other.length;
+	capacity = other.capacity;
+	isExternalArray = other.isExternalArray;
 
-	source.alloc = DefAlloc();
-	source.array = nullptr;
-	source.length = 0;
-	source.capacity = 0;
-	source.isExternalArray = false;
+	other.alloc = DefAlloc();
+	other.array = nullptr;
+	other.length = 0;
+	other.capacity = 0;
+	other.isExternalArray = false;
 }
 
 template <typename T>
@@ -191,6 +197,26 @@ template <typename T>
 const T* TArray<T>::Data() const
 {
 	return array;
+}
+
+template <typename T>
+TArray<T> TArray<T>::Attach(T* externalArray, uint32_t size, IAlloc* alloc)
+{
+	return Attach(externalArray, size, size, alloc);
+}
+
+template <typename T>
+TArray<T> TArray<T>::Attach(T* externalArray, uint32_t size, uint32_t capacity, IAlloc* alloc)
+{
+	TArray tarray;
+
+	tarray.alloc = alloc;
+	tarray.array = (uint32_t*)externalArray;
+	tarray.length = size;
+	tarray.capacity = capacity;
+	tarray.isExternalArray = true;
+
+	return tarray;
 }
 
 template <typename T>
