@@ -25,6 +25,7 @@
     <ClInclude Include="Memory\Containers\Iterators.h">
       <Filter>Memory\Containers</Filter>
     </ClInclude>
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Memory\AllocTracker.cpp">

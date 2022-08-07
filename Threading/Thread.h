@@ -1,6 +1,6 @@
 #pragma once
-#include <cstdint>
 #include <Windows.h>
+#include "Core/Types.h"
 
 namespace DuckLib
 {
@@ -8,7 +8,7 @@ class Thread
 {
 public:
 
-	Thread(uint32_t (*func)(void*), void* data);
+	Thread(uint32 (*func)(void*), void* data);
 
 	void Join();
 
@@ -21,5 +21,5 @@ private:
 #endif
 };
 
-void YieldThread(uint32_t ms);
+void YieldThread(uint32 ms);
 }

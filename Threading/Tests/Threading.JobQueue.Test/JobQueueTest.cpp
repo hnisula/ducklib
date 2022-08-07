@@ -5,21 +5,21 @@
 
 using namespace DuckLib;
 
-std::atomic<uint32_t> numJobsCompleted {0};
-uint32_t* jobItems;
-constexpr uint32_t NUM_JOBS_NOPAUSE = 512;
-constexpr uint32_t NUM_CHILD_JOBS = 16;
-constexpr uint32_t NUM_PAUSE_JOBS = 16;
-constexpr uint32_t QUEUE_SIZE = 1024;
-constexpr uint32_t NUM_FIBERS = 512;
-uint32_t pausePushCounter = 0;
+std::atomic<uint32> numJobsCompleted {0};
+uint32* jobItems;
+constexpr uint32 NUM_JOBS_NOPAUSE = 512;
+constexpr uint32 NUM_CHILD_JOBS = 16;
+constexpr uint32 NUM_PAUSE_JOBS = 16;
+constexpr uint32 QUEUE_SIZE = 1024;
+constexpr uint32 NUM_FIBERS = 512;
+uint32 pausePushCounter = 0;
 
 JobQueue jobQueue(QUEUE_SIZE, NUM_FIBERS);
 
 struct ChildJobData
 {
-	uint32_t result;
-	uint32_t index;
+	uint32 result;
+	uint32 index;
 };
 
 struct PauseJobData
@@ -29,7 +29,7 @@ struct PauseJobData
 
 void JobFunc(void* data)
 {
-	uint32_t* jobItem = (uint32_t*)data;
+	uint32* jobItem = (uint32*)data;
 
 	*jobItem = 0;
 	
@@ -48,7 +48,7 @@ void PauseJobFunc(void* data)
 	PauseJobData* jobData = (PauseJobData*)data;
 	Job* jobs = DefAlloc()->Allocate<Job>(NUM_CHILD_JOBS);
 
-	for (uint32_t i = 0; i < NUM_CHILD_JOBS; ++i)
+	for (uint32 i = 0; i < NUM_CHILD_JOBS; ++i)
 	{
 		jobData->childJobData[i].result = 0;
 		jobData->childJobData[i].index = i + 1;
@@ -62,27 +62,27 @@ void PauseJobFunc(void* data)
 	jobQueue.WaitForCounter(counter);
 }
 
-void InitJobData(uint32_t numJobs)
+void InitJobData(uint32 numJobs)
 {
-	jobItems = DefAlloc()->Allocate<uint32_t>(numJobs);
+	jobItems = DefAlloc()->Allocate<uint32>(numJobs);
 	
-	for (uint32_t i = 0; i < numJobs; ++i)
+	for (uint32 i = 0; i < numJobs; ++i)
 		jobItems[i] = i + 1;
 }
 
-Job* GenerateJobs(uint32_t numJobs)
+Job* GenerateJobs(uint32 numJobs)
 {
 	Job* jobs = DefAlloc()->Allocate<Job>(numJobs);
 
-	for (uint32_t i = 0; i < numJobs; ++i)
+	for (uint32 i = 0; i < numJobs; ++i)
 		jobs[i] = {&JobFunc, &jobItems[i]};
 	
 	return jobs;
 }
 
-bool CheckJobResult(uint32_t numJobs)
+bool CheckJobResult(uint32 numJobs)
 {
-	for (uint32_t i = 0; i < numJobs; ++i)
+	for (uint32 i = 0; i < numJobs; ++i)
 		if (jobItems[i] != 0)
 			return false;
 	return true;
@@ -90,15 +90,15 @@ bool CheckJobResult(uint32_t numJobs)
 
 bool CheckPauseJobResults(PauseJobData* jobData)
 {
-	for (uint32_t i = 0; i < NUM_PAUSE_JOBS; ++i)
-		for (uint32_t u = 0; u < NUM_CHILD_JOBS; ++u)
+	for (uint32 i = 0; i < NUM_PAUSE_JOBS; ++i)
+		for (uint32 u = 0; u < NUM_CHILD_JOBS; ++u)
 			if (jobData[i].childJobData[u].result != jobData[i].childJobData[u].index * 10 + 2)
 				return false;
 
 	return true;
 }
 
-void CleanupJobData(uint32_t numJobs)
+void CleanupJobData(uint32 numJobs)
 {
 	DefAlloc()->Free(jobItems);
 }
@@ -109,7 +109,7 @@ void NoPauseTest()
 
 	Job* jobs = GenerateJobs(NUM_JOBS_NOPAUSE);
 
-	for (uint32_t i = 0; i < NUM_JOBS_NOPAUSE; ++i)
+	for (uint32 i = 0; i < NUM_JOBS_NOPAUSE; ++i)
 		jobQueue.Push(&jobs[i], 1);
 
 	while (numJobsCompleted.load() < NUM_JOBS_NOPAUSE)
@@ -128,7 +128,7 @@ void PauseTest()
 	PauseJobData* pauseJobData = DefAlloc()->Allocate<PauseJobData>(NUM_PAUSE_JOBS);
 	Job* pauseJobs = DefAlloc()->Allocate<Job>(NUM_PAUSE_JOBS);
 	
-	for (uint32_t i = 0; i < NUM_PAUSE_JOBS; ++i)
+	for (uint32 i = 0; i < NUM_PAUSE_JOBS; ++i)
 		pauseJobs[i] = {&PauseJobFunc, &pauseJobData[i]};
 	
 	JobCounter* counter = jobQueue.Push(pauseJobs, NUM_PAUSE_JOBS); // check if counter ever changes. Also check workers if they actually do any job

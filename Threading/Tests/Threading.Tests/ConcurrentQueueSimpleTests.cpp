@@ -4,11 +4,11 @@
 
 using namespace DuckLib;
 
-constexpr uint32_t pushValue = 420;
+constexpr uint32 pushValue = 420;
 
-uint32_t PushThread(void* data)
+uint32 PushThread(void* data)
 {
-	ConcurrentQueue<uint32_t>* queue = (ConcurrentQueue<uint32_t>*)data;
+	ConcurrentQueue<uint32>* queue = (ConcurrentQueue<uint32>*)data;
 
 	queue->TryPush(pushValue);
 
@@ -17,8 +17,8 @@ uint32_t PushThread(void* data)
 
 TEST(ConcurrentQueueTest, TryPushSingle)
 {
-	ConcurrentQueue<uint32_t> queue(128);
-	uint32_t result;
+	ConcurrentQueue<uint32> queue(128);
+	uint32 result;
 
 	queue.TryPush(200);
 	EXPECT_TRUE(queue.TryPop(&result));
@@ -27,8 +27,8 @@ TEST(ConcurrentQueueTest, TryPushSingle)
 
 TEST(ConcurrentQueueTest, TryPushMultiple)
 {
-	ConcurrentQueue<uint32_t> queue(128);
-	uint32_t result;
+	ConcurrentQueue<uint32> queue(128);
+	uint32 result;
 
 	queue.TryPush(200);
 	queue.TryPush(100);
@@ -50,15 +50,15 @@ TEST(ConcurrentQueueTest, TryPushMultiple)
 
 TEST(ConcurrentQueueTest, TryPopEmpty)
 {
-	ConcurrentQueue<uint32_t> queue(128);
-	uint32_t result;
+	ConcurrentQueue<uint32> queue(128);
+	uint32 result;
 
 	EXPECT_FALSE(queue.TryPop(&result));
 }
 
 TEST(ConcurrentQueueTest, TryPushFull)
 {
-	ConcurrentQueue<uint32_t> queue(2);
+	ConcurrentQueue<uint32> queue(2);
 
 	EXPECT_TRUE(queue.TryPush(1));
 	EXPECT_TRUE(queue.TryPush(2));
@@ -67,8 +67,8 @@ TEST(ConcurrentQueueTest, TryPushFull)
 
 TEST(ConcurrentQueueTest, TryPopAfterPushFull)
 {
-	ConcurrentQueue<uint32_t> queue(2);
-	uint32_t result {};
+	ConcurrentQueue<uint32> queue(2);
+	uint32 result {};
 
 	EXPECT_TRUE(queue.TryPush(1));
 	EXPECT_TRUE(queue.TryPush(2));

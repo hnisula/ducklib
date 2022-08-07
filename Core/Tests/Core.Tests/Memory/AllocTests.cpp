@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/HeapAllocator.h"
 
+using namespace DuckLib;
+
 class Foo
 {
 public:
@@ -16,15 +18,15 @@ public:
 		*p = 32;
 	}
 
-	uint32_t v1;
-	uint32_t v2;
-	uint32_t* p;
+	uint32 v1;
+	uint32 v2;
+	uint32* p;
 };
 
 TEST(AllocTest, NewDelete)
 {
-	DuckLib::HeapAllocator alloc;
-	uint32_t v = 2;
+	HeapAllocator alloc;
+	uint32 v = 2;
 	Foo* foo = alloc.New<Foo>();
 	foo->p = &v;
 
@@ -38,24 +40,24 @@ TEST(AllocTest, NewDelete)
 
 TEST(AllocTest, NewDeleteArray)
 {
-	DuckLib::HeapAllocator alloc;
-	uint32_t v = 2;
-	constexpr uint32_t arraySize = 32;
+	HeapAllocator alloc;
+	uint32 v = 2;
+	constexpr uint32 arraySize = 32;
 	Foo* foo = alloc.Allocate<Foo>(arraySize);
 
-	for (uint32_t i = 0; i < arraySize; ++i)
+	for (uint32 i = 0; i < arraySize; ++i)
 		new(&foo[i]) Foo();
 
-	for (uint32_t i = 0; i < arraySize; ++i)
+	for (uint32 i = 0; i < arraySize; ++i)
 		foo[i].p = &v;
 
-	for (uint32_t i = 0; i < arraySize; ++i)
+	for (uint32 i = 0; i < arraySize; ++i)
 	{
 		EXPECT_EQ(16, foo->v1);
 		EXPECT_EQ(69, foo->v2);
 	}
 
-	for (uint32_t i = 0; i < arraySize; ++i)
+	for (uint32 i = 0; i < arraySize; ++i)
 		foo[i].~Foo();
 
 	alloc.Free(foo);

@@ -9,18 +9,18 @@ namespace Render
 struct InputComponent
 {
 	char* name;
-	uint32_t index;
+	uint32 index;
 	Format format;
-	uint32_t inputSlot;
-	uint32_t alignOffset;
-	uint32_t instanceStepRate;
+	uint32 inputSlot;
+	uint32 alignOffset;
+	uint32 instanceStepRate;
 	bool isInstanceData;
 };
 
 struct InputDescription
 {
 	InputComponent* inputComponents;
-	uint32_t numInputComponents;
+	uint32 numInputComponents;
 };
 }
 }
