@@ -2,10 +2,10 @@
 
 namespace DuckLib
 {
-Thread::Thread(uint32_t (* func)(void*), void* data)
+Thread::Thread(uint32 (* func)(void*), void* data)
 {
 #ifdef _WIN32
-	uint32_t threadId {};
+	uint32 threadId {};
 	
 	osHandle = CreateThread(nullptr,
 		0,
@@ -21,7 +21,7 @@ void Thread::Join()
 	WaitForSingleObject(osHandle, INFINITE);
 }
 
-void YieldThread(uint32_t ms)
+void YieldThread(uint32 ms)
 {
 #ifdef _WIN32
 	::Sleep(ms);

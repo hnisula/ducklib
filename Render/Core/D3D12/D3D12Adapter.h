@@ -2,9 +2,7 @@
 #include <dxgi.h>
 #include "../IAdapter.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 class D3D12Adapter : public IAdapter
 {
@@ -20,5 +18,4 @@ protected:
 
 	IDXGIAdapter1* apiAdapter;
 };
-}
 }

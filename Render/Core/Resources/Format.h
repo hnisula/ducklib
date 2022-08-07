@@ -1,10 +1,10 @@
 #pragma once
 
-namespace DuckLib
+#include "../../../Core/Types.h"
+
+namespace DuckLib::Render
 {
-namespace Render
-{
-enum class Format : uint32_t
+enum class Format : uint32
 {
 	UNKNOWN = 0,
 	R32G32B32A32_TYPELESS,
@@ -108,5 +108,4 @@ enum class Format : uint32_t
 	R10G10B10_XR_BIAS_A2_UNORM,
 	ENTRY_COUNT					// what else can you do? :'(
 };
-}
 }

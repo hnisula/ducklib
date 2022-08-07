@@ -8,9 +8,9 @@ namespace Render
 {
 struct ImageBuffer
 {
-	uint32_t width;
-	uint32_t height;
-	uint32_t depth;
+	uint32 width;
+	uint32 height;
+	uint32 depth;
 	Format format;
 	void* apiResource;
 	void* apiDescriptor;

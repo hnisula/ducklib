@@ -19,16 +19,16 @@ AllocTracker::AllocTracker()
 
 void AllocTracker::Track(
 	void* ptr,
-	uint64_t size,
+	uint64 size,
 	const char* file,
 	const char* function,
-	uint32_t line)
+	uint32 line)
 {
 	lock.lock();
 
 	if (length == capacity)
 	{
-		capacity = capacity == 0 ? START_CAPACITY : (uint32_t)(capacity * 1.6);
+		capacity = capacity == 0 ? START_CAPACITY : (uint32)(capacity * 1.6);
 		entries = (Entry*)realloc(entries, capacity * sizeof(Entry));
 	}
 
@@ -46,14 +46,14 @@ void AllocTracker::Track(
 void AllocTracker::Modify(
 	void* ptr,
 	void* newPtr,
-	uint64_t size,
+	uint64 size,
 	const char* file,
 	const char* function,
-	uint32_t line)
+	uint32 line)
 {
 	lock.lock();
 
-	uint32_t i = FindAlloc(ptr);
+	uint32 i = FindAlloc(ptr);
 
 	entries[i].ptr = newPtr;
 	entries[i].file = file;
@@ -68,8 +68,8 @@ void AllocTracker::Remove(void* ptr)
 {
 	lock.lock();
 
-	uint32_t i = FindAlloc(ptr);
-	uint32_t newLength = length - 1;
+	uint32 i = FindAlloc(ptr);
+	uint32 newLength = length - 1;
 
 	entries[i].ptr = entries[newLength].ptr;
 	entries[i].file = entries[newLength].file;
@@ -87,7 +87,7 @@ const AllocTracker::Entry* AllocTracker::GetEntries()
 	return entries;
 }
 
-uint32_t AllocTracker::GetEntryCount()
+uint32 AllocTracker::GetEntryCount()
 {
 	return length;
 }
@@ -97,9 +97,9 @@ void AllocTracker::Clear()
 	length = 0;
 }
 
-uint32_t AllocTracker::FindAlloc(void* ptr)
+uint32 AllocTracker::FindAlloc(void* ptr)
 {
-	for (uint32_t i = 0; i < length; ++i)
+	for (uint32 i = 0; i < length; ++i)
 		if (entries[i].ptr == ptr)
 			return i;
 

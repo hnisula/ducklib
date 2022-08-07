@@ -1,8 +1,8 @@
 #pragma once
 
-namespace DuckLib
-{
-namespace Render
+#include "../../Core/Types.h"
+
+namespace DuckLib::Render
 {
 class IAdapter
 {
@@ -16,10 +16,9 @@ public:
 
 protected:
 
-	static constexpr uint32_t MAX_DESCRIPTION_SIZE = 128;
+	static constexpr uint32 MAX_DESCRIPTION_SIZE = 128;
 
 	char description[MAX_DESCRIPTION_SIZE];
 	bool isHardware;
 };
-}
 }
