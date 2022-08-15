@@ -219,3 +219,28 @@ TEST(TArrayTests, AttachWithAlloc)
 	EXPECT_EQ(64, a[5]);
 	EXPECT_EQ(128, a[6]);
 }
+
+TEST(TArrayTests, Resize)
+{
+	TArray<uint32> a;
+
+	EXPECT_EQ(0, a.Length());
+
+	a.Resize(4);
+
+	EXPECT_EQ(4, a.Length());
+	EXPECT_LE((uint32)4, a.Capacity());
+}
+
+TEST(TArrayTests, Reserve)
+{
+	TArray<uint32> a;
+
+	EXPECT_EQ(0, a.Length());
+	EXPECT_EQ(0, a.Capacity());
+
+	a.Reserve(4);
+
+	EXPECT_EQ(0, a.Length());
+	EXPECT_LE((uint32)4, a.Capacity());
+}
