@@ -1,6 +1,5 @@
 #include "Lib/d3dx12.h"
 #include "D3D12SwapChain.h"
-
 #include <stdexcept>
 
 namespace DuckLib::Render
@@ -28,10 +27,10 @@ D3D12SwapChain::D3D12SwapChain(
 	for (uint32 i = 0; i < bufferCount; ++i)
 		this->buffers[i] = images[i];
 
-	fenceEventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	fenceEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 
-	if (fenceEventHandle == nullptr)
-		throw std::runtime_error("Failed to create D3D12 frame fence event");
+	if (fenceEventHandle == NULL)
+		throw std::runtime_error("Failed to create fence event for D3D12 swap chain");
 }
 
 D3D12SwapChain::~D3D12SwapChain()

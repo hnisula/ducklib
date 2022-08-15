@@ -1,4 +1,5 @@
 #pragma once
+#include <Windows.h>
 #include "Lib/vulkan.h"
 #include "Render/Core/ISwapChain.h"
 
@@ -22,11 +23,14 @@ protected:
 		VkSwapchainKHR vkSwapChain,
 		uint32 bufferCount,
 		const ImageBuffer* images,
+		VkFence vkFence,
 		VkDevice vkDevice);
 
 	void* GetApiHandle() const override;
 
 	VkSwapchainKHR vkSwapChain;
 	VkDevice vkDevice;
+	VkFence vkFence;
+	HANDLE fenceEventHandle;
 };
 }

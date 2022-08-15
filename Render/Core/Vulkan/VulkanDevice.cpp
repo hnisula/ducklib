@@ -107,11 +107,18 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	}
 
 	// Create fence
+	VkFenceCreateInfo fenceCreateInfo{};
+	VkFence vkFence;
+
+	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceCreateInfo.flags = 0;
+
+	DL_VK_CHECK(vkCreateFence(device, &fenceCreateInfo, nullptr, &vkFence), "Failed to create Vulkan fence for swap chain");
 
 	// Create swap chain wrapper
 	VulkanSwapChain* swapChain = alloc->Allocate<VulkanSwapChain>();
 
-	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, device);
+	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, vkFence, device);
 
 	return swapChain;
 }
