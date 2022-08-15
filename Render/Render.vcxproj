@@ -60,6 +60,7 @@
     <ClInclude Include="Core\Vulkan\VulkanAdapter.h" />
     <ClInclude Include="Core\Vulkan\VulkanCommon.h" />
     <ClInclude Include="Core\Vulkan\VulkanDevice.h" />
+    <ClInclude Include="Core\Vulkan\VulkanFormats.h" />
     <ClInclude Include="Core\Vulkan\VulkanRHI.h" />
     <ClInclude Include="Core\Vulkan\VulkanSwapChain.h" />
   </ItemGroup>

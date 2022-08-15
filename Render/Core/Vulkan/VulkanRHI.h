@@ -20,7 +20,7 @@ protected:
 
 	void CreateInstance();
 	void EnumerateAdapters();
-	bool PhysicalDeviceIsUsable(
+	bool IsPhysicalDeviceUsable(
 		const VkPhysicalDeviceProperties& deviceProperties,
 		const VkPhysicalDeviceFeatures& deviceFeatures);
 	TArray<const char*> GetInstanceExtensions();

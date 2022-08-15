@@ -40,7 +40,7 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 
 	adapter = adapters[0];
 	device = adapter->CreateDevice(); // No parameters? Seems odd
-	swapChain = device->CreateSwapChain(width, height, Format::R8G8B8A8_UNORM, 2, windowHandle);
+	swapChain = device->CreateSwapChain(width, height, Format::B8G8R8A8_UNORM, 2, windowHandle);
 	cmdBuffer = device->CreateCommandBuffer();
 }
 

@@ -77,7 +77,18 @@ uint32_t VulkanAdapter::GetGraphicsQueueFamilyIndex()
 
 	for (uint32_t i = 0; i < familyCount; ++i)
 	{
-		if (families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT)
+		// VkSurfaceKHR dummySurface{};
+		VkBool32 hasPresent = false;
+		// TODO: Check this on creation of swap chain instead? Just for validation
+		// vkGetPhysicalDeviceSurfaceSupportKHR(physicalDevice, i, dummySurface, &hasPresent);
+
+		bool hasGraphics = families[i].queueFlags & VK_QUEUE_GRAPHICS_BIT;
+		bool hasCompute = families[i].queueFlags & VK_QUEUE_COMPUTE_BIT;
+		bool hasTransfer = families[i].queueFlags & VK_QUEUE_TRANSFER_BIT;
+		bool hasSparseBinding = families[i].queueFlags & VK_QUEUE_SPARSE_BINDING_BIT;
+		bool hasProtected = families[i].queueFlags & VK_QUEUE_PROTECTED_BIT;
+
+		if (hasGraphics && hasTransfer)
 			return i;
 	}
 

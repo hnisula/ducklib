@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include "Resources/Format.h"
 #include "Resources/ImageBuffer.h"
 
@@ -8,10 +7,8 @@ namespace DuckLib::Render
 class ISwapChain
 {
 public:
+	static constexpr uint32 MAX_BUFFERS = 4;
 
-	static const uint32 MAX_BUFFERS = 4;
-
-	ISwapChain();
 	virtual ~ISwapChain() {}
 
 	ImageBuffer* GetBuffer(uint32 index);
@@ -22,6 +19,7 @@ public:
 	virtual void WaitForFrame() = 0;
 
 protected:
+	ISwapChain();
 
 	virtual void* GetApiHandle() const = 0;
 	

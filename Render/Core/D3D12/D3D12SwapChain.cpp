@@ -11,7 +11,7 @@ D3D12SwapChain::D3D12SwapChain(
 	Format format,
 	IDXGISwapChain1* apiSwapChain,
 	uint32 bufferCount,
-	ImageBuffer* rts,
+	ImageBuffer* images,
 	ID3D12Fence* apiFence,
 	ID3D12DescriptorHeap* descriptorHeap,
 	uint32 descriptorSize)
@@ -19,14 +19,14 @@ D3D12SwapChain::D3D12SwapChain(
 	this->width = width;
 	this->height = height;
 	this->format = format;
-	this->apiSwapChain = apiSwapChain;
+	this->d3dSwapChain = apiSwapChain;
 	this->numBuffers = bufferCount;
-	this->apiFence = apiFence;
+	this->d3dFence = apiFence;
 	this->rtDescriptorHeap = descriptorHeap;
 	this->descriptorSize = descriptorSize;
 
 	for (uint32 i = 0; i < bufferCount; ++i)
-		this->buffers[i] = rts[i];
+		this->buffers[i] = images[i];
 
 	fenceEventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 
@@ -36,18 +36,18 @@ D3D12SwapChain::D3D12SwapChain(
 
 D3D12SwapChain::~D3D12SwapChain()
 {
-	if (apiSwapChain)
-		apiSwapChain->Release();
+	if (d3dSwapChain)
+		d3dSwapChain->Release();
 }
 
 void* D3D12SwapChain::GetApiHandle() const
 {
-	return apiSwapChain;
+	return d3dSwapChain;
 }
 
 void D3D12SwapChain::Present()
 {
-	if (apiSwapChain->Present(0, 0) != S_OK)
+	if (d3dSwapChain->Present(0, 0) != S_OK)
 	{
 		throw std::runtime_error("Failed to present");
 	}
@@ -56,12 +56,12 @@ void D3D12SwapChain::Present()
 void D3D12SwapChain::WaitForFrame()
 {
 	uint32 bufferIndex = currentFrameIndex % numBuffers;
-	uint64 latestCompletedFrame = apiFence->GetCompletedValue();
+	uint64 latestCompletedFrame = d3dFence->GetCompletedValue();
 	uint64 expectedFrame = frameCounters[bufferIndex];
 
 	if (latestCompletedFrame - expectedFrame < UINT32_MAX / 2)
 	{
-		if (FAILED(apiFence->SetEventOnCompletion(frameCounters[bufferIndex], fenceEventHandle)))
+		if (FAILED(d3dFence->SetEventOnCompletion(frameCounters[bufferIndex], fenceEventHandle)))
 			throw std::runtime_error("Failed to set completion event on D3D12 frame fence");
 		WaitForSingleObjectEx(fenceEventHandle, INFINITE, FALSE);
 	}

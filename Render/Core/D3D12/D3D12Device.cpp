@@ -21,13 +21,14 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	uint32_t bufferCount,
 	HWND windowHandle)
 {
+	// Create swap chain
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
 	IDXGISwapChain1* apiSwapChain;
 	ID3D12Resource* apiBuffer;
 
 	swapChainDesc.Width = width;
 	swapChainDesc.Height = height;
-	swapChainDesc.Format = MapToD3D12Format(format);
+	swapChainDesc.Format = ToD3D12Format(format);
 	swapChainDesc.Stereo = FALSE;
 	swapChainDesc.SampleDesc = { 1, 0 };
 	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
@@ -41,6 +42,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 		factory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &apiSwapChain),
 		"Failed to create swap chain");
 
+	// Create image buffer descriptors
 	uint32_t descriptorSize = device->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	ID3D12DescriptorHeap* descriptorHeap = CreateDescriptorHeap(
@@ -67,12 +69,14 @@ ISwapChain* D3D12Device::CreateSwapChain(
 		descriptorIterator.Offset(1, descriptorSize);
 	}
 
+	// Create fence
 	ID3D12Fence* apiFence;
 
 	DL_D3D12_CHECK(
 		device->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
 		"Failed to create fence for frame syncing");
 
+	// Create swap chain wrapper
 	D3D12SwapChain* swapChain = DefAlloc()->New<D3D12SwapChain>(
 		width,
 		height,
@@ -141,7 +145,7 @@ void D3D12Device::SignalCompletion(ISwapChain* swapChain)
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
 	uint64_t signalValue = swapChain->GetSignalValue();
 
-	if (commandQueue->Signal(d3dSwapChain->apiFence, signalValue) != S_OK)
+	if (commandQueue->Signal(d3dSwapChain->d3dFence, signalValue) != S_OK)
 		throw std::runtime_error("Failed to signal completion in D3D12 rendering");
 }
 

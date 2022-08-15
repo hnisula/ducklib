@@ -2,13 +2,6 @@
 
 namespace DuckLib::Render
 {
-ISwapChain::ISwapChain()
-	: currentFrameIndex(0)
-{
-	for (uint32 i = 0; i < MAX_BUFFERS; ++i)
-		frameCounters[i] = UINT32_MAX;
-}
-
 ImageBuffer* ISwapChain::GetBuffer(uint32 index)
 {
 	return &buffers[index];
@@ -26,5 +19,12 @@ uint64 ISwapChain::GetSignalValue()
 	frameCounters[bufferIndex] = currentFrameIndex;
 
 	return (uint32)frameCounters[bufferIndex];
+}
+
+ISwapChain::ISwapChain()
+	: currentFrameIndex(0)
+{
+	for (uint32 i = 0; i < MAX_BUFFERS; ++i)
+		frameCounters[i] = UINT32_MAX;
 }
 }
