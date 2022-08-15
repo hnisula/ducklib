@@ -73,16 +73,37 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 
 	vkImages.Resize(imageCount);
 	vkGetSwapchainImagesKHR(device, vkSwapChain, &imageCount, vkImages.Data());
-
+	
 	ImageBuffer imageBuffers[ISwapChain::MAX_BUFFERS];
 
 	for (uint32 i = 0; i < imageCount; ++i)
 	{
+		VkImageView vkImageView;
+		VkImageViewCreateInfo createInfo{};
+
+		createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+		createInfo.format = vkFormat;
+		createInfo.image = vkImages[i];
+		createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+
+		createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+		createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+		createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+		createInfo.subresourceRange.baseMipLevel = 0;
+		createInfo.subresourceRange.levelCount = 1;
+		createInfo.subresourceRange.baseArrayLayer = 0;
+		createInfo.subresourceRange.layerCount = 1;
+
+		DL_VK_CHECK(vkCreateImageView(device, &createInfo, nullptr, &vkImageView), "Failed to create Vulkan image view for swap chain");
+
 		imageBuffers[i].width = width;
 		imageBuffers[i].height = height;
 		imageBuffers[i].format = format;
 		imageBuffers[i].apiResource = vkImages[i];
-		imageBuffers[i].apiDescriptor = nullptr;
+		imageBuffers[i].apiDescriptor = vkImageView;
 	}
 
 	// Create fence
@@ -90,7 +111,7 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	// Create swap chain wrapper
 	VulkanSwapChain* swapChain = alloc->Allocate<VulkanSwapChain>();
 
-	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers);
+	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, device);
 
 	return swapChain;
 }

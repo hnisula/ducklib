@@ -21,13 +21,12 @@ protected:
 		Format format,
 		VkSwapchainKHR vkSwapChain,
 		uint32 bufferCount,
-		const ImageBuffer* images);
-		// ID3D12Fence* apiFence,
-		// ID3D12DescriptorHeap* descriptorHeap,
-		// uint32 descriptorSize);
+		const ImageBuffer* images,
+		VkDevice vkDevice);
 
 	void* GetApiHandle() const override;
 
 	VkSwapchainKHR vkSwapChain;
+	VkDevice vkDevice;
 };
 }

@@ -11,7 +11,7 @@ D3D12SwapChain::D3D12SwapChain(
 	Format format,
 	IDXGISwapChain1* apiSwapChain,
 	uint32 bufferCount,
-	ImageBuffer* images,
+	const ImageBuffer* images,
 	ID3D12Fence* apiFence,
 	ID3D12DescriptorHeap* descriptorHeap,
 	uint32 descriptorSize)
