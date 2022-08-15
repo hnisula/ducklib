@@ -24,7 +24,8 @@ public:
 	uint32 Length() const;
 	uint32 Capacity() const;
 	bool IsEmpty() const;
-	void Resize(uint32 newCapacity);
+	void Resize(uint32 newLength);
+	void Reserve(uint32 newCapacity);
 
 	T& operator [](uint32 i);
 	const T& operator [](uint32 i) const;
@@ -165,14 +166,17 @@ bool TArray<T>::IsEmpty() const
 }
 
 template <typename T>
-void TArray<T>::Resize(uint32 newCapacity)
+void TArray<T>::Resize(uint32 newLength)
 {
-	if (array)
-		array = (T*)alloc->Reallocate(array, newCapacity * sizeof(T));
-	else
-		array = (T*)alloc->Allocate(newCapacity * sizeof(T), alignof(T));
+	EnsureCapacity(newLength);
+	length = newLength;
+}
 
-	capacity = newCapacity;
+template <typename T>
+void TArray<T>::Reserve(uint32 newCapacity)
+{
+	if (!EnsureCapacity(newCapacity))
+		throw std::runtime_error("Failed to reserve array capacity");
 }
 
 template <typename T>
@@ -229,8 +233,14 @@ bool TArray<T>::EnsureCapacity(uint32 requiredCapacity)
 		return false;
 
 	uint32 exponentiallyIncreasedSize = (uint32)((float)(capacity == 0 ? 4 : capacity) * 1.5f);
+	uint32 newCapacity = requiredCapacity <= exponentiallyIncreasedSize ? exponentiallyIncreasedSize : requiredCapacity;
 
-	Resize(requiredCapacity <= exponentiallyIncreasedSize ? exponentiallyIncreasedSize : requiredCapacity);
+	if (array)
+		array = (T*)alloc->Reallocate(array, newCapacity * sizeof(T));
+	else
+		array = (T*)alloc->Allocate(newCapacity * sizeof(T), alignof(T));
+
+	capacity = newCapacity;
 
 	return true;
 }
