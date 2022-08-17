@@ -19,7 +19,7 @@ HWND window;
 
 #define DL_D3D_API 0
 #define DL_VK_API 1
-#define DL_TEST_API DL_VK_API
+#define DL_TEST_API DL_D3D_API
 
 #if DL_TEST_API == DL_D3D_API
 IRHI* rhi = D3D12RHI::GetInstance();
@@ -46,6 +46,11 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 
 void RenderFrame()
 {
+	Sleep(20);
+
+	swapChain->WaitForFrame();
+	// TODO: VK acquire next swap chain frame. Combine
+	// TODO: VK begin (reset?) with swap chain swap chain image index
 	cmdBuffer->Reset();
 
 	cmdBuffer->Transition(
@@ -68,14 +73,13 @@ void RenderFrame()
 
 	cmdBuffer->Close();
 
+	// TODO: VK queue submit with semaphores
 	device->ExecuteCommandBuffers(&cmdBuffer, 1);
 
 	swapChain->Present();
 
+	// TODO: How is this represented in Vulkan?
 	device->SignalCompletion(swapChain);
-	swapChain->WaitForFrame();
-
-	Sleep(20);
 }
 
 void DestroyRender()

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdexcept>
+
 namespace DuckLib::Render
 {
 #define DL_VK_CHECK(statement, errorText) \

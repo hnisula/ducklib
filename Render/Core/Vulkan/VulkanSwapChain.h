@@ -15,6 +15,8 @@ public:
 	void Present() override;
 	void WaitForFrame() override;
 
+	void* GetApiHandle() const override;
+
 protected:
 	VulkanSwapChain(
 		uint32 width,
@@ -23,14 +25,14 @@ protected:
 		VkSwapchainKHR vkSwapChain,
 		uint32 bufferCount,
 		const ImageBuffer* images,
-		VkFence vkFence,
-		VkDevice vkDevice);
-
-	void* GetApiHandle() const override;
+		VkDevice vkDevice,
+		VkQueue vkPresentQueue);
 
 	VkSwapchainKHR vkSwapChain;
 	VkDevice vkDevice;
-	VkFence vkFence;
-	HANDLE fenceEventHandle;
+	VkQueue vkPresentQueue;
+	VkFence vkRenderFence;
+	VkSemaphore vkRenderFinishedSemaphore;
+	VkSemaphore vkImageAvailableSemaphore;
 };
 }

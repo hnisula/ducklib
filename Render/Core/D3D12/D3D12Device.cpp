@@ -145,14 +145,14 @@ void D3D12Device::SignalCompletion(ISwapChain* swapChain)
 	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
 	uint64_t signalValue = swapChain->GetSignalValue();
 
-	if (commandQueue->Signal(d3dSwapChain->d3dFence, signalValue) != S_OK)
+	if (commandQueue->Signal(d3dSwapChain->d3dRenderFence, signalValue) != S_OK)
 		throw std::runtime_error("Failed to signal completion in D3D12 rendering");
 }
 
-D3D12Device::D3D12Device(ID3D12Device* device, IDXGIFactory4* factory)
+D3D12Device::D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
 {
-	this->factory = factory;
-	this->device = device;
+	this->factory = dxgiFactory;
+	this->device = d3dDevice;
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
 }
 

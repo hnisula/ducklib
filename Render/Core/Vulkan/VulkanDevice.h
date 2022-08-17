@@ -46,7 +46,9 @@ protected:
 
 	VkInstance vkInstance;
 	VkPhysicalDevice physicalDevice;
-	VkDevice device;
-	VkQueue commandQueue;
+	VkDevice vkDevice;
+	// Currently assumed to also be the present queue. Unsure if it is even being tested.
+	// TODO: Make sure this also is the present queue or add a possible other queue for presentation.
+	VkQueue vkCommandQueue;
 };
 }

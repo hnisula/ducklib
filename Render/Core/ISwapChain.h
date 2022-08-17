@@ -18,11 +18,12 @@ public:
 	virtual void Present() = 0;
 	virtual void WaitForFrame() = 0;
 
+	// TODO: Remove as it seems unused so far? Usage of this probably requires knowledge of specific type, anyway
+	virtual void* GetApiHandle() const = 0;
+
 protected:
 	ISwapChain();
 
-	virtual void* GetApiHandle() const = 0;
-	
 	uint32 width;
 	uint32 height;
 	Format format;

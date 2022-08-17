@@ -10,7 +10,7 @@ namespace DuckLib::Render
 {
 VulkanDevice::~VulkanDevice()
 {
-	vkDestroyDevice(device, nullptr);
+	vkDestroyDevice(vkDevice, nullptr);
 }
 
 ICommandBuffer* VulkanDevice::CreateCommandBuffer()
@@ -59,20 +59,20 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	VkSwapchainKHR vkSwapChain;
 
 	DL_VK_CHECK(
-		vkCreateSwapchainKHR(device, &createInfo, nullptr, &vkSwapChain),
+		vkCreateSwapchainKHR(vkDevice, &createInfo, nullptr, &vkSwapChain),
 		"Failed to create Vulkan swap chain");
 
 	// Get image buffers
 	uint32 imageCount = 0;
 	TArray<VkImage> vkImages;
 
-	vkGetSwapchainImagesKHR(device, vkSwapChain, &imageCount, nullptr);
+	vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, nullptr);
 
 	if (imageCount > ISwapChain::MAX_BUFFERS)
 		throw std::runtime_error("Vulkan swap chain contained too many images");
 
 	vkImages.Resize(imageCount);
-	vkGetSwapchainImagesKHR(device, vkSwapChain, &imageCount, vkImages.Data());
+	vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, vkImages.Data());
 	
 	ImageBuffer imageBuffers[ISwapChain::MAX_BUFFERS];
 
@@ -97,7 +97,7 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 		createInfo.subresourceRange.baseArrayLayer = 0;
 		createInfo.subresourceRange.layerCount = 1;
 
-		DL_VK_CHECK(vkCreateImageView(device, &createInfo, nullptr, &vkImageView), "Failed to create Vulkan image view for swap chain");
+		DL_VK_CHECK(vkCreateImageView(vkDevice, &createInfo, nullptr, &vkImageView), "Failed to create Vulkan image view for swap chain");
 
 		imageBuffers[i].width = width;
 		imageBuffers[i].height = height;
@@ -106,19 +106,10 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 		imageBuffers[i].apiDescriptor = vkImageView;
 	}
 
-	// Create fence
-	VkFenceCreateInfo fenceCreateInfo{};
-	VkFence vkFence;
-
-	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fenceCreateInfo.flags = 0;
-
-	DL_VK_CHECK(vkCreateFence(device, &fenceCreateInfo, nullptr, &vkFence), "Failed to create Vulkan fence for swap chain");
-
 	// Create swap chain wrapper
 	VulkanSwapChain* swapChain = alloc->Allocate<VulkanSwapChain>();
 
-	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, vkFence, device);
+	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, vkDevice, vkCommandQueue);
 
 	return swapChain;
 }
@@ -127,7 +118,7 @@ void VulkanDevice::DestroySwapChain(ISwapChain* swapChain) {}
 void VulkanDevice::SignalCompletion(ISwapChain* swapChain) {}
 
 VulkanDevice::VulkanDevice(VkDevice vkDevice, VkQueue commandQueue, VkPhysicalDevice physicalDevice, VkInstance vkInstance)
-	: alloc(DefAlloc()), vkInstance(vkInstance), physicalDevice(physicalDevice), device(vkDevice), commandQueue(commandQueue) {}
+	: alloc(DefAlloc()), vkInstance(vkInstance), physicalDevice(physicalDevice), vkDevice(vkDevice), vkCommandQueue(commandQueue) {}
 
 VkSurfaceKHR VulkanDevice::CreateWindowSurface(HWND windowHandle)
 {

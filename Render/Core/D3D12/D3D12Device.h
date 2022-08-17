@@ -36,7 +36,7 @@ public:
 	void SignalCompletion(ISwapChain* swapChain) override;
 
 private:
-	D3D12Device(ID3D12Device* device, IDXGIFactory4* factory);
+	D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory);
 
 	ID3D12CommandQueue* CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags);
 	ID3D12DescriptorHeap* CreateDescriptorHeap(uint32_t numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);

@@ -1,6 +1,7 @@
 #include "Lib/d3dx12.h"
 #include "D3D12SwapChain.h"
 #include <stdexcept>
+#include "D3D12Common.h"
 
 namespace DuckLib::Render
 {
@@ -14,13 +15,14 @@ D3D12SwapChain::D3D12SwapChain(
 	ID3D12Fence* apiFence,
 	ID3D12DescriptorHeap* descriptorHeap,
 	uint32 descriptorSize)
+		: ISwapChain()
 {
 	this->width = width;
 	this->height = height;
 	this->format = format;
 	this->d3dSwapChain = apiSwapChain;
 	this->numBuffers = bufferCount;
-	this->d3dFence = apiFence;
+	this->d3dRenderFence = apiFence;
 	this->rtDescriptorHeap = descriptorHeap;
 	this->descriptorSize = descriptorSize;
 
@@ -30,7 +32,7 @@ D3D12SwapChain::D3D12SwapChain(
 	fenceEventHandle = CreateEvent(NULL, FALSE, FALSE, NULL);
 
 	if (fenceEventHandle == NULL)
-		throw std::runtime_error("Failed to create fence event for D3D12 swap chain");
+		throw std::runtime_error("Failed to create fence event for swap chain");
 }
 
 D3D12SwapChain::~D3D12SwapChain()
@@ -39,33 +41,29 @@ D3D12SwapChain::~D3D12SwapChain()
 		d3dSwapChain->Release();
 }
 
-void* D3D12SwapChain::GetApiHandle() const
-{
-	return d3dSwapChain;
-}
-
 void D3D12SwapChain::Present()
 {
-	if (d3dSwapChain->Present(0, 0) != S_OK)
-	{
-		throw std::runtime_error("Failed to present");
-	}
+	DL_D3D12_CHECK(d3dSwapChain->Present(0, 0), "Failed to present");
+	++currentFrameIndex;
 }
 
 void D3D12SwapChain::WaitForFrame()
 {
 	uint32 bufferIndex = currentFrameIndex % numBuffers;
-	uint64 latestCompletedFrame = d3dFence->GetCompletedValue();
+	uint64 latestCompletedFrame = d3dRenderFence->GetCompletedValue();
 	uint64 expectedFrame = frameCounters[bufferIndex];
 
 	if (latestCompletedFrame - expectedFrame < UINT32_MAX / 2)
 	{
-		if (FAILED(d3dFence->SetEventOnCompletion(frameCounters[bufferIndex], fenceEventHandle)))
+		if (FAILED(d3dRenderFence->SetEventOnCompletion(frameCounters[bufferIndex], fenceEventHandle)))
 			throw std::runtime_error("Failed to set completion event on D3D12 frame fence");
 		WaitForSingleObjectEx(fenceEventHandle, INFINITE, FALSE);
 	}
+}
 
-	++currentFrameIndex;
+void* D3D12SwapChain::GetApiHandle() const
+{
+	return d3dSwapChain;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentCpuDescriptorHandle()

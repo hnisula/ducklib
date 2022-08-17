@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include "ISwapChain.h"
 
 namespace DuckLib::Render

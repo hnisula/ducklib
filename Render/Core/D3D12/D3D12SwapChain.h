@@ -23,10 +23,10 @@ public:
 		uint32 descriptorSize);
 	~D3D12SwapChain() override;
 
-	void* GetApiHandle() const override;
-
 	void Present() override;
 	void WaitForFrame() override;
+
+	void* GetApiHandle() const override;
 
 	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentCpuDescriptorHandle();
 
@@ -34,9 +34,8 @@ protected:
 	// TODO: Huh?
 	void A(uint32 newFrameIndex); // TODO: Return next value to signal and put this func in interface
 
-private:
 	IDXGISwapChain1* d3dSwapChain;
-	ID3D12Fence* d3dFence;
+	ID3D12Fence* d3dRenderFence;
 	ID3D12DescriptorHeap* rtDescriptorHeap;
 	HANDLE fenceEventHandle;
 	uint32 descriptorSize;
