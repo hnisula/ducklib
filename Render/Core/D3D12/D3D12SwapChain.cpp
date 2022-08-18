@@ -65,12 +65,4 @@ void* D3D12SwapChain::GetApiHandle() const
 {
 	return d3dSwapChain;
 }
-
-D3D12_CPU_DESCRIPTOR_HANDLE D3D12SwapChain::GetCurrentCpuDescriptorHandle()
-{
-	return CD3DX12_CPU_DESCRIPTOR_HANDLE(
-		rtDescriptorHeap->GetCPUDescriptorHandleForHeapStart(),
-		(uint32)this->currentFrameIndex,
-		descriptorSize);
-}
 }

@@ -23,7 +23,6 @@ public:
 
 	virtual void Transition(ImageBuffer* image, ResourceState from, ResourceState to) = 0;
 	virtual void SetRT(ImageBuffer* rt) = 0;
-	virtual void SetRT(ISwapChain* swapChain) = 0;
 	virtual void SetIndexBuffer(Buffer* buffer) = 0;
 	virtual void SetVertexBuffers(Buffer** buffer, uint32 count, uint32 startSlot) = 0;
 	virtual void SetInputDeclaration(InputDescription* inputDescription) = 0;

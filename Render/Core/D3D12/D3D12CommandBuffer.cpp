@@ -60,18 +60,6 @@ void D3D12CommandBuffer::SetRT(ImageBuffer* rt)
 		nullptr);
 }
 
-void D3D12CommandBuffer::SetRT(ISwapChain* swapChain)
-{
-	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
-	D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = d3dSwapChain->GetCurrentCpuDescriptorHandle();
-
-	apiCommandList->OMSetRenderTargets(
-		1,
-		&descriptorHandle,
-		FALSE,
-		nullptr);
-}
-
 void D3D12CommandBuffer::SetIndexBuffer(Buffer* buffer)
 {
 	apiCommandList->IASetIndexBuffer((D3D12_INDEX_BUFFER_VIEW*)buffer->apiResource);

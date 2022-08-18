@@ -17,7 +17,6 @@ public:
 
 	void Transition(ImageBuffer* image, ResourceState from, ResourceState to) override;
 	void SetRT(ImageBuffer* rt) override;
-	void SetRT(ISwapChain* swapChain) override;
 	void SetIndexBuffer(Buffer* buffer) override;
 	void SetVertexBuffers(Buffer** buffer, uint32 count, uint32 startSlot) override;
 	void SetInputDeclaration(InputDescription* inputDescription) override;

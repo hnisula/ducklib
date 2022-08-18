@@ -28,8 +28,6 @@ public:
 
 	void* GetApiHandle() const override;
 
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentCpuDescriptorHandle();
-
 protected:
 	// TODO: Huh?
 	void A(uint32 newFrameIndex); // TODO: Return next value to signal and put this func in interface
