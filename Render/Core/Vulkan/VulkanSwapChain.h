@@ -15,8 +15,6 @@ public:
 	void Present() override;
 	void WaitForFrame() override;
 
-	void* GetApiHandle() const override;
-
 protected:
 	VulkanSwapChain(
 		uint32 width,

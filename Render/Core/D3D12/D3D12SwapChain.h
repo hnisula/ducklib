@@ -1,6 +1,6 @@
 #pragma once
 #include <d3d12.h>
-#include <dxgi1_2.h>
+#include <dxgi1_4.h>
 #include "../ISwapChain.h"
 
 namespace DuckLib::Render
@@ -15,7 +15,7 @@ public:
 		uint32 width,
 		uint32 height,
 		Format format,
-		IDXGISwapChain1* apiSwapChain,
+		IDXGISwapChain3* d3dSwapChain,
 		uint32 bufferCount,
 		const ImageBuffer* images,
 		ID3D12Fence* apiFence,
@@ -26,13 +26,8 @@ public:
 	void Present() override;
 	void WaitForFrame() override;
 
-	void* GetApiHandle() const override;
-
 protected:
-	// TODO: Huh?
-	void A(uint32 newFrameIndex); // TODO: Return next value to signal and put this func in interface
-
-	IDXGISwapChain1* d3dSwapChain;
+	IDXGISwapChain3* d3dSwapChain;
 	ID3D12Fence* d3dRenderFence;
 	ID3D12DescriptorHeap* rtDescriptorHeap;
 	HANDLE fenceEventHandle;

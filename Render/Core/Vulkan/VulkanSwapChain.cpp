@@ -16,14 +16,13 @@ VulkanSwapChain::~VulkanSwapChain()
 void VulkanSwapChain::Present()
 {
 	VkPresentInfoKHR presentInfo{};
-	uint32 halvedCurrentFramerate = (uint32)currentFrameIndex;
 
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
 	presentInfo.waitSemaphoreCount = 1;
 	presentInfo.pWaitSemaphores = &vkRenderFinishedSemaphore;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &vkSwapChain;
-	presentInfo.pImageIndices = &halvedCurrentFramerate;
+	presentInfo.pImageIndices = &currentFrameIndex;
 
 	DL_VK_CHECK(vkQueuePresentKHR(vkPresentQueue, &presentInfo), "Failed to present Vulkan swap chain image");
 }
@@ -31,10 +30,11 @@ void VulkanSwapChain::Present()
 void VulkanSwapChain::WaitForFrame()
 {
 	DL_VK_CHECK(
-		vkWaitForFences(vkDevice, 1, &vkRenderFence, true, UINT64_MAX),
+		vkWaitForFences(vkDevice, 1, &vkRenderFence, VK_TRUE, UINT64_MAX),
 		// UINT64_MAX usage here is entirely arbitrary. No timeout?
 		"Failed to wait for Vulkan render fence when waiting for frame");
 	DL_VK_CHECK(vkResetFences(vkDevice, 1, &vkRenderFence), "Failed to reset Vulkan render fence when waiting for frame");
+	vkAcquireNextImageKHR(vkDevice, vkSwapChain, UINT64_MAX, vkImageAvailableSemaphore, VK_NULL_HANDLE, &currentFrameIndex);
 }
 
 VulkanSwapChain::VulkanSwapChain(
@@ -75,10 +75,5 @@ VulkanSwapChain::VulkanSwapChain(
 	DL_VK_CHECK(
 		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &vkImageAvailableSemaphore),
 		"Failed to create Vulkan semaphore");
-}
-
-void* VulkanSwapChain::GetApiHandle() const
-{
-	return vkSwapChain;
 }
 }

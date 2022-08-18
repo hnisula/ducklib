@@ -13,13 +13,13 @@ ImageBuffer* ISwapChain::GetCurrentBuffer()
 	return &buffers[currentFrameIndex % numBuffers];
 }
 
-uint64 ISwapChain::GetSignalValue()
+uint32 ISwapChain::GetSignalValue()
 {
 	uint32 bufferIndex = currentFrameIndex % numBuffers;
 
 	frameCounters[bufferIndex] = currentFrameIndex;
 
-	return (uint32)frameCounters[bufferIndex];
+	return frameCounters[bufferIndex];
 }
 
 ISwapChain::ISwapChain()

@@ -23,7 +23,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 {
 	// Create swap chain
 	DXGI_SWAP_CHAIN_DESC1 swapChainDesc;
-	IDXGISwapChain1* apiSwapChain;
+	IDXGISwapChain3* d3dSwapChain;
 	ID3D12Resource* apiBuffer;
 
 	swapChainDesc.Width = width;
@@ -38,12 +38,17 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
 	swapChainDesc.Flags = 0;
 
+	// Only IDXGISwapChain1 can be created but we can query another version of the interface afterwards
+	IDXGISwapChain1* d3dSwapChain1;
+
 	DL_D3D12_CHECK(
-		factory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &apiSwapChain),
+		d3dFactory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &d3dSwapChain1),
 		"Failed to create swap chain");
 
+	d3dSwapChain1->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&d3dSwapChain);
+
 	// Create image buffer descriptors
-	uint32_t descriptorSize = device->GetDescriptorHandleIncrementSize(
+	uint32_t descriptorSize = d3dDevice->GetDescriptorHandleIncrementSize(
 		D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 	ID3D12DescriptorHeap* descriptorHeap = CreateDescriptorHeap(
 		bufferCount,
@@ -55,10 +60,10 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	for (uint32_t i = 0; i < bufferCount; ++i)
 	{
 		DL_D3D12_CHECK(
-			apiSwapChain->GetBuffer(i, IID_PPV_ARGS(&apiBuffer)),
+			d3dSwapChain->GetBuffer(i, IID_PPV_ARGS(&apiBuffer)),
 			"Failed to get buffer from D3D12 swap chain");
 
-		device->CreateRenderTargetView(apiBuffer, nullptr, descriptorIterator);
+		d3dDevice->CreateRenderTargetView(apiBuffer, nullptr, descriptorIterator);
 
 		rtvHandles[i].width = width;
 		rtvHandles[i].height = height;
@@ -73,7 +78,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	ID3D12Fence* apiFence;
 
 	DL_D3D12_CHECK(
-		device->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
+		d3dDevice->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
 		"Failed to create fence for frame syncing");
 
 	// Create swap chain wrapper
@@ -81,7 +86,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 		width,
 		height,
 		format,
-		apiSwapChain,
+		d3dSwapChain,
 		bufferCount,
 		rtvHandles,
 		apiFence,
@@ -97,14 +102,14 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 	ID3D12CommandAllocator* apiCommandAllocator;
 	ID3D12GraphicsCommandList1* apiCommandList;
 
-	HRESULT result = device->CreateCommandAllocator(
+	HRESULT result = d3dDevice->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		IID_PPV_ARGS(&apiCommandAllocator));
 
 	if (result != S_OK)
 		throw std::runtime_error("Failed to create D3D12 command allocator");
 
-	result = device->CreateCommandList(
+	result = d3dDevice->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
 		apiCommandAllocator,
@@ -151,8 +156,8 @@ void D3D12Device::SignalCompletion(ISwapChain* swapChain)
 
 D3D12Device::D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
 {
-	this->factory = dxgiFactory;
-	this->device = d3dDevice;
+	this->d3dFactory = dxgiFactory;
+	this->d3dDevice = d3dDevice;
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
 }
 
@@ -166,7 +171,7 @@ ID3D12CommandQueue* D3D12Device::CreateQueue(
 	queueDesc.Type = type;
 	queueDesc.Flags = flags;
 
-	HRESULT result = device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&queue));
+	HRESULT result = d3dDevice->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&queue));
 
 	if (result != S_OK)
 		throw std::runtime_error("Failed to create D3D12 queue");
@@ -186,7 +191,7 @@ ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
 	heapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 
 	DL_D3D12_CHECK(
-		device->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&apiDescriptorHeap)),
+		d3dDevice->CreateDescriptorHeap(&heapDesc, IID_PPV_ARGS(&apiDescriptorHeap)),
 		"Failed to create D3D12 descriptor heap");
 
 	return apiDescriptorHeap;

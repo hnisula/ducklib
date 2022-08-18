@@ -51,7 +51,7 @@ void D3D12RHI::InitFactory()
 	debugInterface->EnableDebugLayer();
 #else
 	DL_D3D12_THROW_FAIL(
-		CreateDXGIFactory2(IID_PPV_ARGS(&factory)),
+		CreateDXGIFactory2(IID_PPV_ARGS(&d3dFactory)),
 		"Failed to create DXGI factory");
 #endif
 }

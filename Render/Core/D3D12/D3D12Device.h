@@ -53,8 +53,8 @@ private:
 
 	static constexpr uint32_t NUM_FRAME_BUFFERS = 4;
 
-	IDXGIFactory4* factory;
-	ID3D12Device* device;
+	IDXGIFactory4* d3dFactory;
+	ID3D12Device* d3dDevice;
 
 	ID3D12CommandQueue* commandQueue;
 
