@@ -37,6 +37,15 @@ void D3D12CommandBuffer::Close()
 	apiCommandList->Close();
 }
 
+void D3D12CommandBuffer::Begin()
+{
+	apiCommandList->ClearRenderTargetView(
+		*(D3D12_CPU_DESCRIPTOR_HANDLE*)&rt->apiDescriptor,
+		clearColorRgba,
+		0,
+		nullptr);
+}
+
 void D3D12CommandBuffer::Transition(ImageBuffer* image, ResourceState from, ResourceState to)
 {
 	D3D12_RESOURCE_BARRIER barrierDesc;
@@ -80,15 +89,6 @@ void D3D12CommandBuffer::SetInputDeclaration(InputDescription* inputDescription)
 	D3D12_INPUT_ELEMENT_DESC desc;
 
 	
-}
-
-void D3D12CommandBuffer::Clear(ImageBuffer* rt, float* rgbaColor)
-{
-	apiCommandList->ClearRenderTargetView(
-		*(D3D12_CPU_DESCRIPTOR_HANDLE*)&rt->apiDescriptor,
-		rgbaColor,
-		0,
-		nullptr);
 }
 
 void D3D12CommandBuffer::SetViewport(const Viewport& viewport)

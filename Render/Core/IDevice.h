@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ICommandBuffer.h"
+#include "ISwapChain.h"
 
 namespace DuckLib::Render
 {
@@ -18,7 +19,10 @@ public:
 		HWND windowHandle) = 0;
 	virtual ICommandBuffer* CreateCommandBuffer() = 0;
 
+	virtual IPass* CreatePass(PassDescription passDesc) = 0;
+
 	virtual void DestroySwapChain(ISwapChain* swapChain) = 0;
+	// TODO: Remove? At least for now until there is some good structure on the allocation handling
 	virtual void DestroyCommandBuffer(ICommandBuffer* commandBuffer) = 0;
 
 	virtual void ExecuteCommandBuffers(

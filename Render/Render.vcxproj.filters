@@ -94,6 +94,18 @@
     <ClInclude Include="Core\Vulkan\VulkanFormats.h">
       <Filter>Core\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="Core\Vulkan\VulkanCommandBuffer.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\PipelineState.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\IPass.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Vulkan\VulkanPass.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -147,6 +159,9 @@
       <Filter>Core\Vulkan</Filter>
     </ClCompile>
     <ClCompile Include="Core\Vulkan\VulkanSwapChain.cpp">
+      <Filter>Core\Vulkan</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Vulkan\VulkanCommandBuffer.cpp">
       <Filter>Core\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>

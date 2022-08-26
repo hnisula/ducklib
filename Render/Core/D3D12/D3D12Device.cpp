@@ -137,12 +137,12 @@ void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 
 void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
 {
-	ID3D12CommandList* apiLists[128];
+	const ID3D12CommandList* d3dCommandLists[128];
 
 	for (uint32_t i = 0; i < numCommandBuffers; ++i)
-		apiLists[i] = (ID3D12CommandList*)commandBuffers[i]->GetApiHandle();
+		d3dCommandLists[i] = (const ID3D12CommandList*)commandBuffers[i]->GetApiHandle();
 
-	commandQueue->ExecuteCommandLists(numCommandBuffers, apiLists);
+	commandQueue->ExecuteCommandLists(numCommandBuffers, d3dCommandLists);
 }
 
 void D3D12Device::SignalCompletion(ISwapChain* swapChain)

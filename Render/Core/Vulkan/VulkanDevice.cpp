@@ -1,4 +1,5 @@
 #include "VulkanDevice.h"
+#include "VulkanCommandBuffer.h"
 #include "VulkanCommon.h"
 #include "VulkanFormats.h"
 #include "VulkanSwapChain.h"
@@ -11,12 +12,36 @@ namespace DuckLib::Render
 VulkanDevice::~VulkanDevice()
 {
 	vkDestroyDevice(vkDevice, nullptr);
+	vkDestroyCommandPool(vkDevice, vkCommandPool, nullptr);
 }
 
 ICommandBuffer* VulkanDevice::CreateCommandBuffer()
 {
-	// TODO: Implement
-	return nullptr;
+	VkCommandBuffer vkCommandBuffer;
+	VkCommandBufferAllocateInfo allocInfo{};
+
+	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+	allocInfo.commandPool = vkCommandPool;
+	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+	allocInfo.commandBufferCount = 1;
+
+	DL_VK_CHECK(vkAllocateCommandBuffers(vkDevice, &allocInfo, &vkCommandBuffer), "Failed to create Vulkan command buffer");
+
+	VulkanCommandBuffer* cmdBuffer = alloc->Allocate<VulkanCommandBuffer>();
+	new(cmdBuffer) VulkanCommandBuffer();
+
+	return cmdBuffer;
+}
+
+IPass* VulkanDevice::CreatePass(PassDescription passDesc)
+{
+	VkRenderPassCreateInfo createInfo{};
+
+	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	createInfo.attachmentCount = 1;
+	// createInfo.pAttachments = 
+
+	// vkCreateRenderPass(vkDevice, &createInfo, nullptr, &vkPass);
 }
 
 void VulkanDevice::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
@@ -39,7 +64,7 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	uint32 presentModeIndex = SelectPresentModeIndex(swapChainSupport.presentModes);
 	VkExtent2D extent = GetSurfaceExtent(swapChainSupport.surfaceCapabilities, width, height);
 
-	VkSwapchainCreateInfoKHR createInfo {};
+	VkSwapchainCreateInfoKHR createInfo{};
 
 	createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
 	createInfo.surface = surface;
@@ -73,7 +98,7 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 
 	vkImages.Resize(imageCount);
 	vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, vkImages.Data());
-	
+
 	ImageBuffer imageBuffers[ISwapChain::MAX_BUFFERS];
 
 	for (uint32 i = 0; i < imageCount; ++i)
@@ -109,7 +134,7 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	// Create swap chain wrapper
 	VulkanSwapChain* swapChain = alloc->Allocate<VulkanSwapChain>();
 
-	new (swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, vkDevice, vkCommandQueue);
+	new(swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, vkDevice, vkCommandQueue);
 
 	return swapChain;
 }
@@ -117,8 +142,29 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 void VulkanDevice::DestroySwapChain(ISwapChain* swapChain) {}
 void VulkanDevice::SignalCompletion(ISwapChain* swapChain) {}
 
-VulkanDevice::VulkanDevice(VkDevice vkDevice, VkQueue commandQueue, VkPhysicalDevice physicalDevice, VkInstance vkInstance)
-	: alloc(DefAlloc()), vkInstance(vkInstance), physicalDevice(physicalDevice), vkDevice(vkDevice), vkCommandQueue(commandQueue) {}
+VulkanDevice::VulkanDevice(
+	VkDevice vkDevice,
+	VkQueue commandQueue,
+	uint32 graphicsQueueFamilyIndex,
+	VkPhysicalDevice physicalDevice,
+	VkInstance vkInstance)
+	: alloc(DefAlloc()),
+	vkInstance(vkInstance),
+	physicalDevice(physicalDevice),
+	vkDevice(vkDevice),
+	vkCommandQueue(commandQueue),
+	graphicsQueueFamilyIndex(graphicsQueueFamilyIndex)
+{
+	// TODO: Maybe be consistent on where things are created? This is getting out of hand...
+
+	VkCommandPoolCreateInfo cmdPoolCreateInfo{};
+
+	cmdPoolCreateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+	cmdPoolCreateInfo.queueFamilyIndex = graphicsQueueFamilyIndex;
+	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+
+	DL_VK_CHECK(vkCreateCommandPool(vkDevice, &cmdPoolCreateInfo, nullptr, &vkCommandPool), "Failed to create Vulkan command pool");
+}
 
 VkSurfaceKHR VulkanDevice::CreateWindowSurface(HWND windowHandle)
 {

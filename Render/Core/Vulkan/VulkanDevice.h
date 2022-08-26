@@ -15,6 +15,8 @@ public:
 
 	ICommandBuffer* CreateCommandBuffer() override;
 
+	IPass* CreatePass(PassDescription passDesc) override;
+
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
 
 	void ExecuteCommandBuffers(
@@ -26,7 +28,12 @@ public:
 	void SignalCompletion(ISwapChain* swapChain) override;
 
 protected:
-	VulkanDevice(VkDevice vkDevice, VkQueue commandQueue, VkPhysicalDevice physicalDevice, VkInstance vkInstance);
+	VulkanDevice(
+		VkDevice vkDevice,
+		VkQueue commandQueue,
+		uint32 graphicsQueueFamilyIndex,
+		VkPhysicalDevice physicalDevice,
+		VkInstance vkInstance);
 
 	VkSurfaceKHR CreateWindowSurface(HWND windowHandle);
 
@@ -50,5 +57,8 @@ protected:
 	// Currently assumed to also be the present queue. Unsure if it is even being tested.
 	// TODO: Make sure this also is the present queue or add a possible other queue for presentation.
 	VkQueue vkCommandQueue;
+	VkCommandPool vkCommandPool;
+
+	uint32 graphicsQueueFamilyIndex;
 };
 }
