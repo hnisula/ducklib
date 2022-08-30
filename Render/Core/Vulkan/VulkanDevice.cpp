@@ -1,7 +1,7 @@
 #include "VulkanDevice.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanCommon.h"
-#include "VulkanFormats.h"
+#include "VulkanPass.h"
 #include "VulkanSwapChain.h"
 #include "Core/Memory/Containers/TArray.h"
 #include "Lib/vulkan_win32.h"
@@ -28,20 +28,72 @@ ICommandBuffer* VulkanDevice::CreateCommandBuffer()
 	DL_VK_CHECK(vkAllocateCommandBuffers(vkDevice, &allocInfo, &vkCommandBuffer), "Failed to create Vulkan command buffer");
 
 	VulkanCommandBuffer* cmdBuffer = alloc->Allocate<VulkanCommandBuffer>();
-	new(cmdBuffer) VulkanCommandBuffer();
+	new(cmdBuffer) VulkanCommandBuffer(vkCommandBuffer);
 
 	return cmdBuffer;
 }
 
 IPass* VulkanDevice::CreatePass(PassDescription passDesc)
 {
+	// Setup all Vulkan descs
+	TArray<VkAttachmentDescription> vkAttachmentDescs(nullptr, passDesc.frameBufferDescs.Length());
+
+	for (uint32 i = 0; i < passDesc.frameBufferDescs.Length(); ++i)
+	{
+		vkAttachmentDescs[i] = {};
+		vkAttachmentDescs[i].loadOp = MapToVulkanLoadOp(passDesc.frameBufferDescs[i].loadOp);
+		vkAttachmentDescs[i].storeOp = MapToVulkanStoreOp(passDesc.frameBufferDescs[i].storeOp);
+		vkAttachmentDescs[i].stencilStoreOp = MapToVulkanStoreOp(passDesc.frameBufferDescs[i].stencilStoreOp);
+		vkAttachmentDescs[i].stencilLoadOp = MapToVulkanLoadOp(passDesc.frameBufferDescs[i].stencilLoadOp);
+		vkAttachmentDescs[i].initialLayout = MapToVulkanImageLayout(passDesc.frameBufferDescs[i].initialLayout);
+		vkAttachmentDescs[i].finalLayout = MapToVulkanImageLayout(passDesc.frameBufferDescs[i].finalLayout);
+		vkAttachmentDescs[i].format = MapToVulkanFormat(passDesc.frameBufferDescs[i].format);
+		vkAttachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
+	}
+
+	TArray<VkAttachmentReference*> vkAttachmentRefPtrs(passDesc.subPassDescs.Length());
+	TArray<VkSubpassDescription> vkSubPassDescs(nullptr, passDesc.subPassDescs.Length());
+
+	for (uint32 i = 0; i < passDesc.subPassDescs.Length(); ++i)
+	{
+		uint32 attachmentRefCount = passDesc.subPassDescs[i].frameBufferDescRefs.Length();
+		vkAttachmentRefPtrs.Append(alloc->Allocate<VkAttachmentReference>(attachmentRefCount));
+		TArray vkAttachmentRefs(vkAttachmentRefPtrs.Last(), attachmentRefCount);
+
+		for (uint32 u = 0; u < attachmentRefCount; ++u)
+		{
+			vkAttachmentRefs[u].attachment = passDesc.subPassDescs[i].frameBufferDescRefs[u].frameBufferDescIndex;
+			vkAttachmentRefs[u].layout = MapToVulkanImageLayout(passDesc.subPassDescs[i].frameBufferDescRefs[u].imageBufferLayout);
+		}
+
+		vkSubPassDescs[i] = {};
+		vkSubPassDescs[i].pipelineBindPoint = MapToVulkanBindPoint(passDesc.subPassDescs[i].pipelineBindPoint);
+		vkSubPassDescs[i].colorAttachmentCount = attachmentRefCount;
+		vkSubPassDescs[i].pColorAttachments = vkAttachmentRefs.Data();
+		// TODO: Add the other members, too
+	}
+
 	VkRenderPassCreateInfo createInfo{};
+	VkRenderPass vkPass;
 
 	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	createInfo.attachmentCount = 1;
-	// createInfo.pAttachments = 
+	createInfo.attachmentCount = vkAttachmentDescs.Length();
+	createInfo.pAttachments = vkAttachmentDescs.Data();
+	createInfo.subpassCount = passDesc.subPassDescs.Length();
+	createInfo.pSubpasses = vkSubPassDescs.Data();
 
-	// vkCreateRenderPass(vkDevice, &createInfo, nullptr, &vkPass);
+	DL_VK_CHECK(vkCreateRenderPass(vkDevice, &createInfo, nullptr, &vkPass), "Failed to create Vulkan render pass");
+
+	// Cleanup of Vulkan descs
+	for (uint32 i = 0; i < vkAttachmentRefPtrs.Length(); ++i)
+		alloc->Free(vkAttachmentRefPtrs[i]);
+
+	// Create VulkanPass
+	VulkanPass* pass = alloc->Allocate<VulkanPass>();
+
+	new (pass) VulkanPass(vkPass);
+
+	return pass;
 }
 
 void VulkanDevice::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
@@ -57,7 +109,7 @@ void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32
 ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Format format, uint32_t bufferCount, HWND windowHandle)
 {
 	// Create swap chain
-	VkFormat vkFormat = ToVulkanFormat(format);
+	VkFormat vkFormat = MapToVulkanFormat(format);
 	VkSurfaceKHR surface = CreateWindowSurface(windowHandle);
 	SwapChainSupport swapChainSupport = QuerySwapChainSupport(surface);
 	uint32 surfaceFormatIndex = SelectSurfaceFormatIndex(swapChainSupport.surfaceFormats, vkFormat);

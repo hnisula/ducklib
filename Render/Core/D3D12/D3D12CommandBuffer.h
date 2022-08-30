@@ -10,12 +10,18 @@ public:
 
 	friend class D3D12Device;
 
-	const void* GetApiHandle() const override;
+	void* GetApiHandle() const override;
 
 	void Reset() override;
 	void Close() override;
 
 	void Begin() override;
+	void End() override;
+
+	void BeginPass(const IPass* pass) override;
+	void EndPass() override;
+
+	void SetPipelineState(PipelineState pipelineState) override;
 
 	void Transition(ImageBuffer* image, ResourceState from, ResourceState to) override;
 	void SetRT(ImageBuffer* rt) override;

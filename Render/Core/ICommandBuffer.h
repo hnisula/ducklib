@@ -14,7 +14,7 @@ namespace DuckLib::Render
 class ICommandBuffer
 {
 public:
-	virtual const void* GetApiHandle() const = 0;
+	virtual void* GetApiHandle() const = 0;
 
 	void SetClearColor(const float* rgbaColor);
 

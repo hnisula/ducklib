@@ -1,37 +1,37 @@
 #pragma once
+#include "Core/Memory/Containers/TArray.h"
 #include "Resources/ImageBuffer.h"
 
 namespace DuckLib::Render
 {
+struct FrameBufferDesc
+{
+	Format format;
+	FrameBufferLoadOp loadOp = FrameBufferLoadOp::LOAD;
+	FrameBufferStoreOp storeOp = FrameBufferStoreOp::STORE;
+	FrameBufferLoadOp stencilLoadOp = FrameBufferLoadOp::LOAD;
+	FrameBufferStoreOp stencilStoreOp = FrameBufferStoreOp::STORE;
+
+	ImageBufferLayout initialLayout = ImageBufferLayout::COLOR;
+	ImageBufferLayout finalLayout = ImageBufferLayout::PRESENT;
+};
+
+struct FrameBufferDescRef
+{
+	uint32 frameBufferDescIndex;
+	ImageBufferLayout imageBufferLayout;
+};
+
+struct SubPassDescription
+{
+	PipelineBindPoint pipelineBindPoint;
+	TArray<FrameBufferDescRef> frameBufferDescRefs;
+};
+
 struct PassDescription
 {
-	struct RtDesc
-	{
-		enum class LoadOp
-		{
-			LOAD,
-			CLEAR,
-			DONT_CARE
-		};
-
-		enum class StoreOp
-		{
-			STORE,
-			DONT_CARE
-		};
-
-		Format format;
-		LoadOp loadOp = LoadOp::LOAD;
-		StoreOp storeOp = StoreOp::STORE;
-		LoadOp stencilLoadOp = LoadOp::LOAD;
-		StoreOp stencilStoreOp = StoreOp::STORE;
-
-		ImageBuffer::Layout initialLayout = ImageBuffer::Layout::COLOR;
-		ImageBuffer::Layout finalLayout = ImageBuffer::Layout::PRESENT;
-	};
-
-	ImageBuffer** imageBuffers;
-	uint32 imageBufferCount;
+	TArray<FrameBufferDesc> frameBufferDescs;
+	TArray<SubPassDescription> subPassDescs;
 };
 
 class IPass

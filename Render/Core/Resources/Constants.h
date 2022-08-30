@@ -1,9 +1,36 @@
 #pragma once
 
-#include "../../Core/Types.h"
+#include "Core/Types.h"
 
 namespace DuckLib::Render
 {
+enum class FrameBufferLoadOp
+{
+	LOAD,
+	CLEAR,
+	DONT_CARE
+};
+
+enum class FrameBufferStoreOp
+{
+	STORE,
+	DONT_CARE
+};
+
+enum class ImageBufferLayout
+{
+	COLOR, // DRAW?
+	PRESENT,
+	TRANSFER
+	// Use both transfer source and dest?
+};
+
+enum class PipelineBindPoint
+{
+	GRAPHICS,
+	COMPUTE
+};
+
 enum class Format : uint32
 {
 	UNKNOWN = 0,

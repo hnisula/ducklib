@@ -53,7 +53,7 @@
     <ClInclude Include="Core\IPass.h" />
     <ClInclude Include="Core\PipelineState.h" />
     <ClInclude Include="Core\Resources\Buffer.h" />
-    <ClInclude Include="Core\Resources\Format.h" />
+    <ClInclude Include="Core\Resources\Constants.h" />
     <ClInclude Include="Core\Resources\ImageBuffer.h" />
     <ClInclude Include="Core\Resources\InputDescription.h" />
     <ClInclude Include="Core\Resources\PrimitiveTopology.h" />
@@ -64,7 +64,6 @@
     <ClInclude Include="Core\Vulkan\VulkanCommandBuffer.h" />
     <ClInclude Include="Core\Vulkan\VulkanCommon.h" />
     <ClInclude Include="Core\Vulkan\VulkanDevice.h" />
-    <ClInclude Include="Core\Vulkan\VulkanFormats.h" />
     <ClInclude Include="Core\Vulkan\VulkanPass.h" />
     <ClInclude Include="Core\Vulkan\VulkanRHI.h" />
     <ClInclude Include="Core\Vulkan\VulkanSwapChain.h" />

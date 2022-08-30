@@ -29,6 +29,8 @@ public:
 
 	T& operator [](uint32 i);
 	const T& operator [](uint32 i) const;
+	T& First();
+	T& Last();
 
 	T* Data();
 	const T* Data() const;
@@ -71,8 +73,10 @@ TArray<T>::TArray(const T* other, uint32 otherLength, uint32 startCapacity)
 	: TArray()
 {
 	EnsureCapacity(startCapacity);
-	memcpy(array, other, sizeof(T) * otherLength);
 	length = otherLength;
+
+	if (other)
+		memcpy(array, other, sizeof(T) * otherLength);
 }
 
 template <typename T>
@@ -189,6 +193,18 @@ template <typename T>
 const T& TArray<T>::operator[](uint32 i) const
 {
 	return array[i];
+}
+
+template <typename T>
+T& TArray<T>::First()
+{
+	return this->operator[](0);
+}
+
+template <typename T>
+T& TArray<T>::Last()
+{
+	return this->operator[](length - 1);
 }
 
 template <typename T>

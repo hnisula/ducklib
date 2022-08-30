@@ -3,6 +3,7 @@
 #include "Core/Memory/IAlloc.h"
 #include "D3D12Device.h"
 #include "D3D12CommandBuffer.h"
+#include "D3D12Common.h"
 #include "D3D12SwapChain.h"
 #include "D3D12Formats.h"
 
@@ -124,6 +125,11 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 	return new(DefAlloc()->Allocate<D3D12CommandBuffer>()) D3D12CommandBuffer(apiCommandList, apiCommandAllocator);
 }
 
+IPass* D3D12Device::CreatePass(PassDescription passDesc)
+{
+	return nullptr;
+}
+
 void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));
@@ -137,10 +143,10 @@ void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 
 void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
 {
-	const ID3D12CommandList* d3dCommandLists[128];
+	ID3D12CommandList* d3dCommandLists[128];
 
 	for (uint32_t i = 0; i < numCommandBuffers; ++i)
-		d3dCommandLists[i] = (const ID3D12CommandList*)commandBuffers[i]->GetApiHandle();
+		d3dCommandLists[i] = (ID3D12CommandList* const)commandBuffers[i]->GetApiHandle();
 
 	commandQueue->ExecuteCommandLists(numCommandBuffers, d3dCommandLists);
 }

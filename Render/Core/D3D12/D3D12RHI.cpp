@@ -1,5 +1,6 @@
 #include <stdexcept>
 #include "D3D12RHI.h"
+#include "D3D12Common.h"
 #include "D3D12Device.h"
 #include "Core/Utility.h"
 #include "Core/Memory/IAlloc.h"

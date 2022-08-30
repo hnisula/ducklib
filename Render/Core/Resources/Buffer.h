@@ -1,6 +1,5 @@
 #pragma once
-#include <cstdint>
-#include "Format.h"
+#include "Constants.h"
 
 namespace DuckLib::Render
 {

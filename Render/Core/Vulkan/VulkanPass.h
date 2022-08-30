@@ -6,9 +6,12 @@ namespace DuckLib::Render
 {
 class VulkanPass : public IPass
 {
-public:
-
 protected:
+	friend class VulkanDevice;
+
+	VulkanPass(VkRenderPass vkPass)
+		: vkPass(vkPass) {}
+
 	VkRenderPass vkPass;
 };
 }

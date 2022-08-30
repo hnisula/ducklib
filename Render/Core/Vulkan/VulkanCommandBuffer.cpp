@@ -3,7 +3,7 @@
 
 namespace DuckLib::Render
 {
-const void* VulkanCommandBuffer::GetApiHandle() const
+void* VulkanCommandBuffer::GetApiHandle() const
 {
 	return vkCommandBuffer;
 }

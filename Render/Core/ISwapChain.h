@@ -1,5 +1,5 @@
 #pragma once
-#include "Resources/Format.h"
+#include "Resources/Constants.h"
 #include "Resources/ImageBuffer.h"
 
 namespace DuckLib::Render

@@ -65,7 +65,7 @@ void RenderFrame()
 	cmdBuffer->SetScissorRect(scissorRect);
 	cmdBuffer->SetViewport(viewport);
 	cmdBuffer->SetRT(swapChain->GetCurrentBuffer());
-	cmdBuffer->Clear(swapChain->GetCurrentBuffer(), clearColor);
+	// cmdBuffer->Clear(swapChain->GetCurrentBuffer(), clearColor);
 
 	// cmdBuffer->
 

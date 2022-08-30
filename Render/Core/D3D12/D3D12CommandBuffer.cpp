@@ -19,7 +19,7 @@ D3D12CommandBuffer::~D3D12CommandBuffer()
 	// TODO: do stuff?
 }
 
-const void* D3D12CommandBuffer::GetApiHandle() const
+void* D3D12CommandBuffer::GetApiHandle() const
 {
 	return apiCommandList;
 }
@@ -39,12 +39,17 @@ void D3D12CommandBuffer::Close()
 
 void D3D12CommandBuffer::Begin()
 {
-	apiCommandList->ClearRenderTargetView(
-		*(D3D12_CPU_DESCRIPTOR_HANDLE*)&rt->apiDescriptor,
-		clearColorRgba,
-		0,
-		nullptr);
+	// apiCommandList->ClearRenderTargetView(
+	// 	*(D3D12_CPU_DESCRIPTOR_HANDLE*)&rt->apiDescriptor,
+	// 	clearColorRgba,
+	// 	0,
+	// 	nullptr);
 }
+
+void D3D12CommandBuffer::End() {}
+void D3D12CommandBuffer::BeginPass(const IPass* pass) {}
+void D3D12CommandBuffer::EndPass() {}
+void D3D12CommandBuffer::SetPipelineState(PipelineState pipelineState) {}
 
 void D3D12CommandBuffer::Transition(ImageBuffer* image, ResourceState from, ResourceState to)
 {
@@ -86,9 +91,7 @@ void D3D12CommandBuffer::SetVertexBuffers(Buffer** buffer, uint32 count, uint32 
 
 void D3D12CommandBuffer::SetInputDeclaration(InputDescription* inputDescription)
 {
-	D3D12_INPUT_ELEMENT_DESC desc;
-
-	
+	// D3D12_INPUT_ELEMENT_DESC desc;
 }
 
 void D3D12CommandBuffer::SetViewport(const Viewport& viewport)
@@ -114,7 +117,7 @@ void D3D12CommandBuffer::SetScissorRect(const Rect& scissorRect)
 
 void D3D12CommandBuffer::SetPrimitiveTopology(PrimitiveTopology topology)
 {
-	apiCommandList->IASetPrimitiveTopology(MapPrimitiveTopology(topology));
+	apiCommandList->IASetPrimitiveTopology(MapD3D12PrimitiveTopology(topology));
 }
 
 void D3D12CommandBuffer::SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers)

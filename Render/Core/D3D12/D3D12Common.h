@@ -4,13 +4,13 @@
 #include <stdexcept>
 #include "../Resources/PrimitiveTopology.h"
 
+namespace DuckLib::Render
+{
 #define DL_D3D12_CHECK(statement, errorText) \
 	if ((statement) != S_OK) \
 		throw std::runtime_error((errorText))
 
-namespace DuckLib::Render
-{
-inline D3D12_PRIMITIVE_TOPOLOGY MapPrimitiveTopology(PrimitiveTopology topology)
+inline D3D12_PRIMITIVE_TOPOLOGY MapD3D12PrimitiveTopology(PrimitiveTopology topology)
 {
 	switch (topology)
 	{

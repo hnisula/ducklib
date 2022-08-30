@@ -8,7 +8,9 @@ namespace DuckLib::Render
 class VulkanCommandBuffer : public ICommandBuffer
 {
 public:
-	const void* GetApiHandle() const override;
+	friend class VulkanDevice;
+
+	void* GetApiHandle() const override;
 
 	void Reset() override;
 	void Close() override;

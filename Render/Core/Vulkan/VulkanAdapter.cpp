@@ -45,7 +45,7 @@ IDevice* VulkanAdapter::CreateDevice()
 
 	vkGetDeviceQueue(vkDevice, graphicsQueueFamilyIndex, 0, &commandQueue);
 
-	new(device) VulkanDevice(vkDevice, commandQueue, physicalDevice, vkInstance);
+	new(device) VulkanDevice(vkDevice, commandQueue, graphicsQueueFamilyIndex, physicalDevice, vkInstance);
 
 	return device;
 }

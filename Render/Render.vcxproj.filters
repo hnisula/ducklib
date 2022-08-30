@@ -46,7 +46,7 @@
     <ClInclude Include="Core\D3D12\D3D12ResourceStates.h">
       <Filter>Core\D3D12</Filter>
     </ClInclude>
-    <ClInclude Include="Core\Resources\Format.h">
+    <ClInclude Include="Core\Resources\Constants.h">
       <Filter>Core\Resources</Filter>
     </ClInclude>
     <ClInclude Include="Core\IDevice.h">
@@ -89,9 +89,6 @@
       <Filter>Core\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="Core\Vulkan\VulkanCommon.h">
-      <Filter>Core\Vulkan</Filter>
-    </ClInclude>
-    <ClInclude Include="Core\Vulkan\VulkanFormats.h">
       <Filter>Core\Vulkan</Filter>
     </ClInclude>
     <ClInclude Include="Core\Vulkan\VulkanCommandBuffer.h">
