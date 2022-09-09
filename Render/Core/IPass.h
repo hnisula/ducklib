@@ -37,5 +37,6 @@ struct PassDescription
 class IPass
 {
 public:
+	virtual ~IPass() = 0;
 };
 }

@@ -1,4 +1,5 @@
 #pragma once
+#include "IFrameBuffer.h"
 #include "IPass.h"
 #include "PipelineState.h"
 #include "Resources/Buffer.h"
@@ -16,6 +17,7 @@ class ICommandBuffer
 public:
 	virtual void* GetApiHandle() const = 0;
 
+	// TODO: Make virtual?
 	void SetClearColor(const float* rgbaColor);
 
 	virtual void Reset() = 0;
@@ -24,7 +26,7 @@ public:
 	virtual void Begin() = 0;
 	virtual void End() = 0;
 
-	virtual void BeginPass(const IPass* pass) = 0;
+	virtual void BeginPass(const IPass* pass, const IFrameBuffer*) = 0;
 	virtual void EndPass() = 0;
 
 	virtual void SetPipelineState(PipelineState pipelineState) = 0;

@@ -47,7 +47,7 @@ void D3D12CommandBuffer::Begin()
 }
 
 void D3D12CommandBuffer::End() {}
-void D3D12CommandBuffer::BeginPass(const IPass* pass) {}
+void D3D12CommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer*) {}
 void D3D12CommandBuffer::EndPass() {}
 void D3D12CommandBuffer::SetPipelineState(PipelineState pipelineState) {}
 

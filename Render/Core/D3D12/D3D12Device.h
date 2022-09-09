@@ -28,6 +28,7 @@ public:
 	ICommandBuffer* CreateCommandBuffer() override;
 
 	IPass* CreatePass(PassDescription passDesc) override;
+	IFrameBuffer* CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass) override;
 
 	void DestroySwapChain(ISwapChain* swapChain) override;
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;

@@ -45,6 +45,7 @@
     <ClInclude Include="Core\D3D12\D3D12Device.h" />
     <ClInclude Include="Core\IDevice.h" />
     <ClInclude Include="Core\ICommandBuffer.h" />
+    <ClInclude Include="Core\IFrameBuffer.h" />
     <ClInclude Include="Core\IRHI.h" />
     <ClInclude Include="Core\ISwapChain.h" />
     <ClInclude Include="Core\IResourceCommandBuffer.h" />
@@ -64,6 +65,7 @@
     <ClInclude Include="Core\Vulkan\VulkanCommandBuffer.h" />
     <ClInclude Include="Core\Vulkan\VulkanCommon.h" />
     <ClInclude Include="Core\Vulkan\VulkanDevice.h" />
+    <ClInclude Include="Core\Vulkan\VulkanFrameBuffer.h" />
     <ClInclude Include="Core\Vulkan\VulkanPass.h" />
     <ClInclude Include="Core\Vulkan\VulkanRHI.h" />
     <ClInclude Include="Core\Vulkan\VulkanSwapChain.h" />

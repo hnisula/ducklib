@@ -103,6 +103,12 @@
     <ClInclude Include="Core\Vulkan\VulkanPass.h">
       <Filter>Core\Vulkan</Filter>
     </ClInclude>
+    <ClInclude Include="Core\IFrameBuffer.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Vulkan\VulkanFrameBuffer.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">

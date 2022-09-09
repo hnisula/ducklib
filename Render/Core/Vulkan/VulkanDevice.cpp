@@ -1,6 +1,7 @@
 #include "VulkanDevice.h"
 #include "VulkanCommandBuffer.h"
 #include "VulkanCommon.h"
+#include "VulkanFrameBuffer.h"
 #include "VulkanPass.h"
 #include "VulkanSwapChain.h"
 #include "Core/Memory/Containers/TArray.h"
@@ -35,7 +36,7 @@ ICommandBuffer* VulkanDevice::CreateCommandBuffer()
 
 IPass* VulkanDevice::CreatePass(PassDescription passDesc)
 {
-	// Setup all Vulkan descs
+	// Setup attachments
 	TArray<VkAttachmentDescription> vkAttachmentDescs(nullptr, passDesc.frameBufferDescs.Length());
 
 	for (uint32 i = 0; i < passDesc.frameBufferDescs.Length(); ++i)
@@ -51,6 +52,7 @@ IPass* VulkanDevice::CreatePass(PassDescription passDesc)
 		vkAttachmentDescs[i].samples = VK_SAMPLE_COUNT_1_BIT;
 	}
 
+	// Setup subpasses
 	TArray<VkAttachmentReference*> vkAttachmentRefPtrs(passDesc.subPassDescs.Length());
 	TArray<VkSubpassDescription> vkSubPassDescs(nullptr, passDesc.subPassDescs.Length());
 
@@ -73,16 +75,17 @@ IPass* VulkanDevice::CreatePass(PassDescription passDesc)
 		// TODO: Add the other members, too
 	}
 
-	VkRenderPassCreateInfo createInfo{};
+	// Setup the pass
+	VkRenderPassCreateInfo passCreateInfo{};
 	VkRenderPass vkPass;
 
-	createInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-	createInfo.attachmentCount = vkAttachmentDescs.Length();
-	createInfo.pAttachments = vkAttachmentDescs.Data();
-	createInfo.subpassCount = passDesc.subPassDescs.Length();
-	createInfo.pSubpasses = vkSubPassDescs.Data();
+	passCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
+	passCreateInfo.attachmentCount = vkAttachmentDescs.Length();
+	passCreateInfo.pAttachments = vkAttachmentDescs.Data();
+	passCreateInfo.subpassCount = passDesc.subPassDescs.Length();
+	passCreateInfo.pSubpasses = vkSubPassDescs.Data();
 
-	DL_VK_CHECK(vkCreateRenderPass(vkDevice, &createInfo, nullptr, &vkPass), "Failed to create Vulkan render pass");
+	DL_VK_CHECK(vkCreateRenderPass(vkDevice, &passCreateInfo, nullptr, &vkPass), "Failed to create Vulkan render pass");
 
 	// Cleanup of Vulkan descs
 	for (uint32 i = 0; i < vkAttachmentRefPtrs.Length(); ++i)
@@ -91,9 +94,36 @@ IPass* VulkanDevice::CreatePass(PassDescription passDesc)
 	// Create VulkanPass
 	VulkanPass* pass = alloc->Allocate<VulkanPass>();
 
-	new (pass) VulkanPass(vkPass);
+	new(pass) VulkanPass(vkPass, vkDevice);
 
 	return pass;
+}
+
+IFrameBuffer* VulkanDevice::CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass)
+{
+	VkFramebuffer vkFrameBuffer;
+	VkFramebufferCreateInfo frameBufferCreateInfo{};
+	TArray<VkImageView> vkFrameBufferImageViews(nullptr, imageBufferCount);
+
+	// TODO: Loop images
+	for (uint32 i = 0; i < imageBufferCount; ++i)
+		vkFrameBufferImageViews[i] = (VkImageView)imageBuffers[i]->apiDescriptor;
+
+	frameBufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	frameBufferCreateInfo.renderPass = ((VulkanPass*)pass)->vkPass;
+	frameBufferCreateInfo.pAttachments = vkFrameBufferImageViews.Data();
+	frameBufferCreateInfo.attachmentCount = vkFrameBufferImageViews.Length();
+	frameBufferCreateInfo.layers = 1;
+	frameBufferCreateInfo.width = imageBuffers[0]->width;
+	frameBufferCreateInfo.height = imageBuffers[0]->height;
+
+	vkCreateFramebuffer(vkDevice, &frameBufferCreateInfo, nullptr, &vkFrameBuffer);
+
+	VulkanFrameBuffer* frameBuffer = alloc->Allocate<VulkanFrameBuffer>();
+
+	new(frameBuffer) VulkanFrameBuffer(vkFrameBuffer, VkExtent2D{ imageBuffers[0]->width, imageBuffers[0]->height });
+
+	return frameBuffer;
 }
 
 void VulkanDevice::DestroyCommandBuffer(ICommandBuffer* commandBuffer)

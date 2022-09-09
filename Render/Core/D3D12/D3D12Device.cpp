@@ -130,6 +130,11 @@ IPass* D3D12Device::CreatePass(PassDescription passDesc)
 	return nullptr;
 }
 
+IFrameBuffer* D3D12Device::CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass)
+{
+	return nullptr;
+}
+
 void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));

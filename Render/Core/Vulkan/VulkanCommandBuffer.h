@@ -18,7 +18,7 @@ public:
 	void Begin() override;
 	void End() override;
 
-	void BeginPass(const IPass* pass) override;
+	void BeginPass(const IPass* pass, const IFrameBuffer*) override;
 	void EndPass() override;
 
 	void SetPipelineState(PipelineState pipelineState) override;
