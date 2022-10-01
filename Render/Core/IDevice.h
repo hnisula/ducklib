@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ICommandBuffer.h"
+#include "IFence.h"
 #include "IFrameBuffer.h"
 #include "ISwapChain.h"
 
@@ -20,7 +21,7 @@ public:
 		HWND windowHandle) = 0;
 	virtual ICommandBuffer* CreateCommandBuffer() = 0;
 
-	virtual IPass* CreatePass(PassDescription passDesc) = 0;
+	virtual IPass* CreatePass(const PassDescription& passDesc) = 0;
 	virtual IFrameBuffer* CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass) = 0;
 
 	virtual void DestroySwapChain(ISwapChain* swapChain) = 0;
@@ -29,8 +30,9 @@ public:
 
 	virtual void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
-		uint32_t numCommandBuffers) = 0;
+		uint32_t numCommandBuffers,
+		IFence* signalFence) = 0;
 
-	virtual void SignalCompletion(ISwapChain* swapChain) = 0;
+	virtual IFence* CreateFence() = 0;
 };
 }

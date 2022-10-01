@@ -27,15 +27,15 @@ public:
 		HWND windowHandle) override;
 	ICommandBuffer* CreateCommandBuffer() override;
 
-	IPass* CreatePass(PassDescription passDesc) override;
+	IPass* CreatePass(const PassDescription& passDesc) override;
 	IFrameBuffer* CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass) override;
 
 	void DestroySwapChain(ISwapChain* swapChain) override;
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
 
-	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers) override;
+	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers, IFence*signalFence) override;
 
-	void SignalCompletion(ISwapChain* swapChain) override;
+	IFence* CreateFence() override;
 
 private:
 	D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory);
@@ -54,6 +54,8 @@ private:
 	void DestroyDescriptorHeap(ID3D12DescriptorHeap* descriptorHeap);
 
 	static constexpr uint32_t NUM_FRAME_BUFFERS = 4;
+
+	IAlloc* alloc;
 
 	IDXGIFactory4* d3dFactory;
 	ID3D12Device* d3dDevice;

@@ -8,7 +8,6 @@ VulkanSwapChain::~VulkanSwapChain()
 	for (uint32 i = 0; i < numBuffers; ++i)
 		vkDestroyImageView(vkDevice, (VkImageView)buffers[i].apiDescriptor, nullptr);
 
-	vkDestroyFence(vkDevice, vkRenderFence, nullptr);
 	vkDestroySemaphore(vkDevice, vkRenderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(vkDevice, vkImageAvailableSemaphore, nullptr);
 }
@@ -27,13 +26,8 @@ void VulkanSwapChain::Present()
 	DL_VK_CHECK(vkQueuePresentKHR(vkPresentQueue, &presentInfo), "Failed to present Vulkan swap chain image");
 }
 
-void VulkanSwapChain::WaitForFrame()
+void VulkanSwapChain::PrepareFrame()
 {
-	DL_VK_CHECK(
-		vkWaitForFences(vkDevice, 1, &vkRenderFence, VK_TRUE, UINT64_MAX),
-		// UINT64_MAX usage here is entirely arbitrary. No timeout?
-		"Failed to wait for Vulkan render fence when waiting for frame");
-	DL_VK_CHECK(vkResetFences(vkDevice, 1, &vkRenderFence), "Failed to reset Vulkan render fence when waiting for frame");
 	vkAcquireNextImageKHR(vkDevice, vkSwapChain, UINT64_MAX, vkImageAvailableSemaphore, VK_NULL_HANDLE, &currentFrameIndex);
 }
 
@@ -60,15 +54,10 @@ VulkanSwapChain::VulkanSwapChain(
 		this->buffers[i] = images[i];
 
 	// Create sync primites
-	VkFenceCreateInfo fenceCreateInfo{};
 	VkSemaphoreCreateInfo semaphoreCreateInfo{};
-
-	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	DL_VK_CHECK(vkCreateFence(vkDevice, &fenceCreateInfo, nullptr, &vkRenderFence), "Failed to create Vulkan fence for swap chain");
 	DL_VK_CHECK(
 		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &vkRenderFinishedSemaphore),
 		"Failed to create Vulkan semaphore");

@@ -1,5 +1,5 @@
 #pragma once
-#include <Windows.h>
+#include "VulkanFence.h"
 #include "Lib/vulkan.h"
 #include "Render/Core/ISwapChain.h"
 
@@ -13,7 +13,7 @@ public:
 	~VulkanSwapChain() override;
 
 	void Present() override;
-	void WaitForFrame() override;
+	void PrepareFrame() override;
 
 protected:
 	VulkanSwapChain(
@@ -29,7 +29,6 @@ protected:
 	VkSwapchainKHR vkSwapChain;
 	VkDevice vkDevice;
 	VkQueue vkPresentQueue;
-	VkFence vkRenderFence;
 	VkSemaphore vkRenderFinishedSemaphore;
 	VkSemaphore vkImageAvailableSemaphore;
 };

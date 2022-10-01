@@ -34,7 +34,7 @@ ICommandBuffer* VulkanDevice::CreateCommandBuffer()
 	return cmdBuffer;
 }
 
-IPass* VulkanDevice::CreatePass(PassDescription passDesc)
+IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 {
 	// Setup attachments
 	TArray<VkAttachmentDescription> vkAttachmentDescs(nullptr, passDesc.frameBufferDescs.Length());
@@ -117,7 +117,7 @@ IFrameBuffer* VulkanDevice::CreateFrameBuffer(ImageBuffer** imageBuffers, uint32
 	frameBufferCreateInfo.width = imageBuffers[0]->width;
 	frameBufferCreateInfo.height = imageBuffers[0]->height;
 
-	vkCreateFramebuffer(vkDevice, &frameBufferCreateInfo, nullptr, &vkFrameBuffer);
+	DL_VK_CHECK(vkCreateFramebuffer(vkDevice, &frameBufferCreateInfo, nullptr, &vkFrameBuffer), "Failed to create Vulkan frame buffer");
 
 	VulkanFrameBuffer* frameBuffer = alloc->Allocate<VulkanFrameBuffer>();
 
@@ -131,9 +131,21 @@ void VulkanDevice::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 	// TODO: Implement
 }
 
-void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
+void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t commandBufferCount, IFence* signalFence)
 {
-	// TODO: Implement
+	TArray<VkCommandBuffer> vkCommandBuffers(nullptr, commandBufferCount);
+	VkSubmitInfo submitInfo;
+
+	for (uint32 i = 0; i < commandBufferCount; ++i)
+		vkCommandBuffers[i] = ((VulkanCommandBuffer*)commandBuffers[i])->vkCommandBuffer;
+
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = commandBufferCount;
+	submitInfo.pCommandBuffers = vkCommandBuffers.Data();
+
+	DL_VK_CHECK(
+		vkQueueSubmit(vkCommandQueue, 1, &submitInfo, ((VulkanFence*)signalFence)->vkFence),
+		"Failed to submit command buffer to Vulkan queue");
 }
 
 ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Format format, uint32_t bufferCount, HWND windowHandle)
@@ -173,13 +185,13 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	uint32 imageCount = 0;
 	TArray<VkImage> vkImages;
 
-	vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, nullptr);
+	DL_VK_CHECK(vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, nullptr), "Failed to get Vulkan swapchain image count");
 
 	if (imageCount > ISwapChain::MAX_BUFFERS)
 		throw std::runtime_error("Vulkan swap chain contained too many images");
 
 	vkImages.Resize(imageCount);
-	vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, vkImages.Data());
+	DL_VK_CHECK(vkGetSwapchainImagesKHR(vkDevice, vkSwapChain, &imageCount, vkImages.Data()), "Failed to get Vulkan swapchain images");
 
 	ImageBuffer imageBuffers[ISwapChain::MAX_BUFFERS];
 
@@ -222,7 +234,22 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 }
 
 void VulkanDevice::DestroySwapChain(ISwapChain* swapChain) {}
-void VulkanDevice::SignalCompletion(ISwapChain* swapChain) {}
+
+IFence* VulkanDevice::CreateFence()
+{
+	VkFence vkFence;
+	VkFenceCreateInfo fenceCreateInfo {};
+
+	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+
+	DL_VK_CHECK(
+		vkCreateFence(vkDevice, &fenceCreateInfo, nullptr, &vkFence),
+		"Failed to create Vulkan fence for swap chain");
+
+	VulkanFence* fence = alloc->Allocate<VulkanFence>();
+	return new(fence) VulkanFence(vkDevice, vkFence);
+}
 
 VulkanDevice::VulkanDevice(
 	VkDevice vkDevice,
@@ -269,15 +296,25 @@ VulkanDevice::SwapChainSupport VulkanDevice::QuerySwapChainSupport(VkSurfaceKHR 
 	uint32_t surfaceFormatCount;
 	uint32_t presentModeCount;
 
-	vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatCount, nullptr);
+	DL_VK_CHECK(
+		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatCount, nullptr),
+		"Failed to get Vulkan adapter surface format count");
 	support.surfaceFormats.Resize(surfaceFormatCount);
-	vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatCount, support.surfaceFormats.Data());
+	DL_VK_CHECK(
+		vkGetPhysicalDeviceSurfaceFormatsKHR(physicalDevice, surface, &surfaceFormatCount, support.surfaceFormats.Data()),
+		"Failed to get Vulkan adapter surface formats");
 
-	vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr);
+	DL_VK_CHECK(
+		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, nullptr),
+		"Failed to get Vulkan adapter surface present mode count");
 	support.presentModes.Resize(presentModeCount);
-	vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, support.presentModes.Data());
+	DL_VK_CHECK(
+		vkGetPhysicalDeviceSurfacePresentModesKHR(physicalDevice, surface, &presentModeCount, support.presentModes.Data()),
+		"Failed to get Vulkan adapter surface present modes");
 
-	vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &support.surfaceCapabilities);
+	DL_VK_CHECK(
+		vkGetPhysicalDeviceSurfaceCapabilitiesKHR(physicalDevice, surface, &support.surfaceCapabilities),
+		"Failed to get Vulkan adapter surface capabilities");
 
 	return support;
 }

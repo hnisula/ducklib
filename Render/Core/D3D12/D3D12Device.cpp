@@ -4,6 +4,7 @@
 #include "D3D12Device.h"
 #include "D3D12CommandBuffer.h"
 #include "D3D12Common.h"
+#include "D3D12Fence.h"
 #include "D3D12SwapChain.h"
 #include "D3D12Formats.h"
 
@@ -76,21 +77,17 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	}
 
 	// Create fence
-	ID3D12Fence* apiFence;
-
-	DL_D3D12_CHECK(
-		d3dDevice->CreateFence(UINT_MAX, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&apiFence)),
-		"Failed to create fence for frame syncing");
+	D3D12Fence* fence = (D3D12Fence*)CreateFence();
 
 	// Create swap chain wrapper
-	D3D12SwapChain* swapChain = DefAlloc()->New<D3D12SwapChain>(
+	D3D12SwapChain* swapChain = alloc->New<D3D12SwapChain>(
 		width,
 		height,
 		format,
 		d3dSwapChain,
 		bufferCount,
 		rtvHandles,
-		apiFence,
+		fence,
 		descriptorHeap,
 		descriptorSize);
 	swapChains.push_back(swapChain);
@@ -122,10 +119,10 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 
 	apiCommandList->Close();
 
-	return new(DefAlloc()->Allocate<D3D12CommandBuffer>()) D3D12CommandBuffer(apiCommandList, apiCommandAllocator);
+	return new(alloc->Allocate<D3D12CommandBuffer>()) D3D12CommandBuffer(apiCommandList, apiCommandAllocator);
 }
 
-IPass* D3D12Device::CreatePass(PassDescription passDesc)
+IPass* D3D12Device::CreatePass(const PassDescription& passDesc)
 {
 	return nullptr;
 }
@@ -139,14 +136,14 @@ void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));
 
-	DefAlloc()->Delete(swapChain);
+	alloc->Delete(swapChain);
 }
 
 void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 {
 }
 
-void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers)
+void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers, IFence* signalFence)
 {
 	ID3D12CommandList* d3dCommandLists[128];
 
@@ -154,18 +151,27 @@ void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_
 		d3dCommandLists[i] = (ID3D12CommandList* const)commandBuffers[i]->GetApiHandle();
 
 	commandQueue->ExecuteCommandLists(numCommandBuffers, d3dCommandLists);
-}
 
-void D3D12Device::SignalCompletion(ISwapChain* swapChain)
-{
-	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
-	uint64_t signalValue = swapChain->GetSignalValue();
+	D3D12Fence* d3dFence = (D3D12Fence*)signalFence;
 
-	if (commandQueue->Signal(d3dSwapChain->d3dRenderFence, signalValue) != S_OK)
+	if (commandQueue->Signal(d3dFence->d3dFence, d3dFence->expectedValue) != S_OK)
 		throw std::runtime_error("Failed to signal completion in D3D12 rendering");
 }
 
+IFence* D3D12Device::CreateFence()
+{
+	ID3D12Fence* d3dFence;
+
+	DL_D3D12_CHECK(
+		d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3dFence)),
+		"Failed to create fence for frame syncing");
+
+	D3D12Fence* fence = alloc->Allocate<D3D12Fence>();
+	return new(fence) D3D12Fence(d3dFence);
+}
+
 D3D12Device::D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
+	: alloc(DefAlloc())
 {
 	this->d3dFactory = dxgiFactory;
 	this->d3dDevice = d3dDevice;
@@ -216,7 +222,7 @@ ImageBuffer* D3D12Device::CreateImageBuffer(
 	ID3D12Resource* apiResource,
 	D3D12_CPU_DESCRIPTOR_HANDLE apiDescriptor)
 {
-	ImageBuffer* imageBuffer = DefAlloc()->New<ImageBuffer>(
+	ImageBuffer* imageBuffer = alloc->New<ImageBuffer>(
 		width,
 		height,
 		depth,

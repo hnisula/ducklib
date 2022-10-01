@@ -26,10 +26,16 @@ IRHI* rhi = D3D12RHI::GetInstance();
 #elif DL_TEST_API == DL_VK_API
 IRHI* rhi = VulkanRHI::GetInstance();
 #endif
+
+float clearColor[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+
 IAdapter* adapter;
 IDevice* device;
 ISwapChain* swapChain;
 ICommandBuffer* cmdBuffer;
+IPass* pass;
+IFrameBuffer* frameBuffers[2];
+IFence* renderFence;
 
 void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 {
@@ -38,48 +44,71 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 	if (adapters.IsEmpty())
 		throw std::runtime_error("No adapters found");
 
+	FrameBufferDesc frameBufferDesc;
+	SubPassDescription subPassDesc;
+	PassDescription passDesc;
+
+	frameBufferDesc.format = Format::B8G8R8A8_UNORM;
+
+	subPassDesc.frameBufferDescRefs.Append(FrameBufferDescRef{ 0, ImageBufferLayout::COLOR });
+	subPassDesc.pipelineBindPoint = PipelineBindPoint::GRAPHICS;
+
+	passDesc.frameBufferDescs.Append(frameBufferDesc);
+	passDesc.subPassDescs.Append(subPassDesc);
+
 	adapter = adapters[0];
 	device = adapter->CreateDevice(); // No parameters? Seems odd
 	swapChain = device->CreateSwapChain(width, height, Format::B8G8R8A8_UNORM, 2, windowHandle);
 	cmdBuffer = device->CreateCommandBuffer();
+	pass = device->CreatePass(passDesc);
+	renderFence = device->CreateFence();
+
+	ImageBuffer* imageBuffer1 = swapChain->GetBuffer(0);
+	ImageBuffer* imageBuffer2 = swapChain->GetBuffer(1);
+
+	frameBuffers[0] = device->CreateFrameBuffer(&imageBuffer1, 1, pass);
+	frameBuffers[1] = device->CreateFrameBuffer(&imageBuffer2, 1, pass);
+
+	cmdBuffer->SetClearColor(clearColor);
 }
 
 void RenderFrame()
 {
 	Sleep(20);
 
-	swapChain->WaitForFrame();
-	// TODO: VK acquire next swap chain frame. Combine
-	// TODO: VK begin (reset?) with swap chain swap chain image index
+	renderFence->Wait();
+	swapChain->PrepareFrame();
+
 	cmdBuffer->Reset();
+	cmdBuffer->Begin();
 
-	cmdBuffer->Transition(
-		swapChain->GetCurrentBuffer(),
-		ResourceState::PRESENT,
-		ResourceState::RENDER_TARGET);
+	cmdBuffer->BeginPass(pass, frameBuffers[swapChain->GetCurrentBufferIndex()]);
 
-	float clearColor[] = { 0.0f, 1.0f, 0.0f, 1.0f };
+	// cmdBuffer->Transition(
+	// 	swapChain->GetCurrentBuffer(),
+	// 	ResourceState::PRESENT,
+	// 	ResourceState::RENDER_TARGET);
+
 	Rect scissorRect{ 0, 0, WND_WIDTH, WND_HEIGHT };
 	Viewport viewport{ 0.0f, 0.0f, (float)WND_WIDTH, (float)WND_HEIGHT, 0, 1 };
 
-	cmdBuffer->SetScissorRect(scissorRect);
-	cmdBuffer->SetViewport(viewport);
-	cmdBuffer->SetRT(swapChain->GetCurrentBuffer());
+	// TODO: Add passes and stuff here to see if Vulkan path can be tested yet (before adding emulated passes for D3D12)
+
+	// cmdBuffer->SetScissorRect(scissorRect);
+	// cmdBuffer->SetViewport(viewport);
+	// cmdBuffer->SetRT(swapChain->GetCurrentBuffer());
+
 	// cmdBuffer->Clear(swapChain->GetCurrentBuffer(), clearColor);
 
-	// cmdBuffer->
+	// cmdBuffer->Transition(swapChain->GetCurrentBuffer(), ResourceState::RENDER_TARGET, ResourceState::PRESENT);
 
-	cmdBuffer->Transition(swapChain->GetCurrentBuffer(), ResourceState::RENDER_TARGET, ResourceState::PRESENT);
-
-	cmdBuffer->Close();
+	cmdBuffer->EndPass();
+	cmdBuffer->End();
 
 	// TODO: VK queue submit with semaphores
-	device->ExecuteCommandBuffers(&cmdBuffer, 1);
+	device->ExecuteCommandBuffers(&cmdBuffer, 1, renderFence);
 
 	swapChain->Present();
-
-	// TODO: How is this represented in Vulkan?
-	device->SignalCompletion(swapChain);
 }
 
 void DestroyRender()

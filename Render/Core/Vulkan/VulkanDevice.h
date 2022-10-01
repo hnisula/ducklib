@@ -15,18 +15,20 @@ public:
 
 	ICommandBuffer* CreateCommandBuffer() override;
 
-	IPass* CreatePass(PassDescription passDesc) override;
+	IPass* CreatePass(const PassDescription& passDesc) override;
 	IFrameBuffer* CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass) override;
 
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
 
 	void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
-		uint32_t numCommandBuffers) override;
+		uint32_t commandBufferCount,
+		IFence*signalFence) override;
 
 	ISwapChain* CreateSwapChain(uint32_t width, uint32_t height, Format format, uint32_t bufferCount,HWND windowHandle) override;
 	void DestroySwapChain(ISwapChain* swapChain) override;
-	void SignalCompletion(ISwapChain* swapChain) override;
+
+	IFence* CreateFence() override;
 
 protected:
 	VulkanDevice(
