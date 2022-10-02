@@ -14,6 +14,7 @@ VulkanDevice::~VulkanDevice()
 {
 	vkDestroyDevice(vkDevice, nullptr);
 	vkDestroyCommandPool(vkDevice, vkCommandPool, nullptr);
+	vkDestroySemaphore(vkDevice, commandQueueFinishedSemaphore, nullptr);
 }
 
 ICommandBuffer* VulkanDevice::CreateCommandBuffer()
@@ -53,19 +54,25 @@ IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 	}
 
 	// Setup subpasses
+	uint32 totalAttachmentRefCount = 0;
+	uint32 attachmentRefOffset = 0;
+
+	for (uint32 i = 0; i < passDesc.subPassDescCount; ++i)
+		totalAttachmentRefCount += passDesc.subPassDescs[i].frameBufferDescRefCount;
+
+	TArray<VkAttachmentReference> vkAttachmentRefs(totalAttachmentRefCount);
 	TArray<VkAttachmentReference*> vkAttachmentRefPtrs(passDesc.subPassDescCount);
 	TArray<VkSubpassDescription> vkSubPassDescs(nullptr, passDesc.subPassDescCount);
 
 	for (uint32 i = 0; i < passDesc.subPassDescCount; ++i)
 	{
 		uint32 attachmentRefCount = passDesc.subPassDescs[i].frameBufferDescRefCount;
-		vkAttachmentRefPtrs.Append(alloc->Allocate<VkAttachmentReference>(attachmentRefCount));
-		TArray vkAttachmentRefs(vkAttachmentRefPtrs.Last(), attachmentRefCount);
 
 		for (uint32 u = 0; u < attachmentRefCount; ++u)
 		{
-			vkAttachmentRefs[u].attachment = passDesc.subPassDescs[i].frameBufferDescRefs[u].frameBufferDescIndex;
-			vkAttachmentRefs[u].layout = MapToVulkanImageLayout(passDesc.subPassDescs[i].frameBufferDescRefs[u].imageBufferLayout);
+			vkAttachmentRefs[attachmentRefOffset + u].attachment = passDesc.subPassDescs[i].frameBufferDescRefs[u].frameBufferDescIndex;
+			vkAttachmentRefs[attachmentRefOffset + u].layout = MapToVulkanImageLayout(
+				passDesc.subPassDescs[i].frameBufferDescRefs[u].imageBufferLayout);
 		}
 
 		vkSubPassDescs[i] = {};
@@ -73,6 +80,8 @@ IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 		vkSubPassDescs[i].colorAttachmentCount = attachmentRefCount;
 		vkSubPassDescs[i].pColorAttachments = vkAttachmentRefs.Data();
 		// TODO: Add the other members, too
+
+		attachmentRefOffset += attachmentRefCount;
 	}
 
 	// Setup the pass
@@ -131,10 +140,16 @@ void VulkanDevice::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 	// TODO: Implement
 }
 
-void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t commandBufferCount, IFence* signalFence)
+void VulkanDevice::ExecuteCommandBuffers(
+	ICommandBuffer** commandBuffers,
+	uint32_t commandBufferCount,
+	void* waitSemaphore,
+	IFence* signalFence)
 {
 	TArray<VkCommandBuffer> vkCommandBuffers(nullptr, commandBufferCount);
-	VkSubmitInfo submitInfo;
+	VkSubmitInfo submitInfo{};
+	VkSemaphore vkWaitSemaphore = (VkSemaphore)waitSemaphore;
+	VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 	for (uint32 i = 0; i < commandBufferCount; ++i)
 		vkCommandBuffers[i] = ((VulkanCommandBuffer*)commandBuffers[i])->vkCommandBuffer;
@@ -142,6 +157,11 @@ void VulkanDevice::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 	submitInfo.commandBufferCount = commandBufferCount;
 	submitInfo.pCommandBuffers = vkCommandBuffers.Data();
+	submitInfo.waitSemaphoreCount = 1;
+	submitInfo.pWaitSemaphores = &vkWaitSemaphore;
+	submitInfo.pWaitDstStageMask = &waitStage;
+	submitInfo.signalSemaphoreCount = 1;
+	submitInfo.pSignalSemaphores = &commandQueueFinishedSemaphore;
 
 	DL_VK_CHECK(
 		vkQueueSubmit(vkCommandQueue, 1, &submitInfo, ((VulkanFence*)signalFence)->vkFence),
@@ -238,7 +258,7 @@ void VulkanDevice::DestroySwapChain(ISwapChain* swapChain) {}
 IFence* VulkanDevice::CreateFence()
 {
 	VkFence vkFence;
-	VkFenceCreateInfo fenceCreateInfo {};
+	VkFenceCreateInfo fenceCreateInfo{};
 
 	fenceCreateInfo.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
 	fenceCreateInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
@@ -257,12 +277,12 @@ VulkanDevice::VulkanDevice(
 	uint32 graphicsQueueFamilyIndex,
 	VkPhysicalDevice physicalDevice,
 	VkInstance vkInstance)
-	: alloc(DefAlloc()),
-	vkInstance(vkInstance),
-	physicalDevice(physicalDevice),
-	vkDevice(vkDevice),
-	vkCommandQueue(commandQueue),
-	graphicsQueueFamilyIndex(graphicsQueueFamilyIndex)
+	: alloc(DefAlloc())
+	, vkInstance(vkInstance)
+	, physicalDevice(physicalDevice)
+	, vkDevice(vkDevice)
+	, vkCommandQueue(commandQueue)
+	, graphicsQueueFamilyIndex(graphicsQueueFamilyIndex)
 {
 	// TODO: Maybe be consistent on where things are created? This is getting out of hand...
 
@@ -273,6 +293,14 @@ VulkanDevice::VulkanDevice(
 	cmdPoolCreateInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
 
 	DL_VK_CHECK(vkCreateCommandPool(vkDevice, &cmdPoolCreateInfo, nullptr, &vkCommandPool), "Failed to create Vulkan command pool");
+
+	VkSemaphoreCreateInfo semaphoreCreateInfo{};
+
+	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+
+	DL_VK_CHECK(
+		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &commandQueueFinishedSemaphore),
+		"Failed to create Vulkan command-queue-finished semaphore");
 }
 
 VkSurfaceKHR VulkanDevice::CreateWindowSurface(HWND windowHandle)

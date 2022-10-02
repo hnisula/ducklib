@@ -139,7 +139,11 @@ void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 {
 }
 
-void D3D12Device::ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers, IFence* signalFence)
+void D3D12Device::ExecuteCommandBuffers(
+	ICommandBuffer** commandBuffers,
+	uint32_t numCommandBuffers,
+	void* waitSemaphore,
+	IFence* signalFence)
 {
 	ID3D12CommandList* d3dCommandLists[128];
 

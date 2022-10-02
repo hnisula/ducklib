@@ -1,5 +1,4 @@
 #pragma once
-#include "IFence.h"
 #include "Resources/Constants.h"
 #include "Resources/ImageBuffer.h"
 
@@ -15,6 +14,8 @@ public:
 	ImageBuffer* GetBuffer(uint32 index);
 	ImageBuffer* GetCurrentBuffer();
 	uint32 GetCurrentBufferIndex() const;
+
+	virtual void* GetImageAvailabilitySemaphore() = 0;
 
 	virtual void Present() = 0;
 	virtual void PrepareFrame() = 0;

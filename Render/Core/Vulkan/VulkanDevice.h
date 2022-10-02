@@ -23,6 +23,7 @@ public:
 	void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
 		uint32_t commandBufferCount,
+		void* waitSemaphore,
 		IFence*signalFence) override;
 
 	ISwapChain* CreateSwapChain(uint32_t width, uint32_t height, Format format, uint32_t bufferCount,HWND windowHandle) override;
@@ -59,8 +60,9 @@ protected:
 	VkDevice vkDevice;
 	// Currently assumed to also be the present queue. Unsure if it is even being tested.
 	// TODO: Make sure this also is the present queue or add a possible other queue for presentation.
-	VkQueue vkCommandQueue;
 	VkCommandPool vkCommandPool;
+	VkQueue vkCommandQueue;
+	VkSemaphore commandQueueFinishedSemaphore;
 
 	uint32 graphicsQueueFamilyIndex;
 };

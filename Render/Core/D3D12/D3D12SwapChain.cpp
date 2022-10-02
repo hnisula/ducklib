@@ -41,6 +41,11 @@ D3D12SwapChain::~D3D12SwapChain()
 		d3dSwapChain->Release();
 }
 
+void* D3D12SwapChain::GetImageAvailabilitySemaphore()
+{
+	throw std::runtime_error("Not implemented");
+}
+
 void D3D12SwapChain::Present()
 {
 	DL_D3D12_CHECK(d3dSwapChain->Present(0, 0), "Failed to present");

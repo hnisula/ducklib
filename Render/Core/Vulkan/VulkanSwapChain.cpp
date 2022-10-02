@@ -8,17 +8,22 @@ VulkanSwapChain::~VulkanSwapChain()
 	for (uint32 i = 0; i < numBuffers; ++i)
 		vkDestroyImageView(vkDevice, (VkImageView)buffers[i].apiDescriptor, nullptr);
 
-	vkDestroySemaphore(vkDevice, vkRenderFinishedSemaphore, nullptr);
 	vkDestroySemaphore(vkDevice, vkImageAvailableSemaphore, nullptr);
 }
 
+void* VulkanSwapChain::GetImageAvailabilitySemaphore()
+{
+	return vkImageAvailableSemaphore;
+}
+
+// TODO: Add semaphore for finished rendering as argument!
 void VulkanSwapChain::Present()
 {
 	VkPresentInfoKHR presentInfo{};
 
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	presentInfo.waitSemaphoreCount = 1;
-	presentInfo.pWaitSemaphores = &vkRenderFinishedSemaphore;
+	// presentInfo.waitSemaphoreCount = 1;
+	// presentInfo.pWaitSemaphores = &vkRenderFinishedSemaphore;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &vkSwapChain;
 	presentInfo.pImageIndices = &currentFrameIndex;
@@ -58,9 +63,6 @@ VulkanSwapChain::VulkanSwapChain(
 
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
-	DL_VK_CHECK(
-		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &vkRenderFinishedSemaphore),
-		"Failed to create Vulkan semaphore");
 	DL_VK_CHECK(
 		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &vkImageAvailableSemaphore),
 		"Failed to create Vulkan semaphore");

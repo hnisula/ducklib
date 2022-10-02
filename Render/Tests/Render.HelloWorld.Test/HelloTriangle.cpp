@@ -86,19 +86,17 @@ void RenderFrame()
 
 	// TODO: Add passes and stuff here to see if Vulkan path can be tested yet (before adding emulated passes for D3D12)
 
-	// cmdBuffer->SetScissorRect(scissorRect);
-	// cmdBuffer->SetViewport(viewport);
+	cmdBuffer->SetScissorRect(scissorRect);
+	cmdBuffer->SetViewport(viewport);
 	// cmdBuffer->SetRT(swapChain->GetCurrentBuffer());
 
-	// cmdBuffer->Clear(swapChain->GetCurrentBuffer(), clearColor);
+	// cmdBuffer->Draw();
 
-	// cmdBuffer->Transition(swapChain->GetCurrentBuffer(), ResourceState::RENDER_TARGET, ResourceState::PRESENT);
 
 	cmdBuffer->EndPass();
 	cmdBuffer->End();
 
-	// TODO: VK queue submit with semaphores
-	device->ExecuteCommandBuffers(&cmdBuffer, 1, renderFence);
+	device->ExecuteCommandBuffers(&cmdBuffer, 1, swapChain->GetImageAvailabilitySemaphore(), renderFence);
 
 	swapChain->Present();
 }

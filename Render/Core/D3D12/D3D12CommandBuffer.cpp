@@ -99,7 +99,7 @@ void D3D12CommandBuffer::SetViewport(const Viewport& viewport)
 {
 	D3D12_VIEWPORT d3dViewport{
 		viewport.topLeftX,
-		viewport.topleftY,
+		viewport.topLeftY,
 		viewport.width,
 		viewport.height,
 		viewport.minDepth,

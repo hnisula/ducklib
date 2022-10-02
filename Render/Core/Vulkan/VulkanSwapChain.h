@@ -12,6 +12,8 @@ public:
 
 	~VulkanSwapChain() override;
 
+	void* GetImageAvailabilitySemaphore() override;
+
 	void Present() override;
 	void PrepareFrame() override;
 
@@ -29,7 +31,6 @@ protected:
 	VkSwapchainKHR vkSwapChain;
 	VkDevice vkDevice;
 	VkQueue vkPresentQueue;
-	VkSemaphore vkRenderFinishedSemaphore;
 	VkSemaphore vkImageAvailableSemaphore;
 };
 }

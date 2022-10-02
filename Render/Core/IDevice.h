@@ -32,6 +32,7 @@ public:
 	virtual void ExecuteCommandBuffers(
 		ICommandBuffer** commandBuffers,
 		uint32_t numCommandBuffers,
+		void* waitSemaphore,
 		IFence* signalFence) = 0;
 
 	virtual IFence* CreateFence() = 0;

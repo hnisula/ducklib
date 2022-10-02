@@ -23,6 +23,8 @@ public:
 		uint32 descriptorSize);
 	~D3D12SwapChain() override;
 
+	void* GetImageAvailabilitySemaphore() override;
+
 	void Present() override;
 	void PrepareFrame() override;
 

@@ -33,7 +33,7 @@ public:
 	void DestroySwapChain(ISwapChain* swapChain) override;
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
 
-	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers, IFence*signalFence) override;
+	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers, void* waitSemaphore, IFence*signalFence) override;
 
 	IFence* CreateFence() override;
 

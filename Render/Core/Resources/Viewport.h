@@ -5,7 +5,7 @@ namespace DuckLib::Render
 struct Viewport
 {
 	float topLeftX;
-	float topleftY;
+	float topLeftY;
 	float width;
 	float height;
 	float minDepth;
