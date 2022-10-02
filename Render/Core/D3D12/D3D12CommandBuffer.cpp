@@ -32,11 +32,6 @@ void D3D12CommandBuffer::Reset()
 		throw std::runtime_error("Failed to reset D3D12 command list");
 }
 
-void D3D12CommandBuffer::Close()
-{
-	apiCommandList->Close();
-}
-
 void D3D12CommandBuffer::Begin()
 {
 	// apiCommandList->ClearRenderTargetView(
@@ -46,8 +41,14 @@ void D3D12CommandBuffer::Begin()
 	// 	nullptr);
 }
 
-void D3D12CommandBuffer::End() {}
-void D3D12CommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer*) {}
+void D3D12CommandBuffer::End()
+{
+	apiCommandList->Close();
+}
+void D3D12CommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer*)
+{
+	
+}
 void D3D12CommandBuffer::EndPass() {}
 void D3D12CommandBuffer::SetPipelineState(PipelineState pipelineState) {}
 

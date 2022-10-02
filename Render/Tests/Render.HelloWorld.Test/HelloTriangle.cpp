@@ -5,7 +5,6 @@
 #include "Render/Core/IDevice.h"
 #include "Render/Core/D3D12/D3D12RHI.h"
 #include "Render/Core/ISwapChain.h"
-#include "Render/Core/D3D12/D3D12Device.h"
 #include "Render/Core/Vulkan/VulkanRHI.h"
 
 using namespace DuckLib;
@@ -19,7 +18,7 @@ HWND window;
 
 #define DL_D3D_API 0
 #define DL_VK_API 1
-#define DL_TEST_API DL_D3D_API
+#define DL_TEST_API DL_VK_API
 
 #if DL_TEST_API == DL_D3D_API
 IRHI* rhi = D3D12RHI::GetInstance();
@@ -44,17 +43,10 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 	if (adapters.IsEmpty())
 		throw std::runtime_error("No adapters found");
 
-	FrameBufferDesc frameBufferDesc;
-	SubPassDescription subPassDesc;
-	PassDescription passDesc;
-
-	frameBufferDesc.format = Format::B8G8R8A8_UNORM;
-
-	subPassDesc.frameBufferDescRefs.Append(FrameBufferDescRef{ 0, ImageBufferLayout::COLOR });
-	subPassDesc.pipelineBindPoint = PipelineBindPoint::GRAPHICS;
-
-	passDesc.frameBufferDescs.Append(frameBufferDesc);
-	passDesc.subPassDescs.Append(subPassDesc);
+	FrameBufferDesc frameBufferDesc(Format::B8G8R8A8_UNORM);
+	FrameBufferDescRef frameBufferDescRef(0, ImageBufferLayout::COLOR);
+	SubPassDescription subPassDesc(PipelineBindPoint::GRAPHICS, &frameBufferDescRef, 1);
+	PassDescription passDesc(&frameBufferDesc, 1, &subPassDesc, 1);
 
 	adapter = adapters[0];
 	device = adapter->CreateDevice(); // No parameters? Seems odd

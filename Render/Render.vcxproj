@@ -56,6 +56,7 @@
     <ClCompile Include="Core\D3D12\D3D12Adapter.cpp" />
     <ClCompile Include="Core\D3D12\D3D12Device.cpp" />
     <ClInclude Include="Core\IPass.h" />
+    <ClInclude Include="Core\PassDescription.h" />
     <ClInclude Include="Core\PipelineState.h" />
     <ClInclude Include="Core\Resources\Buffer.h" />
     <ClInclude Include="Core\Resources\Constants.h" />

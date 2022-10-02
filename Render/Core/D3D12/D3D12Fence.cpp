@@ -16,5 +16,11 @@ void D3D12Fence::Wait()
 	}
 }
 
-D3D12Fence::D3D12Fence(ID3D12Fence* d3dFence) : d3dFence(d3dFence), expectedValue(1) {}
+D3D12Fence::D3D12Fence(ID3D12Fence* d3dFence) : d3dFence(d3dFence), expectedValue(1)
+{
+	fenceEventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+
+	if (fenceEventHandle == nullptr)
+		throw std::runtime_error("Failed to create D3D12 fence event handle");
+}
 }

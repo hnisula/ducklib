@@ -4,6 +4,7 @@
 #include "IFence.h"
 #include "IFrameBuffer.h"
 #include "ISwapChain.h"
+#include "PassDescription.h"
 
 namespace DuckLib::Render
 {

@@ -12,8 +12,8 @@ public:
 
 	void* GetApiHandle() const override;
 
+	// TODO: Remove?
 	void Reset() override;
-	void Close() override;
 
 	void Begin() override;
 	void End() override;

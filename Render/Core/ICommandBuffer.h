@@ -21,7 +21,6 @@ public:
 	void SetClearColor(const float* rgbaColor);
 
 	virtual void Reset() = 0;
-	virtual void Close() = 0; // TODO: Put in End()?
 
 	virtual void Begin() = 0;
 	virtual void End() = 0;

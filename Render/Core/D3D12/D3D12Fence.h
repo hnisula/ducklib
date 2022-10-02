@@ -7,6 +7,7 @@ namespace DuckLib::Render
 {
 class D3D12Fence : public IFence
 {
+public:
 	~D3D12Fence() override;
 
 	void Wait() override;

@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include "../IAlloc.h"
 
 namespace DuckLib
@@ -12,8 +11,8 @@ public:
 	TArray(uint32 initialCapacity);
 	TArray(const T* other, uint32 otherLength);
 	TArray(const T* other, uint32 otherLength, uint32 startCapacity);
-	TArray(const TArray<T>& other);
-	TArray(TArray<T>&& other) noexcept;
+	TArray(const TArray& other);
+	TArray(TArray&& other) noexcept;
 	~TArray();
 
 	void Append(T&& item);
@@ -35,8 +34,8 @@ public:
 	T* Data();
 	const T* Data() const;
 
-	static TArray<T> Attach(T* externalArray, uint32 size, IAlloc* alloc = nullptr);
-	static TArray<T> Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc = nullptr);
+	static TArray Attach(T* externalArray, uint32 size, IAlloc* alloc = nullptr);
+	static TArray Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc = nullptr);
 
 protected:
 	bool EnsureCapacity(uint32 requiredCapacity);
@@ -80,7 +79,7 @@ TArray<T>::TArray(const T* other, uint32 otherLength, uint32 startCapacity)
 }
 
 template <typename T>
-TArray<T>::TArray(const TArray<T>& other)
+TArray<T>::TArray(const TArray& other)
 	: TArray()
 {
 	if (other.isExternalArray)
@@ -101,7 +100,7 @@ TArray<T>::TArray(const TArray<T>& other)
 }
 
 template <typename T>
-TArray<T>::TArray(TArray<T>&& other) noexcept
+TArray<T>::TArray(TArray&& other) noexcept
 	: TArray()
 {
 	alloc = other.alloc;

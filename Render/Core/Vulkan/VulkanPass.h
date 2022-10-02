@@ -1,5 +1,6 @@
 #pragma once
 #include "Lib/vulkan.h"
+#include "../../../Core/Memory/Containers/TArray.h"
 #include "Render/Core/IPass.h"
 
 namespace DuckLib::Render

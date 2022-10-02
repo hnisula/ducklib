@@ -76,9 +76,6 @@ ISwapChain* D3D12Device::CreateSwapChain(
 		descriptorIterator.Offset(1, descriptorSize);
 	}
 
-	// Create fence
-	D3D12Fence* fence = (D3D12Fence*)CreateFence();
-
 	// Create swap chain wrapper
 	D3D12SwapChain* swapChain = alloc->New<D3D12SwapChain>(
 		width,
@@ -87,7 +84,6 @@ ISwapChain* D3D12Device::CreateSwapChain(
 		d3dSwapChain,
 		bufferCount,
 		rtvHandles,
-		fence,
 		descriptorHeap,
 		descriptorSize);
 	swapChains.push_back(swapChain);

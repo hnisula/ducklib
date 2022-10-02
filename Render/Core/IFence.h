@@ -5,7 +5,7 @@ namespace DuckLib::Render
 class IFence
 {
 public:
-	virtual ~IFence() = 0;
+	virtual ~IFence() {}
 
 	virtual void Wait() = 0;
 };

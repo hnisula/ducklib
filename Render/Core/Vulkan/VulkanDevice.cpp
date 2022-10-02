@@ -37,9 +37,9 @@ ICommandBuffer* VulkanDevice::CreateCommandBuffer()
 IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 {
 	// Setup attachments
-	TArray<VkAttachmentDescription> vkAttachmentDescs(nullptr, passDesc.frameBufferDescs.Length());
+	TArray<VkAttachmentDescription> vkAttachmentDescs(nullptr, passDesc.frameBufferDescCount);
 
-	for (uint32 i = 0; i < passDesc.frameBufferDescs.Length(); ++i)
+	for (uint32 i = 0; i < passDesc.frameBufferDescCount; ++i)
 	{
 		vkAttachmentDescs[i] = {};
 		vkAttachmentDescs[i].loadOp = MapToVulkanLoadOp(passDesc.frameBufferDescs[i].loadOp);
@@ -53,12 +53,12 @@ IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 	}
 
 	// Setup subpasses
-	TArray<VkAttachmentReference*> vkAttachmentRefPtrs(passDesc.subPassDescs.Length());
-	TArray<VkSubpassDescription> vkSubPassDescs(nullptr, passDesc.subPassDescs.Length());
+	TArray<VkAttachmentReference*> vkAttachmentRefPtrs(passDesc.subPassDescCount);
+	TArray<VkSubpassDescription> vkSubPassDescs(nullptr, passDesc.subPassDescCount);
 
-	for (uint32 i = 0; i < passDesc.subPassDescs.Length(); ++i)
+	for (uint32 i = 0; i < passDesc.subPassDescCount; ++i)
 	{
-		uint32 attachmentRefCount = passDesc.subPassDescs[i].frameBufferDescRefs.Length();
+		uint32 attachmentRefCount = passDesc.subPassDescs[i].frameBufferDescRefCount;
 		vkAttachmentRefPtrs.Append(alloc->Allocate<VkAttachmentReference>(attachmentRefCount));
 		TArray vkAttachmentRefs(vkAttachmentRefPtrs.Last(), attachmentRefCount);
 
@@ -82,7 +82,7 @@ IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 	passCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
 	passCreateInfo.attachmentCount = vkAttachmentDescs.Length();
 	passCreateInfo.pAttachments = vkAttachmentDescs.Data();
-	passCreateInfo.subpassCount = passDesc.subPassDescs.Length();
+	passCreateInfo.subpassCount = passDesc.subPassDescCount;
 	passCreateInfo.pSubpasses = vkSubPassDescs.Data();
 
 	DL_VK_CHECK(vkCreateRenderPass(vkDevice, &passCreateInfo, nullptr, &vkPass), "Failed to create Vulkan render pass");

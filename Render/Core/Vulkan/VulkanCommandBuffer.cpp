@@ -51,6 +51,19 @@ void VulkanCommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer* frame
 	vkCmdBeginRenderPass(vkCommandBuffer, &beginPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 }
 
+void VulkanCommandBuffer::EndPass() {}
+void VulkanCommandBuffer::SetPipelineState(PipelineState pipelineState) {}
+void VulkanCommandBuffer::Transition(ImageBuffer* image, ResourceState from, ResourceState to) {}
+void VulkanCommandBuffer::SetRT(ImageBuffer* rt) {}
+void VulkanCommandBuffer::SetIndexBuffer(Buffer* buffer) {}
+void VulkanCommandBuffer::SetVertexBuffers(Buffer** buffer, uint32 count, uint32 startSlot) {}
+void VulkanCommandBuffer::SetInputDeclaration(InputDescription* inputDescription) {}
+void VulkanCommandBuffer::SetViewport(const Viewport& viewport) {}
+void VulkanCommandBuffer::SetScissorRect(const Rect& rect) {}
+void VulkanCommandBuffer::SetPrimitiveTopology(PrimitiveTopology topology) {}
+void VulkanCommandBuffer::SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers) {}
+void VulkanCommandBuffer::Draw() {}
+
 VulkanCommandBuffer::VulkanCommandBuffer(VkCommandBuffer vkCommandBuffer)
 	: vkCommandBuffer(vkCommandBuffer) {}
 }

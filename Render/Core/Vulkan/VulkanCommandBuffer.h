@@ -13,7 +13,6 @@ public:
 	void* GetApiHandle() const override;
 
 	void Reset() override;
-	void Close() override;
 
 	void Begin() override;
 	void End() override;
@@ -23,6 +22,7 @@ public:
 
 	void SetPipelineState(PipelineState pipelineState) override;
 
+	// TODO: Remove?
 	void Transition(ImageBuffer* image, ResourceState from, ResourceState to) override;
 	void SetRT(ImageBuffer* rt) override;
 	void SetIndexBuffer(Buffer* buffer) override;

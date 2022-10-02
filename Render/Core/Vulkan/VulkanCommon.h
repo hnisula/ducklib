@@ -1,7 +1,7 @@
 #pragma once
 
 #include <stdexcept>
-#include "Render/Core/IPass.h"
+#include "Render/Core/PassDescription.h"
 
 namespace DuckLib::Render
 {
