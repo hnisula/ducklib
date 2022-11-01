@@ -16,11 +16,11 @@ struct FrameBufferDesc
 
 	FrameBufferDesc(
 		Format format,
-		FrameBufferLoadOp loadOp = FrameBufferLoadOp::LOAD,
+		FrameBufferLoadOp loadOp = FrameBufferLoadOp::CLEAR,
 		FrameBufferStoreOp storeOp = FrameBufferStoreOp::STORE,
-		FrameBufferLoadOp stencilLoadOp = FrameBufferLoadOp::LOAD,
-		FrameBufferStoreOp stencilStoreOp = FrameBufferStoreOp::STORE,
-		ImageBufferLayout initialLayout = ImageBufferLayout::COLOR,
+		FrameBufferLoadOp stencilLoadOp = FrameBufferLoadOp::DONT_CARE,
+		FrameBufferStoreOp stencilStoreOp = FrameBufferStoreOp::DONT_CARE,
+		ImageBufferLayout initialLayout = ImageBufferLayout::UNDEFINED,
 		ImageBufferLayout finalLayout = ImageBufferLayout::PRESENT)
 		: format(format)
 		, loadOp(loadOp)

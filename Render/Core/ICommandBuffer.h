@@ -18,6 +18,7 @@ public:
 	virtual void* GetApiHandle() const = 0;
 
 	// TODO: Make virtual?
+	// RGBA
 	void SetClearColor(const float* rgbaColor);
 
 	virtual void Reset() = 0;

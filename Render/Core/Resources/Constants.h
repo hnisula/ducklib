@@ -19,6 +19,7 @@ enum class FrameBufferStoreOp
 
 enum class ImageBufferLayout
 {
+	UNDEFINED,
 	COLOR, // DRAW?
 	PRESENT,
 	TRANSFER

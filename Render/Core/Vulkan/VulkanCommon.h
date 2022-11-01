@@ -34,6 +34,7 @@ inline VkImageLayout MapToVulkanImageLayout(ImageBufferLayout layout)
 {
 	switch (layout)
 	{
+	case ImageBufferLayout::UNDEFINED: return VK_IMAGE_LAYOUT_UNDEFINED;
 	case ImageBufferLayout::COLOR: return VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 	case ImageBufferLayout::PRESENT: return VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 	case ImageBufferLayout::TRANSFER: return VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
