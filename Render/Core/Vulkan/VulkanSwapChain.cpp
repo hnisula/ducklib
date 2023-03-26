@@ -1,5 +1,6 @@
 #include "VulkanSwapChain.h"
 #include "VulkanCommon.h"
+#include "VulkanSemaphore.h"
 
 namespace DuckLib::Render
 {
@@ -16,14 +17,15 @@ void* VulkanSwapChain::GetImageAvailabilitySemaphore()
 	return vkImageAvailableSemaphore;
 }
 
-// TODO: Add semaphore for finished rendering as argument!
+// TODO: Add semaphore for finished rendering as argument, to decouple swap chain (properly, if possible in both APIs)
 void VulkanSwapChain::Present()
 {
 	VkPresentInfoKHR presentInfo{};
+	const VkSemaphore vkWaitSemaphore = ((VulkanSemaphore*)vkFrameRenderFinishSemaphore)->vkSemaphore;
 
 	presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-	// presentInfo.waitSemaphoreCount = 1;
-	// presentInfo.pWaitSemaphores = &vkRenderFinishedSemaphore;
+	presentInfo.waitSemaphoreCount = 1;
+	presentInfo.pWaitSemaphores = & vkWaitSemaphore;
 	presentInfo.swapchainCount = 1;
 	presentInfo.pSwapchains = &vkSwapChain;
 	presentInfo.pImageIndices = &currentFrameIndex;
@@ -44,7 +46,8 @@ VulkanSwapChain::VulkanSwapChain(
 	uint32 bufferCount,
 	const ImageBuffer* images,
 	VkDevice vkDevice,
-	VkQueue vkPresentQueue)
+	VkQueue vkPresentQueue,
+	ISemaphore* frameRenderFinishedSemaphore)
 	: ISwapChain()
 {
 	this->width = width;
@@ -54,6 +57,7 @@ VulkanSwapChain::VulkanSwapChain(
 	this->numBuffers = bufferCount;
 	this->vkDevice = vkDevice;
 	this->vkPresentQueue = vkPresentQueue;
+	this->vkFrameRenderFinishSemaphore = frameRenderFinishedSemaphore;
 
 	for (uint32 i = 0; i < bufferCount; ++i)
 		this->buffers[i] = images[i];

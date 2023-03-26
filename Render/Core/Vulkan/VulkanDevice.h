@@ -1,4 +1,5 @@
 #pragma once
+#include "VulkanSemaphore.h"
 #include "Lib/vulkan.h"
 #include "../IDevice.h"
 #include "Core/Memory/IAlloc.h"
@@ -62,7 +63,7 @@ protected:
 	// TODO: Make sure this also is the present queue or add a possible other queue for presentation.
 	VkCommandPool vkCommandPool;
 	VkQueue vkCommandQueue;
-	VkSemaphore commandQueueFinishedSemaphore;
+	VulkanSemaphore* commandQueueFinishedSemaphore; // TODO: Change back to VkSemaphore? Sync primitive triage
 
 	uint32 graphicsQueueFamilyIndex;
 };

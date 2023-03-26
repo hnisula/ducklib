@@ -121,6 +121,15 @@
     <ClInclude Include="Core\PassDescription.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="Core\ISemaphore.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\D3D12.h\D3D12Semaphore.h">
+      <Filter>Core\D3D12</Filter>
+    </ClInclude>
+    <ClInclude Include="Core\Vulkan\VulkanSemaphore.h">
+      <Filter>Core\Vulkan</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Core">
@@ -184,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="Core\D3D12\D3D12Fence.cpp">
       <Filter>Core\D3D12</Filter>
+    </ClCompile>
+    <ClCompile Include="Core\Vulkan\VulkanSemaphore.cpp">
+      <Filter>Core\Vulkan</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

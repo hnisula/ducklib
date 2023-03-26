@@ -1,8 +1,9 @@
 #pragma once
 
+#include "../Types.h"
+
 #ifdef DL_TRACK_ALLOCS
 #include <mutex>
-#include "../Types.h"
 
 namespace DuckLib::Internal::Memory
 {

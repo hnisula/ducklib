@@ -33,7 +33,10 @@ public:
 	void DestroySwapChain(ISwapChain* swapChain) override;
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
 
-	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32_t numCommandBuffers, void* waitSemaphore, IFence*signalFence) override;
+	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers,
+		uint32_t numCommandBuffers,
+		void* waitSemaphore,
+		IFence* signalFence) override;
 
 	IFence* CreateFence() override;
 
@@ -62,7 +65,7 @@ private:
 
 	ID3D12CommandQueue* commandQueue;
 
-	ID3D12DescriptorHeap* descriptorHeap;
+	ID3D12DescriptorHeap* descriptorHeap{};
 
 	// TODO: Replace this temporary store with an allocation object
 	// TODO: ALSO use TArray instead of vector

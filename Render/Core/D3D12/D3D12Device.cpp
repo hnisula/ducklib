@@ -44,7 +44,13 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	IDXGISwapChain1* d3dSwapChain1;
 
 	DL_D3D12_CHECK(
-		d3dFactory->CreateSwapChainForHwnd(commandQueue, windowHandle, &swapChainDesc, nullptr, nullptr, &d3dSwapChain1),
+		d3dFactory->CreateSwapChainForHwnd(
+			commandQueue,
+			windowHandle,
+			&swapChainDesc,
+			nullptr,
+			nullptr,
+			&d3dSwapChain1),
 		"Failed to create swap chain");
 
 	d3dSwapChain1->QueryInterface(__uuidof(IDXGISwapChain3), (void**)&d3dSwapChain);
@@ -136,8 +142,7 @@ void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
 }
 
 void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
-{
-}
+{}
 
 void D3D12Device::ExecuteCommandBuffers(
 	ICommandBuffer** commandBuffers,
@@ -166,7 +171,7 @@ IFence* D3D12Device::CreateFence()
 		d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3dFence)),
 		"Failed to create fence for frame syncing");
 
-	D3D12Fence* fence = alloc->Allocate<D3D12Fence>();
+	auto* fence = alloc->Allocate<D3D12Fence>();
 	return new(fence) D3D12Fence(d3dFence);
 }
 
@@ -178,9 +183,7 @@ D3D12Device::D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
 }
 
-ID3D12CommandQueue* D3D12Device::CreateQueue(
-	D3D12_COMMAND_LIST_TYPE type,
-	D3D12_COMMAND_QUEUE_FLAGS flags)
+ID3D12CommandQueue* D3D12Device::CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags)
 {
 	ID3D12CommandQueue* queue;
 	D3D12_COMMAND_QUEUE_DESC queueDesc{};

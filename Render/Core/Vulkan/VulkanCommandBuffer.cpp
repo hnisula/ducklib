@@ -49,6 +49,8 @@ void VulkanCommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer* frame
 	beginPassInfo.framebuffer = vulkanFrameBuffer->vkFrameBuffer;
 
 	vkCmdBeginRenderPass(vkCommandBuffer, &beginPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	// TODO: Add vkCmdBindPipeline here?
 }
 
 void VulkanCommandBuffer::EndPass()

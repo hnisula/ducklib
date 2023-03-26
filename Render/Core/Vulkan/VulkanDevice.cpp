@@ -14,7 +14,9 @@ VulkanDevice::~VulkanDevice()
 {
 	vkDestroyDevice(vkDevice, nullptr);
 	vkDestroyCommandPool(vkDevice, vkCommandPool, nullptr);
-	vkDestroySemaphore(vkDevice, commandQueueFinishedSemaphore, nullptr);
+
+	commandQueueFinishedSemaphore->~VulkanSemaphore();
+	alloc->Free(commandQueueFinishedSemaphore);
 }
 
 ICommandBuffer* VulkanDevice::CreateCommandBuffer()
@@ -161,7 +163,7 @@ void VulkanDevice::ExecuteCommandBuffers(
 	submitInfo.pWaitSemaphores = &vkWaitSemaphore;
 	submitInfo.pWaitDstStageMask = &waitStage;
 	submitInfo.signalSemaphoreCount = 1;
-	submitInfo.pSignalSemaphores = &commandQueueFinishedSemaphore;
+	submitInfo.pSignalSemaphores = &commandQueueFinishedSemaphore->vkSemaphore;
 
 	DL_VK_CHECK(
 		vkQueueSubmit(vkCommandQueue, 1, &submitInfo, ((VulkanFence*)signalFence)->vkFence),
@@ -248,7 +250,15 @@ ISwapChain* VulkanDevice::CreateSwapChain(uint32_t width, uint32_t height, Forma
 	// Create swap chain wrapper
 	VulkanSwapChain* swapChain = alloc->Allocate<VulkanSwapChain>();
 
-	new(swapChain) VulkanSwapChain(width, height, format, vkSwapChain, imageCount, imageBuffers, vkDevice, vkCommandQueue);
+	new(swapChain) VulkanSwapChain(width,
+		height,
+		format,
+		vkSwapChain,
+		imageCount,
+		imageBuffers,
+		vkDevice,
+		vkCommandQueue,
+		commandQueueFinishedSemaphore);
 
 	return swapChain;
 }
@@ -284,7 +294,7 @@ VulkanDevice::VulkanDevice(
 	, vkCommandQueue(commandQueue)
 	, graphicsQueueFamilyIndex(graphicsQueueFamilyIndex)
 {
-	// TODO: Maybe be consistent on where things are created? This is getting out of hand...
+	// TODO: Maybe be consistent on where things are created?
 
 	VkCommandPoolCreateInfo cmdPoolCreateInfo{};
 
@@ -294,13 +304,16 @@ VulkanDevice::VulkanDevice(
 
 	DL_VK_CHECK(vkCreateCommandPool(vkDevice, &cmdPoolCreateInfo, nullptr, &vkCommandPool), "Failed to create Vulkan command pool");
 
+	VkSemaphore vkCommandQueueFinishedSemaphore;
 	VkSemaphoreCreateInfo semaphoreCreateInfo{};
 
 	semaphoreCreateInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
 
 	DL_VK_CHECK(
-		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &commandQueueFinishedSemaphore),
+		vkCreateSemaphore(vkDevice, &semaphoreCreateInfo, nullptr, &vkCommandQueueFinishedSemaphore),
 		"Failed to create Vulkan command-queue-finished semaphore");
+
+	commandQueueFinishedSemaphore = alloc->New<VulkanSemaphore>(vkCommandQueueFinishedSemaphore, vkDevice);
 }
 
 VkSurfaceKHR VulkanDevice::CreateWindowSurface(HWND windowHandle)

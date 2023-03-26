@@ -4,7 +4,7 @@
 
 namespace DuckLib::Render
 {
-IAdapter::~IAdapter() { }
+IAdapter::~IAdapter() = default;
 
 uint32_t IAdapter::GetDeviceId() const
 {

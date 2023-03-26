@@ -1,4 +1,5 @@
 #pragma once
+#include "ISemaphore.h"
 #include "Resources/Constants.h"
 #include "Resources/ImageBuffer.h"
 

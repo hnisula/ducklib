@@ -16,6 +16,7 @@ constexpr int WND_HEIGHT = 600;
 bool runTest = true;
 HWND window;
 
+// ReSharper disable once CppInconsistentNaming
 #define DL_D3D_API 0
 #define DL_VK_API 1
 #define DL_TEST_API DL_VK_API
@@ -34,7 +35,7 @@ ISwapChain* swapChain;
 ICommandBuffer* cmdBuffer;
 IPass* pass;
 IFrameBuffer* frameBuffers[2];
-IFence* renderFence;
+IFence* frameRenderFence;
 
 void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 {
@@ -46,14 +47,14 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 	FrameBufferDesc frameBufferDesc(Format::B8G8R8A8_UNORM);
 	FrameBufferDescRef frameBufferDescRef(0, ImageBufferLayout::COLOR);
 	SubPassDescription subPassDesc(PipelineBindPoint::GRAPHICS, &frameBufferDescRef, 1);
-	PassDescription passDesc(&frameBufferDesc, 1, &subPassDesc, 1);
+	const PassDescription passDesc(&frameBufferDesc, 1, &subPassDesc, 1);
 
 	adapter = adapters[0];
 	device = adapter->CreateDevice(); // No parameters? Seems odd
 	swapChain = device->CreateSwapChain(width, height, Format::B8G8R8A8_UNORM, 2, windowHandle);
 	cmdBuffer = device->CreateCommandBuffer();
 	pass = device->CreatePass(passDesc);
-	renderFence = device->CreateFence();
+	frameRenderFence = device->CreateFence();
 
 	ImageBuffer* imageBuffer1 = swapChain->GetBuffer(0);
 	ImageBuffer* imageBuffer2 = swapChain->GetBuffer(1);
@@ -68,23 +69,17 @@ void RenderFrame()
 {
 	Sleep(20);
 
-	renderFence->Wait();
+	frameRenderFence->Wait();
 	swapChain->PrepareFrame();
 
 	cmdBuffer->Reset();
 	cmdBuffer->Begin();
 
+	// TODO: Add passes and stuff here to see if Vulkan path can be tested yet (before adding emulated passes for D3D12) - done?
 	cmdBuffer->BeginPass(pass, frameBuffers[swapChain->GetCurrentBufferIndex()]);
 
-	// cmdBuffer->Transition(
-	// 	swapChain->GetCurrentBuffer(),
-	// 	ResourceState::PRESENT,
-	// 	ResourceState::RENDER_TARGET);
-
-	Rect scissorRect{ 0, 0, WND_WIDTH, WND_HEIGHT };
-	Viewport viewport{ 0.0f, 0.0f, (float)WND_WIDTH, (float)WND_HEIGHT, 0, 1 };
-
-	// TODO: Add passes and stuff here to see if Vulkan path can be tested yet (before adding emulated passes for D3D12)
+	constexpr Rect scissorRect{ 0, 0, WND_WIDTH, WND_HEIGHT };
+	constexpr Viewport viewport{ 0.0f, 0.0f, (float)WND_WIDTH, (float)WND_HEIGHT, 0, 1 };
 
 	cmdBuffer->SetScissorRect(scissorRect);
 	cmdBuffer->SetViewport(viewport);
@@ -92,11 +87,10 @@ void RenderFrame()
 
 	// cmdBuffer->Draw();
 
-
 	cmdBuffer->EndPass();
 	cmdBuffer->End();
 
-	device->ExecuteCommandBuffers(&cmdBuffer, 1, swapChain->GetImageAvailabilitySemaphore(), renderFence);
+	device->ExecuteCommandBuffers(&cmdBuffer, 1, swapChain->GetImageAvailabilitySemaphore(), frameRenderFence);
 
 	swapChain->Present();
 }
@@ -148,10 +142,10 @@ HWND InitWindow(uint32_t width, uint32_t height, HINSTANCE hInstance)
 	RegisterClassExA(&wndClass);
 	AdjustWindowRectEx(&clientAreaRect, WS_OVERLAPPEDWINDOW, false, 0);
 
-	uint32_t windowWidth = clientAreaRect.right - clientAreaRect.left;
-	uint32_t windowHeight = clientAreaRect.bottom - clientAreaRect.top;
+	const uint32_t windowWidth = clientAreaRect.right - clientAreaRect.left;
+	const uint32_t windowHeight = clientAreaRect.bottom - clientAreaRect.top;
 
-	HWND newWindow = CreateWindowExA(
+	const HWND newWindow = CreateWindowExA(
 		0,
 		"renderWindowClass",
 		"Hello Triangle sample",

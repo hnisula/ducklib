@@ -26,11 +26,13 @@ protected:
 		uint32 bufferCount,
 		const ImageBuffer* images,
 		VkDevice vkDevice,
-		VkQueue vkPresentQueue);
+		VkQueue vkPresentQueue,
+		ISemaphore* frameRenderFinishedSemaphore);
 
 	VkSwapchainKHR vkSwapChain;
 	VkDevice vkDevice;
 	VkQueue vkPresentQueue;
 	VkSemaphore vkImageAvailableSemaphore;
+	ISemaphore* vkFrameRenderFinishSemaphore;
 };
 }
