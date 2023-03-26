@@ -1,10 +1,7 @@
 #pragma once
-#include <cstdint>
-#include "Format.h"
+#include "Constants.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct InputComponent
 {
@@ -22,5 +19,4 @@ struct InputDescription
 	InputComponent* inputComponents;
 	uint32 numInputComponents;
 };
-}
 }

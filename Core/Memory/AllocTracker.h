@@ -1,8 +1,9 @@
 #pragma once
 
+#include "../Types.h"
+
 #ifdef DL_TRACK_ALLOCS
 #include <mutex>
-#include "../Types.h"
 
 namespace DuckLib::Internal::Memory
 {
@@ -34,7 +35,7 @@ public:
 	void Clear();
 
 protected:
-	uint32 FindAlloc(void* ptr);
+	uint32 FindAlloc(const void* ptr);
 
 	const uint32 START_CAPACITY = 16;
 

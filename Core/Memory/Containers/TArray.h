@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include "../IAlloc.h"
 
 namespace DuckLib
@@ -12,8 +11,8 @@ public:
 	TArray(uint32 initialCapacity);
 	TArray(const T* other, uint32 otherLength);
 	TArray(const T* other, uint32 otherLength, uint32 startCapacity);
-	TArray(const TArray<T>& other);
-	TArray(TArray<T>&& other) noexcept;
+	TArray(const TArray& other);
+	TArray(TArray&& other) noexcept;
 	~TArray();
 
 	void Append(T&& item);
@@ -23,17 +22,20 @@ public:
 
 	uint32 Length() const;
 	uint32 Capacity() const;
+	bool IsEmpty() const;
 	void Resize(uint32 newLength);
 	void Reserve(uint32 newCapacity);
 
 	T& operator [](uint32 i);
 	const T& operator [](uint32 i) const;
+	T& First();
+	T& Last();
 
 	T* Data();
 	const T* Data() const;
 
-	static TArray<T> Attach(T* externalArray, uint32 size, IAlloc* alloc = nullptr);
-	static TArray<T> Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc = nullptr);
+	static TArray Attach(T* externalArray, uint32 size, IAlloc* alloc = nullptr);
+	static TArray Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc = nullptr);
 
 protected:
 	bool EnsureCapacity(uint32 requiredCapacity);
@@ -70,12 +72,14 @@ TArray<T>::TArray(const T* other, uint32 otherLength, uint32 startCapacity)
 	: TArray()
 {
 	EnsureCapacity(startCapacity);
-	memcpy(array, other, sizeof(T) * otherLength);
 	length = otherLength;
+
+	if (other)
+		memcpy(array, other, sizeof(T) * otherLength);
 }
 
 template <typename T>
-TArray<T>::TArray(const TArray<T>& other)
+TArray<T>::TArray(const TArray& other)
 	: TArray()
 {
 	if (other.isExternalArray)
@@ -96,7 +100,7 @@ TArray<T>::TArray(const TArray<T>& other)
 }
 
 template <typename T>
-TArray<T>::TArray(TArray<T>&& other) noexcept
+TArray<T>::TArray(TArray&& other) noexcept
 	: TArray()
 {
 	alloc = other.alloc;
@@ -159,6 +163,12 @@ uint32 TArray<T>::Capacity() const
 }
 
 template <typename T>
+bool TArray<T>::IsEmpty() const
+{
+	return length == 0;
+}
+
+template <typename T>
 void TArray<T>::Resize(uint32 newLength)
 {
 	EnsureCapacity(newLength);
@@ -182,6 +192,18 @@ template <typename T>
 const T& TArray<T>::operator[](uint32 i) const
 {
 	return array[i];
+}
+
+template <typename T>
+T& TArray<T>::First()
+{
+	return this->operator[](0);
+}
+
+template <typename T>
+T& TArray<T>::Last()
+{
+	return this->operator[](length - 1);
 }
 
 template <typename T>

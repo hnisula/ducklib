@@ -1,24 +1,29 @@
 #pragma once
 
 #include "../../Core/Types.h"
+#include "IDevice.h"
 
 namespace DuckLib::Render
 {
 class IAdapter
 {
 public:
-
-	IAdapter(const char* description, bool isHardware);
 	virtual ~IAdapter();
 
+	// TODO: Perhaps object to change
 	virtual void* GetApiHandle() const = 0;
+
+	uint32_t GetDeviceId() const;
+	const char* GetDescription() const;
 	bool IsHardware() const;
 
+	virtual IDevice* CreateDevice() = 0;
+
 protected:
+	IAdapter(const char* description, bool isHardware);
 
-	static constexpr uint32 MAX_DESCRIPTION_SIZE = 128;
-
-	char description[MAX_DESCRIPTION_SIZE];
+	char* description;
+	uint32 deviceId;
 	bool isHardware;
 };
 }

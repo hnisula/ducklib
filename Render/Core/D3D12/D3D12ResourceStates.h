@@ -1,9 +1,7 @@
 #pragma once
 #include <d3d12.h>
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 // The order of these must match the one in the ResourceState enum
 static D3D12_RESOURCE_STATES d3d12ResourceStates[] =
@@ -15,6 +13,5 @@ static D3D12_RESOURCE_STATES d3d12ResourceStates[] =
 inline D3D12_RESOURCE_STATES MapToD3D12ResourceState(ResourceState resourceState)
 {
 	return d3d12ResourceStates[(uint32)resourceState];
-}
 }
 }

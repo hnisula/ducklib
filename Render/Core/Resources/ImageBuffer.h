@@ -1,10 +1,7 @@
 #pragma once
-#include <cstdint>
-#include "Format.h"
+#include "Constants.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct ImageBuffer
 {
@@ -15,5 +12,4 @@ struct ImageBuffer
 	void* apiResource;
 	void* apiDescriptor;
 };
-}
 }

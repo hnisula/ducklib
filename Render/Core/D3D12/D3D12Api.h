@@ -1,28 +1,27 @@
 #pragma once
 #include <cstdint>
-#include <d3d12.h>
-#include <dxgi1_4.h>
 #include <vector>
+#include "Lib/d3d12.h"
+#include "Lib/dxgi1_4.h"
 #include "D3D12Common.h"
 #include "D3D12Adapter.h"
-#include "D3D12SwapChain.h"
 #include "../ICommandBuffer.h"
 #include "../IResourceCommandBuffer.h"
-#include "../IApi.h"
+#include "../IDevice.h"
 #include "../Resources/Format.h"
 
 namespace DuckLib
 {
 namespace Render
 {
-const D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
+constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 
-class D3D12Api : public IApi
+class D3D12Device : public IDevice
 {
 public:
 
-	D3D12Api();
-	~D3D12Api() override;
+	D3D12Device();
+	~D3D12Device() override;
 
 	const std::vector<IAdapter*>& GetAdapters() const override;
 
@@ -33,11 +32,9 @@ public:
 		uint32 bufferCount,
 		HWND windowHandle) override;
 	ICommandBuffer* CreateCommandBuffer() override;
-	IResourceCommandBuffer* CreateResourceCommandBuffer() override;
 
 	void DestroySwapChain(ISwapChain* swapChain) override;
 	void DestroyCommandBuffer(ICommandBuffer* commandBuffer) override;
-	void DestroyResourceCommandBuffer(IResourceCommandBuffer* resourceCommandBuffer) override;
 
 	void ExecuteCommandBuffers(ICommandBuffer** commandBuffers, uint32 numCommandBuffers) override;
 
@@ -61,7 +58,7 @@ private:
 
 	void DestroyAdapters();
 
-	static const uint32 NUM_FRAME_BUFFERS = 4;
+	static constexpr uint32 NUM_FRAME_BUFFERS = 4;
 
 #ifdef _DEBUG
 	ID3D12Debug* debugInterface;

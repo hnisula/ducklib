@@ -1,15 +1,13 @@
 #pragma once
-#include <cstdint>
+#include "Constants.h"
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 struct Buffer
 {
-	uint32 something;
-	uint8_t* data;
+	uint32 size;
+	Format format;
 	void* apiResource;
+	void* apiDescriptor;
 };
-}
 }

@@ -1,8 +1,8 @@
 #include <conio.h>
 #include <exception>
 #include <iostream>
-#include "../../ConcurrentQueue.h"
-#include "../../Thread.h"
+#include "Threading/ConcurrentQueue.h"
+#include "Threading/Thread.h"
 
 using namespace DuckLib;
 
@@ -158,7 +158,7 @@ int main()
 			}
 
 		if (matchedIndex == (uint32)-1)
-			throw std::exception("ERROR: Item missing!");
+			throw std::runtime_error("ERROR: Item missing!");
 	}
 
 	std::cout << "Test completed successfully" << std::endl;

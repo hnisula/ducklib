@@ -88,7 +88,7 @@ bool CheckJobResult(uint32 numJobs)
 	return true;
 }
 
-bool CheckPauseJobResults(PauseJobData* jobData)
+bool CheckPauseJobResults(const PauseJobData* jobData)
 {
 	for (uint32 i = 0; i < NUM_PAUSE_JOBS; ++i)
 		for (uint32 u = 0; u < NUM_CHILD_JOBS; ++u)

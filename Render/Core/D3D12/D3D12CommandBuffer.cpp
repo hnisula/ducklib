@@ -1,27 +1,25 @@
-#include "D3D12CommandBuffer.h"
-
 #include <exception>
+#include "D3D12CommandBuffer.h"
+#include "D3D12Common.h"
 #include "D3D12ResourceStates.h"
 #include "D3D12SwapChain.h"
 
-namespace DuckLib
+namespace DuckLib::Render
 {
-namespace Render
-{
+struct Buffer;
+
 D3D12CommandBuffer::D3D12CommandBuffer(
 	ID3D12GraphicsCommandList1* apiCommandList,
 	ID3D12CommandAllocator* apiCommandAllocator)
-{
-	this->apiCommandList = apiCommandList;
-	this->apiCommandAllocator = apiCommandAllocator;
-}
+	: apiCommandList(apiCommandList)
+	, apiCommandAllocator(apiCommandAllocator) { }
 
 D3D12CommandBuffer::~D3D12CommandBuffer()
 {
 	// TODO: do stuff?
 }
 
-const void* D3D12CommandBuffer::GetApiHandle() const
+void* D3D12CommandBuffer::GetApiHandle() const
 {
 	return apiCommandList;
 }
@@ -29,15 +27,30 @@ const void* D3D12CommandBuffer::GetApiHandle() const
 void D3D12CommandBuffer::Reset()
 {
 	if (apiCommandAllocator->Reset() != S_OK)
-		throw std::exception("Failed to reset D3D12 command allocator");
+		throw std::runtime_error("Failed to reset D3D12 command allocator");
 	if (apiCommandList->Reset(apiCommandAllocator, nullptr) != S_OK)
-		throw std::exception("Failed to reset D3D12 command list");
+		throw std::runtime_error("Failed to reset D3D12 command list");
 }
 
-void D3D12CommandBuffer::Close()
+void D3D12CommandBuffer::Begin()
+{
+	// apiCommandList->ClearRenderTargetView(
+	// 	*(D3D12_CPU_DESCRIPTOR_HANDLE*)&rt->apiDescriptor,
+	// 	clearColorRgba,
+	// 	0,
+	// 	nullptr);
+}
+
+void D3D12CommandBuffer::End()
 {
 	apiCommandList->Close();
 }
+void D3D12CommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer*)
+{
+	
+}
+void D3D12CommandBuffer::EndPass() {}
+void D3D12CommandBuffer::SetPipelineState(PipelineState pipelineState) {}
 
 void D3D12CommandBuffer::Transition(ImageBuffer* image, ResourceState from, ResourceState to)
 {
@@ -62,18 +75,6 @@ void D3D12CommandBuffer::SetRT(ImageBuffer* rt)
 		nullptr);
 }
 
-void D3D12CommandBuffer::SetRT(ISwapChain* swapChain)
-{
-	D3D12SwapChain* d3dSwapChain = (D3D12SwapChain*)swapChain;
-	D3D12_CPU_DESCRIPTOR_HANDLE descriptorHandle = d3dSwapChain->GetCurrentCpuDescriptorHandle();
-
-	apiCommandList->OMSetRenderTargets(
-		1,
-		&descriptorHandle,
-		FALSE,
-		nullptr);
-}
-
 void D3D12CommandBuffer::SetIndexBuffer(Buffer* buffer)
 {
 	apiCommandList->IASetIndexBuffer((D3D12_INDEX_BUFFER_VIEW*)buffer->apiResource);
@@ -91,18 +92,43 @@ void D3D12CommandBuffer::SetVertexBuffers(Buffer** buffer, uint32 count, uint32 
 
 void D3D12CommandBuffer::SetInputDeclaration(InputDescription* inputDescription)
 {
-	D3D12_INPUT_ELEMENT_DESC desc;
-
-	
+	// D3D12_INPUT_ELEMENT_DESC desc;
 }
 
-void D3D12CommandBuffer::Clear(ImageBuffer* rt, float* rgbaColor)
+void D3D12CommandBuffer::SetViewport(const Viewport& viewport)
 {
-	apiCommandList->ClearRenderTargetView(
-		*(D3D12_CPU_DESCRIPTOR_HANDLE*)&rt->apiDescriptor,
-		rgbaColor,
-		0,
-		nullptr);
+	D3D12_VIEWPORT d3dViewport{
+		viewport.topLeftX,
+		viewport.topLeftY,
+		viewport.width,
+		viewport.height,
+		viewport.minDepth,
+		viewport.maxDepth
+	};
+
+	apiCommandList->RSSetViewports(1, &d3dViewport);
 }
+
+void D3D12CommandBuffer::SetScissorRect(const Rect& scissorRect)
+{
+	D3D12_RECT d3dScissorRect { scissorRect.left, scissorRect.top, scissorRect.right, scissorRect.bottom };
+
+	apiCommandList->RSSetScissorRects(1, &d3dScissorRect);
+}
+
+void D3D12CommandBuffer::SetPrimitiveTopology(PrimitiveTopology topology)
+{
+	apiCommandList->IASetPrimitiveTopology(MapD3D12PrimitiveTopology(topology));
+}
+
+void D3D12CommandBuffer::SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers)
+{
+	// d3dbuffers here
+
+	// apiCommandList->IASetVertexBuffers(startIndex, numViews, buffers);
+}
+void D3D12CommandBuffer::Draw()
+{
+	
 }
 }

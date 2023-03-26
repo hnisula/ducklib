@@ -1,13 +1,10 @@
 #pragma once
 
-namespace DuckLib
-{
-namespace Render
+namespace DuckLib::Render
 {
 enum class ResourceState
 {
 	PRESENT,
 	RENDER_TARGET
 };
-}
 }

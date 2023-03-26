@@ -67,7 +67,7 @@ uint32 _stdcall WorkerThreadJob(void* data)
 		}
 
 		if (!jobFiber->currentJob.jobFunction)
-			throw std::exception("Tried to start a fiber with a nullptr job");
+			throw std::runtime_error("Tried to start a fiber with a nullptr job");
 
 		currentFiber = jobFiber;
 		SwitchFiber(currentFiber);
@@ -136,7 +136,7 @@ JobCounter* JobQueue::Push(Job* jobs, uint32 numJobs)
 	JobCounter* jobCounter;
 
 	if (!counterQueue->TryPop(&jobCounter))
-		throw std::exception("Failed to acquire job counter");
+		throw std::runtime_error("Failed to acquire job counter");
 
 	for (uint32 i = 0; i < numJobs; ++i)
 		jobs[i].jobCounter = jobCounter;
@@ -144,7 +144,7 @@ JobCounter* JobQueue::Push(Job* jobs, uint32 numJobs)
 	uint32 jobsQueued = jobQueue->TryPush(jobs, numJobs);
 
 	if (jobsQueued != numJobs)
-		throw std::exception("Failed to push jobs to queue");
+		throw std::runtime_error("Failed to push jobs to queue");
 
 	jobCounter->counter.store(jobsQueued);
 
@@ -176,7 +176,7 @@ Internal::Fiber* JobQueue::GetReadyJobAndFiber()
 	if (jobQueue->TryPop(&newJob))
 	{
 		if (!fiberQueue->TryPop(&newJobFiber))
-			throw std::exception("Failed to acquire fiber for new job");
+			throw std::runtime_error("Failed to acquire fiber for new job");
 
 		newJobFiber->currentJob = newJob;
 		return newJobFiber;
@@ -192,18 +192,18 @@ void JobQueue::ReturnFiberIfJobCompleted(Internal::Fiber* completedFiber)
 		return;
 
 	if (!fiberQueue->TryPush(completedFiber))
-		throw std::exception("Failed to push used fiber back on fiber queue. Wtf?");
+		throw std::runtime_error("Failed to push used fiber back on fiber queue. Wtf?");
 }
 
 void JobQueue::FinalizeCompletedJobCounter(JobCounter* counter)
 {
 	if (!readyPausedJobFiberQueue->TryPush(counter->waitingJobFiber))
-		throw std::exception("Failed to push job onto job queue");
+		throw std::runtime_error("Failed to push job onto job queue");
 
 	counter->Reset();
 
 	if (!counterQueue->TryPush(counter))
-		throw std::exception("Failed to push job counter back on job counter queue");
+		throw std::runtime_error("Failed to push job counter back on job counter queue");
 }
 
 Internal::Fiber JobQueue::CreateFiber(void* fiberData)
