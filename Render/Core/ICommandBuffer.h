@@ -17,10 +17,6 @@ class ICommandBuffer
 public:
 	virtual void* GetApiHandle() const = 0;
 
-	// TODO: Make virtual?
-	// RGBA
-	void SetClearColor(const float* rgbaColor);
-
 	virtual void Reset() = 0;
 
 	virtual void Begin() = 0;
@@ -43,16 +39,5 @@ public:
 	virtual void SetVertexBuffer(uint32_t startIndex, uint32_t numViews, Buffer** buffers) = 0;
 
 	virtual void Draw() = 0;
-
-protected:
-	float clearColorRgba[4];
 };
-
-inline void ICommandBuffer::SetClearColor(const float* rgbaColor)
-{
-	clearColorRgba[0] = rgbaColor[0];
-	clearColorRgba[1] = rgbaColor[1];
-	clearColorRgba[2] = rgbaColor[2];
-	clearColorRgba[3] = rgbaColor[3];
-}
 }

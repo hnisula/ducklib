@@ -61,8 +61,6 @@ void InitRender(uint32_t width, uint32_t height, HWND windowHandle)
 
 	frameBuffers[0] = device->CreateFrameBuffer(&imageBuffer1, 1, pass);
 	frameBuffers[1] = device->CreateFrameBuffer(&imageBuffer2, 1, pass);
-
-	cmdBuffer->SetClearColor(clearColor);
 }
 
 void RenderFrame()

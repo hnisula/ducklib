@@ -38,6 +38,7 @@
     <ClInclude Include="Core\D3D12\D3D12Common.h" />
     <ClInclude Include="Core\D3D12\D3D12Fence.h" />
     <ClInclude Include="Core\D3D12\D3D12Formats.h" />
+    <ClInclude Include="Core\D3D12\D3D12Pass.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceAllocator.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceCommandBuffer.h" />
     <ClInclude Include="Core\D3D12\D3D12ResourceStates.h" />

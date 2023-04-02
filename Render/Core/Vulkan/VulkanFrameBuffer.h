@@ -15,5 +15,6 @@ protected:
 
 	VkFramebuffer vkFrameBuffer;
 	VkExtent2D vkExtent;
+	float clearColorBGRA[4];
 };
 }

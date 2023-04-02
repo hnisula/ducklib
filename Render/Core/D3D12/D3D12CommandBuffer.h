@@ -40,7 +40,7 @@ public:
 protected:
 
 	D3D12CommandBuffer(
-		ID3D12GraphicsCommandList1* apiCommandList,
+		ID3D12GraphicsCommandList4* apiCommandList,
 		ID3D12CommandAllocator* apiCommandAllocator);
 	~D3D12CommandBuffer();
 
@@ -48,7 +48,7 @@ private:
 
 	static constexpr uint32 MAX_SET_VB_COUNT = 32;
 
-	ID3D12GraphicsCommandList1* apiCommandList;
+	ID3D12GraphicsCommandList4* apiCommandList;
 	ID3D12CommandAllocator* apiCommandAllocator;
 };
 }

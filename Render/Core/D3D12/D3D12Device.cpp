@@ -13,7 +13,7 @@ namespace DuckLib::Render
 D3D12Device::~D3D12Device()
 {
 	for (ISwapChain* swapChain : swapChains)
-		DestroySwapChain(swapChain);
+		D3D12Device::DestroySwapChain(swapChain);
 }
 
 ISwapChain* D3D12Device::CreateSwapChain(
@@ -100,7 +100,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 ICommandBuffer* D3D12Device::CreateCommandBuffer()
 {
 	ID3D12CommandAllocator* apiCommandAllocator;
-	ID3D12GraphicsCommandList1* apiCommandList;
+	ID3D12GraphicsCommandList4* apiCommandList;
 
 	HRESULT result = d3dDevice->CreateCommandAllocator(
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
@@ -126,7 +126,14 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 
 IPass* D3D12Device::CreatePass(const PassDescription& passDesc)
 {
-	return nullptr;
+	D3D12_RENDER_PASS_RENDER_TARGET_DESC rtvDesc;
+
+	for (uint32 i = 0; i < passDesc.frameBufferDescCount; ++i)
+	{
+		// TODO: Branch on stencip OP? E.g. if (stencipOp != DONTKARE) create DSV instead of RTV
+		
+		passDesc.frameBufferDescs[i].
+	}
 }
 
 IFrameBuffer* D3D12Device::CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass)

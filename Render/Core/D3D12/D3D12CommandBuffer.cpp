@@ -1,6 +1,7 @@
 #include <exception>
 #include "D3D12CommandBuffer.h"
 #include "D3D12Common.h"
+#include "D3D12Pass.h"
 #include "D3D12ResourceStates.h"
 #include "D3D12SwapChain.h"
 
@@ -9,7 +10,7 @@ namespace DuckLib::Render
 struct Buffer;
 
 D3D12CommandBuffer::D3D12CommandBuffer(
-	ID3D12GraphicsCommandList1* apiCommandList,
+	ID3D12GraphicsCommandList4* apiCommandList,
 	ID3D12CommandAllocator* apiCommandAllocator)
 	: apiCommandList(apiCommandList)
 	, apiCommandAllocator(apiCommandAllocator) { }
@@ -45,10 +46,13 @@ void D3D12CommandBuffer::End()
 {
 	apiCommandList->Close();
 }
-void D3D12CommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer*)
+void D3D12CommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer* frameBuffer)
 {
+	const auto* d3dPass = (const D3D12Pass*)pass;
 	
+	apiCommandList->BeginRenderPass()
 }
+
 void D3D12CommandBuffer::EndPass() {}
 void D3D12CommandBuffer::SetPipelineState(PipelineState pipelineState) {}
 

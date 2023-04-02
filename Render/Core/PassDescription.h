@@ -3,6 +3,8 @@
 
 namespace DuckLib::Render
 {
+constexpr float DEFAULT_CLEAR_COLOR_RGBA[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+
 struct FrameBufferDesc
 {
 	Format format;
@@ -10,6 +12,8 @@ struct FrameBufferDesc
 	FrameBufferStoreOp storeOp;
 	FrameBufferLoadOp stencilLoadOp;
 	FrameBufferStoreOp stencilStoreOp;
+
+	float clearColorRgba[4];
 
 	ImageBufferLayout initialLayout;
 	ImageBufferLayout finalLayout;
@@ -20,6 +24,7 @@ struct FrameBufferDesc
 		FrameBufferStoreOp storeOp = FrameBufferStoreOp::STORE,
 		FrameBufferLoadOp stencilLoadOp = FrameBufferLoadOp::DONT_CARE,
 		FrameBufferStoreOp stencilStoreOp = FrameBufferStoreOp::DONT_CARE,
+		const float clearColorRgba[4] = DEFAULT_CLEAR_COLOR_RGBA,
 		ImageBufferLayout initialLayout = ImageBufferLayout::UNDEFINED,
 		ImageBufferLayout finalLayout = ImageBufferLayout::PRESENT)
 		: format(format)
@@ -27,6 +32,7 @@ struct FrameBufferDesc
 		, storeOp(storeOp)
 		, stencilLoadOp(stencilLoadOp)
 		, stencilStoreOp(stencilStoreOp)
+		, clearColorRgba{ clearColorRgba[0], clearColorRgba[1], clearColorRgba[2], clearColorRgba[3] }
 		, initialLayout(initialLayout)
 		, finalLayout(finalLayout) {}
 };

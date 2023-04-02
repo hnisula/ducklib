@@ -30,14 +30,16 @@ void VulkanCommandBuffer::End()
 	DL_VK_CHECK(vkEndCommandBuffer(vkCommandBuffer), "Failed to end Vulkan command buffer");
 }
 
+// Should not this be multiple framebuffers, potentially?
 void VulkanCommandBuffer::BeginPass(const IPass* pass, const IFrameBuffer* frameBuffer)
 {
-	const VulkanPass* vulkanPass = (const VulkanPass*)pass;
-	const VulkanFrameBuffer* vulkanFrameBuffer = (const VulkanFrameBuffer*)frameBuffer;
+	const auto* vulkanPass = (const VulkanPass*)pass;
+	const auto* vulkanFrameBuffer = (const VulkanFrameBuffer*)frameBuffer;
 	VkRenderPassBeginInfo beginPassInfo{};
+	const float* clearColor = vulkanFrameBuffer->clearColorBGRA;
 	VkClearValue clearValue;
 
-	clearValue.color = VkClearColorValue{ .float32 = { clearColorRgba[0], clearColorRgba[1], clearColorRgba[2], clearColorRgba[3] } };
+	clearValue.color = VkClearColorValue{ .float32 = { clearColor[0], clearColor[1], clearColor[2], clearColor[3] } };
 	clearValue.depthStencil = VkClearDepthStencilValue{ 1.0f, 0 };
 
 	beginPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;

@@ -18,10 +18,12 @@ public:
 
 protected:
 	VulkanPass(VkRenderPass vkPass, VkDevice vkDevice)
-		: vkDevice(vkDevice), vkPass(vkPass) {}
+		: vkDevice(vkDevice)
+		, vkPass(vkPass)
+	{}
 
 	VkDevice vkDevice;
 	VkRenderPass vkPass;
-	TArray<VkFramebuffer> vkFrameBuffers;
+	TArray<VkFramebuffer> vkFrameBuffers; // Unused?
 };
 }

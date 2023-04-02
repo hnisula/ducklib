@@ -31,7 +31,7 @@ ICommandBuffer* VulkanDevice::CreateCommandBuffer()
 
 	DL_VK_CHECK(vkAllocateCommandBuffers(vkDevice, &allocInfo, &vkCommandBuffer), "Failed to create Vulkan command buffer");
 
-	VulkanCommandBuffer* cmdBuffer = alloc->Allocate<VulkanCommandBuffer>();
+	auto* cmdBuffer = alloc->Allocate<VulkanCommandBuffer>();
 	new(cmdBuffer) VulkanCommandBuffer(vkCommandBuffer);
 
 	return cmdBuffer;
@@ -105,7 +105,7 @@ IPass* VulkanDevice::CreatePass(const PassDescription& passDesc)
 	// Create VulkanPass
 	VulkanPass* pass = alloc->Allocate<VulkanPass>();
 
-	new(pass) VulkanPass(vkPass, vkDevice);
+	new(pass) VulkanPass(vkPass, vkDevice, passDesc.);
 
 	return pass;
 }
@@ -150,7 +150,7 @@ void VulkanDevice::ExecuteCommandBuffers(
 {
 	TArray<VkCommandBuffer> vkCommandBuffers(nullptr, commandBufferCount);
 	VkSubmitInfo submitInfo{};
-	VkSemaphore vkWaitSemaphore = (VkSemaphore)waitSemaphore;
+	auto vkWaitSemaphore = (VkSemaphore)waitSemaphore;
 	VkPipelineStageFlags waitStage = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
 
 	for (uint32 i = 0; i < commandBufferCount; ++i)

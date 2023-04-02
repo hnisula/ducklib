@@ -12,8 +12,8 @@ class IDevice
 {
 public:
 
-	virtual ~IDevice() {}
-	
+	virtual ~IDevice() = default;
+
 	virtual ISwapChain* CreateSwapChain(
 		uint32_t width,
 		uint32_t height,
