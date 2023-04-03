@@ -19,12 +19,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\D3D12\D3D12CommandBuffer.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12Fence.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12ResourceAllocator.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12ResourceCommandBuffer.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12RHI.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12SwapChain.cpp" />
+    <ClCompile Include="Core\D3D12\CommandBuffer.cpp" />
+    <ClCompile Include="Core\D3D12\Fence.cpp" />
+    <ClCompile Include="Core\D3D12\ResourceAllocator.cpp" />
+    <ClCompile Include="Core\D3D12\ResourceCommandBuffer.cpp" />
+    <ClCompile Include="Core\D3D12\RHI.cpp" />
+    <ClCompile Include="Core\D3D12\SwapChain.cpp" />
     <ClCompile Include="Core\IAdapter.cpp" />
     <ClCompile Include="Core\ISwapChain.cpp" />
     <ClCompile Include="Core\Vulkan\VulkanAdapter.cpp" />
@@ -34,19 +34,17 @@
     <ClCompile Include="Core\Vulkan\VulkanRHI.cpp" />
     <ClCompile Include="Core\Vulkan\VulkanSemaphore.cpp" />
     <ClCompile Include="Core\Vulkan\VulkanSwapChain.cpp" />
-    <ClInclude Include="Core\D3D12\D3D12CommandBuffer.h" />
-    <ClInclude Include="Core\D3D12\D3D12Common.h" />
-    <ClInclude Include="Core\D3D12\D3D12Fence.h" />
-    <ClInclude Include="Core\D3D12\D3D12Formats.h" />
-    <ClInclude Include="Core\D3D12\D3D12ResourceAllocator.h" />
-    <ClInclude Include="Core\D3D12\D3D12ResourceCommandBuffer.h" />
-    <ClInclude Include="Core\D3D12\D3D12ResourceStates.h" />
-    <ClInclude Include="Core\D3D12\D3D12RHI.h" />
-    <ClInclude Include="Core\D3D12\D3D12SwapChain.h" />
+    <ClInclude Include="Core\D3D12\CommandBuffer.h" />
+    <ClInclude Include="Core\D3D12\Common.h" />
+    <ClInclude Include="Core\D3D12\Fence.h" />
+    <ClInclude Include="Core\D3D12\ResourceAllocator.h" />
+    <ClInclude Include="Core\D3D12\ResourceCommandBuffer.h" />
+    <ClInclude Include="Core\D3D12\RHI.h" />
+    <ClInclude Include="Core\D3D12\SwapChain.h" />
     <ClInclude Include="Core\Handle.h" />
     <ClInclude Include="Core\IAdapter.h" />
-    <ClInclude Include="Core\D3D12\D3D12Adapter.h" />
-    <ClInclude Include="Core\D3D12\D3D12Device.h" />
+    <ClInclude Include="Core\D3D12\Adapter.h" />
+    <ClInclude Include="Core\D3D12\Device.h" />
     <ClInclude Include="Core\IDevice.h" />
     <ClInclude Include="Core\ICommandBuffer.h" />
     <ClInclude Include="Core\IFence.h" />
@@ -55,8 +53,8 @@
     <ClInclude Include="Core\ISemaphore.h" />
     <ClInclude Include="Core\ISwapChain.h" />
     <ClInclude Include="Core\IResourceCommandBuffer.h" />
-    <ClCompile Include="Core\D3D12\D3D12Adapter.cpp" />
-    <ClCompile Include="Core\D3D12\D3D12Device.cpp" />
+    <ClCompile Include="Core\D3D12\Adapter.cpp" />
+    <ClCompile Include="Core\D3D12\Device.cpp" />
     <ClInclude Include="Core\IPass.h" />
     <ClInclude Include="Core\PassDescription.h" />
     <ClInclude Include="Core\PipelineState.h" />
@@ -66,7 +64,6 @@
     <ClInclude Include="Core\Resources\InputDescription.h" />
     <ClInclude Include="Core\Resources\PrimitiveTopology.h" />
     <ClInclude Include="Core\Resources\Rect.h" />
-    <ClInclude Include="Core\Resources\ResourceStates.h" />
     <ClInclude Include="Core\Resources\Viewport.h" />
     <ClInclude Include="Core\Vulkan\VulkanAdapter.h" />
     <ClInclude Include="Core\Vulkan\VulkanCommandBuffer.h" />

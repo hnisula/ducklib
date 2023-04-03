@@ -1,11 +1,9 @@
-#include "D3D12Fence.h"
+#include "Fence.h"
 #include <stdexcept>
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-D3D12Fence::~D3D12Fence() {}
-
-void D3D12Fence::Wait()
+void Fence::Wait()
 {
 	if (d3dFence->GetCompletedValue() - expectedValue < UINT32_MAX / 2)
 	{
@@ -16,7 +14,7 @@ void D3D12Fence::Wait()
 	}
 }
 
-D3D12Fence::D3D12Fence(ID3D12Fence* d3dFence) : d3dFence(d3dFence), expectedValue(1)
+Fence::Fence(ID3D12Fence* d3dFence) : d3dFence(d3dFence), expectedValue(1)
 {
 	fenceEventHandle = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 

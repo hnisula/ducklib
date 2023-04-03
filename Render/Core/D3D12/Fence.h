@@ -3,19 +3,19 @@
 #include "Lib/d3d12.h"
 #include "Render/Core/IFence.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-class D3D12Fence : public IFence
+class Fence : public IFence
 {
 public:
-	~D3D12Fence() override;
+	~Fence() override = default;
 
 	void Wait() override;
 
 protected:
-	friend class D3D12Device;
+	friend class Device;
 
-	D3D12Fence(ID3D12Fence* d3dFence);
+	Fence(ID3D12Fence* d3dFence);
 
 	ID3D12Fence* d3dFence;
 	HANDLE fenceEventHandle;

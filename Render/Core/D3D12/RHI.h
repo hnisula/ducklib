@@ -1,23 +1,23 @@
 #pragma once
 
-#include "D3D12Adapter.h"
+#include "Adapter.h"
 #include "Lib/dxgi1_4.h"
 #include "../IRHI.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-class D3D12RHI : IRHI
+class RHI : IRHI
 {
 public:
 	static IRHI* GetInstance();
 
-	~D3D12RHI() override;
+	~RHI() override;
 
 	const TArray<IAdapter*>& GetAdapters() const override;
 
 protected:
-	D3D12RHI();
+	RHI();
 
 	void InitFactory();
 	// Currently only run when creating the RHI

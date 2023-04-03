@@ -1,22 +1,21 @@
 #include <exception>
 #include "Lib/d3dx12.h"
 #include "Core/Memory/IAlloc.h"
-#include "D3D12Device.h"
-#include "D3D12CommandBuffer.h"
-#include "D3D12Common.h"
-#include "D3D12Fence.h"
-#include "D3D12SwapChain.h"
-#include "D3D12Formats.h"
+#include "Device.h"
+#include "CommandBuffer.h"
+#include "Common.h"
+#include "Fence.h"
+#include "SwapChain.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-D3D12Device::~D3D12Device()
+Device::~Device()
 {
 	for (ISwapChain* swapChain : swapChains)
-		DestroySwapChain(swapChain);
+		Device::DestroySwapChain(swapChain);
 }
 
-ISwapChain* D3D12Device::CreateSwapChain(
+ISwapChain* Device::CreateSwapChain(
 	uint32_t width,
 	uint32_t height,
 	Format format,
@@ -83,7 +82,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	}
 
 	// Create swap chain wrapper
-	D3D12SwapChain* swapChain = alloc->New<D3D12SwapChain>(
+	SwapChain* swapChain = alloc->New<SwapChain>(
 		width,
 		height,
 		format,
@@ -97,7 +96,7 @@ ISwapChain* D3D12Device::CreateSwapChain(
 	return swapChain;
 }
 
-ICommandBuffer* D3D12Device::CreateCommandBuffer()
+ICommandBuffer* Device::CreateCommandBuffer()
 {
 	ID3D12CommandAllocator* apiCommandAllocator;
 	ID3D12GraphicsCommandList1* apiCommandList;
@@ -121,30 +120,30 @@ ICommandBuffer* D3D12Device::CreateCommandBuffer()
 
 	apiCommandList->Close();
 
-	return new(alloc->Allocate<D3D12CommandBuffer>()) D3D12CommandBuffer(apiCommandList, apiCommandAllocator);
+	return new(alloc->Allocate<CommandBuffer>()) CommandBuffer(apiCommandList, apiCommandAllocator);
 }
 
-IPass* D3D12Device::CreatePass(const PassDescription& passDesc)
+IPass* Device::CreatePass(const PassDescription& passDesc)
 {
 	return nullptr;
 }
 
-IFrameBuffer* D3D12Device::CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass)
+IFrameBuffer* Device::CreateFrameBuffer(ImageBuffer** imageBuffers, uint32 imageBufferCount, IPass* pass)
 {
 	return nullptr;
 }
 
-void D3D12Device::DestroySwapChain(ISwapChain* swapChain)
+void Device::DestroySwapChain(ISwapChain* swapChain)
 {
 	swapChains.erase(std::find(swapChains.begin(), swapChains.end(), swapChain));
 
 	alloc->Delete(swapChain);
 }
 
-void D3D12Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
+void Device::DestroyCommandBuffer(ICommandBuffer* commandBuffer)
 {}
 
-void D3D12Device::ExecuteCommandBuffers(
+void Device::ExecuteCommandBuffers(
 	ICommandBuffer** commandBuffers,
 	uint32_t numCommandBuffers,
 	void* waitSemaphore,
@@ -157,13 +156,13 @@ void D3D12Device::ExecuteCommandBuffers(
 
 	commandQueue->ExecuteCommandLists(numCommandBuffers, d3dCommandLists);
 
-	D3D12Fence* d3dFence = (D3D12Fence*)signalFence;
+	Fence* d3dFence = (Fence*)signalFence;
 
 	if (commandQueue->Signal(d3dFence->d3dFence, d3dFence->expectedValue) != S_OK)
 		throw std::runtime_error("Failed to signal completion in D3D12 rendering");
 }
 
-IFence* D3D12Device::CreateFence()
+IFence* Device::CreateFence()
 {
 	ID3D12Fence* d3dFence;
 
@@ -171,11 +170,11 @@ IFence* D3D12Device::CreateFence()
 		d3dDevice->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&d3dFence)),
 		"Failed to create fence for frame syncing");
 
-	auto* fence = alloc->Allocate<D3D12Fence>();
-	return new(fence) D3D12Fence(d3dFence);
+	auto* fence = alloc->Allocate<Fence>();
+	return new(fence) Fence(d3dFence);
 }
 
-D3D12Device::D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
+Device::Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
 	: alloc(DefAlloc())
 {
 	this->d3dFactory = dxgiFactory;
@@ -183,7 +182,7 @@ D3D12Device::D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory)
 	commandQueue = CreateQueue(D3D12_COMMAND_LIST_TYPE_DIRECT, D3D12_COMMAND_QUEUE_FLAG_NONE);
 }
 
-ID3D12CommandQueue* D3D12Device::CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags)
+ID3D12CommandQueue* Device::CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags)
 {
 	ID3D12CommandQueue* queue;
 	D3D12_COMMAND_QUEUE_DESC queueDesc{};
@@ -199,7 +198,7 @@ ID3D12CommandQueue* D3D12Device::CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12
 	return queue;
 }
 
-ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
+ID3D12DescriptorHeap* Device::CreateDescriptorHeap(
 	uint32_t numDescriptors,
 	D3D12_DESCRIPTOR_HEAP_TYPE type)
 {
@@ -217,7 +216,7 @@ ID3D12DescriptorHeap* D3D12Device::CreateDescriptorHeap(
 	return apiDescriptorHeap;
 }
 
-ImageBuffer* D3D12Device::CreateImageBuffer(
+ImageBuffer* Device::CreateImageBuffer(
 	uint32_t width,
 	uint32_t height,
 	uint32_t depth,

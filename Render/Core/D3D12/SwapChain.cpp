@@ -1,11 +1,11 @@
 #include "Lib/d3dx12.h"
-#include "D3D12SwapChain.h"
+#include "SwapChain.h"
 #include <stdexcept>
-#include "D3D12Common.h"
+#include "Common.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-D3D12SwapChain::D3D12SwapChain(
+SwapChain::SwapChain(
 	uint32 width,
 	uint32 height,
 	Format format,
@@ -35,23 +35,23 @@ D3D12SwapChain::D3D12SwapChain(
 	currentFrameIndex = d3dSwapChain->GetCurrentBackBufferIndex();
 }
 
-D3D12SwapChain::~D3D12SwapChain()
+SwapChain::~SwapChain()
 {
 	if (d3dSwapChain)
 		d3dSwapChain->Release();
 }
 
-void* D3D12SwapChain::GetImageAvailabilitySemaphore()
+void* SwapChain::GetImageAvailabilitySemaphore()
 {
 	throw std::runtime_error("Not implemented");
 }
 
-void D3D12SwapChain::Present()
+void SwapChain::Present()
 {
 	DL_D3D12_CHECK(d3dSwapChain->Present(0, 0), "Failed to present");
 }
 
-void D3D12SwapChain::PrepareFrame()
+void SwapChain::PrepareFrame()
 {
 	currentFrameIndex = d3dSwapChain->GetCurrentBackBufferIndex();
 }

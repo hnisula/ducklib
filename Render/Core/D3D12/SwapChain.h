@@ -1,18 +1,18 @@
 #pragma once
 #include <d3d12.h>
 #include <dxgi1_4.h>
-#include "D3D12Fence.h"
+#include "Fence.h"
 #include "../ISwapChain.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-class D3D12SwapChain : public ISwapChain
+class SwapChain : public ISwapChain
 {
 public:
-	friend class D3D12Device;
+	friend class Device;
 
 	// TODO: -> protected
-	D3D12SwapChain(
+	SwapChain(
 		uint32 width,
 		uint32 height,
 		Format format,
@@ -21,7 +21,7 @@ public:
 		const ImageBuffer* images,
 		ID3D12DescriptorHeap* descriptorHeap,
 		uint32 descriptorSize);
-	~D3D12SwapChain() override;
+	~SwapChain() override;
 
 	void* GetImageAvailabilitySemaphore() override;
 

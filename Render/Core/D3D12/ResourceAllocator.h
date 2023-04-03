@@ -1,26 +1,26 @@
 #pragma once
-#include "D3D12Adapter.h"
+#include "Adapter.h"
 #include "../Resources/ImageBuffer.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-class D3D12ResourceAllocator
+class ResourceAllocator
 {
 public:
 
-	D3D12ResourceAllocator();
+	ResourceAllocator();
 
 	ImageBuffer* AllocatorImageBuffer();
-	D3D12Adapter* AllocateAdapter();
+	Adapter* AllocateAdapter();
 
 	void FreeImageBuffer(ImageBuffer* imageBuffer);
-	void FreeAdapter(D3D12Adapter* adapter);
+	void FreeAdapter(Adapter* adapter);
 	
 private:
 
 	IAlloc* alloc;
 
-	TArray<D3D12Adapter*> adapters;
+	TArray<Adapter*> adapters;
 };
 }

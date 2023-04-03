@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include "Render/Core/ICommandBuffer.h"
 #include "Render/Core/IDevice.h"
-#include "Render/Core/D3D12/D3D12RHI.h"
+#include "Render/Core/D3D12/RHI.h"
 #include "Render/Core/ISwapChain.h"
 #include "Render/Core/Vulkan/VulkanRHI.h"
 
@@ -22,7 +22,7 @@ HWND window;
 #define DL_TEST_API DL_VK_API
 
 #if DL_TEST_API == DL_D3D_API
-IRHI* rhi = D3D12RHI::GetInstance();
+IRHI* rhi = RHI::GetInstance();
 #elif DL_TEST_API == DL_VK_API
 IRHI* rhi = VulkanRHI::GetInstance();
 #endif

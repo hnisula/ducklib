@@ -1,8 +1,8 @@
-#include "D3D12ResourceCommandBuffer.h"
+#include "ResourceCommandBuffer.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-Buffer* D3D12ResourceCommandBuffer::CreateBuffer()
+Buffer* ResourceCommandBuffer::CreateBuffer()
 {
 	// apiDevice->CreateCommittedResource()
 
@@ -10,7 +10,7 @@ Buffer* D3D12ResourceCommandBuffer::CreateBuffer()
 	return nullptr;
 }
 
-D3D12ResourceCommandBuffer::D3D12ResourceCommandBuffer(
+ResourceCommandBuffer::ResourceCommandBuffer(
 	ID3D12Device* apiDevice,
 	ID3D12CommandList* apiCommandList,
 	ID3D12CommandAllocator* apiCommandAllocator)
@@ -20,7 +20,7 @@ D3D12ResourceCommandBuffer::D3D12ResourceCommandBuffer(
 	this->apiCommandAllocator = apiCommandAllocator;
 }
 
-D3D12ResourceCommandBuffer::~D3D12ResourceCommandBuffer()
+ResourceCommandBuffer::~ResourceCommandBuffer()
 {
 	apiCommandList->Release();
 	apiCommandAllocator->Release();

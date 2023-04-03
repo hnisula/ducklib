@@ -2,13 +2,13 @@
 #include <d3d12.h>
 #include "../ICommandBuffer.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-class D3D12CommandBuffer : public ICommandBuffer
+class CommandBuffer : public ICommandBuffer
 {
 public:
 
-	friend class D3D12Device;
+	friend class Device;
 
 	void* GetApiHandle() const override;
 
@@ -39,10 +39,10 @@ public:
 
 protected:
 
-	D3D12CommandBuffer(
+	CommandBuffer(
 		ID3D12GraphicsCommandList1* apiCommandList,
 		ID3D12CommandAllocator* apiCommandAllocator);
-	~D3D12CommandBuffer();
+	~CommandBuffer() = default;
 
 private:
 

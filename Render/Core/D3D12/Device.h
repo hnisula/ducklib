@@ -3,21 +3,21 @@
 #include <vector>
 #include "Lib/d3d12.h"
 #include "Lib/dxgi1_4.h"
-#include "D3D12Adapter.h"
+#include "Adapter.h"
 #include "../ICommandBuffer.h"
 #include "../IDevice.h"
 #include "../Resources/Constants.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
 constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 
-class D3D12Device : public IDevice
+class Device : public IDevice
 {
 public:
-	friend class D3D12Adapter;
+	friend class Adapter;
 
-	~D3D12Device() override;
+	~Device() override;
 
 	ISwapChain* CreateSwapChain(
 		uint32_t width,
@@ -41,7 +41,7 @@ public:
 	IFence* CreateFence() override;
 
 private:
-	D3D12Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory);
+	Device(ID3D12Device* d3dDevice, IDXGIFactory4* dxgiFactory);
 
 	ID3D12CommandQueue* CreateQueue(D3D12_COMMAND_LIST_TYPE type, D3D12_COMMAND_QUEUE_FLAGS flags);
 	ID3D12DescriptorHeap* CreateDescriptorHeap(uint32_t numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);

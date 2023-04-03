@@ -1,35 +1,35 @@
 #include <stdexcept>
-#include "D3D12RHI.h"
-#include "D3D12Common.h"
-#include "D3D12Device.h"
+#include "RHI.h"
+#include "Common.h"
+#include "Device.h"
 #include "Core/Utility.h"
 #include "Core/Memory/IAlloc.h"
 #include "Core/Memory/Containers/Iterators.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-IRHI* D3D12RHI::GetInstance()
+IRHI* RHI::GetInstance()
 {
-	static D3D12RHI rhi;
+	static RHI rhi;
 
 	return &rhi;
 }
 
-D3D12RHI::~D3D12RHI()
+RHI::~RHI()
 {
 	for (IAdapter* adapter : adapters)
 	{
-		((D3D12Adapter*)adapter)->~D3D12Adapter();
+		((Adapter*)adapter)->~Adapter();
 		alloc->Free(adapter);
 	}
 }
 
-const TArray<IAdapter*>& D3D12RHI::GetAdapters() const
+const TArray<IAdapter*>& RHI::GetAdapters() const
 {
 	return adapters;
 }
 
-D3D12RHI::D3D12RHI()
+RHI::RHI()
 	: alloc(nullptr)
 	, factory(nullptr)
 {
@@ -38,7 +38,7 @@ D3D12RHI::D3D12RHI()
 	EnumerateAdapters();
 }
 
-void D3D12RHI::InitFactory()
+void RHI::InitFactory()
 {
 #ifdef _DEBUG
 	DL_D3D12_CHECK(
@@ -57,7 +57,7 @@ void D3D12RHI::InitFactory()
 #endif
 }
 
-void D3D12RHI::EnumerateAdapters()
+void RHI::EnumerateAdapters()
 {
 	IDXGIAdapter1* adapterIt;
 	uint32_t adapterCounter = 0;
@@ -73,9 +73,9 @@ void D3D12RHI::EnumerateAdapters()
 		// S_FALSE when testing device (nullptr) == success
 		if (D3D12CreateDevice(adapterIt, DL_D3D_FEATURE_LEVEL, _uuidof(ID3D12Device), nullptr) == S_FALSE)
 		{
-			D3D12Adapter* adapter = alloc->Allocate<D3D12Adapter>();
+			Adapter* adapter = alloc->Allocate<Adapter>();
 
-			new(adapter) D3D12Adapter(
+			new(adapter) Adapter(
 				descriptionBuffer,
 				(adapterDesc.Flags & DXGI_ADAPTER_FLAG_SOFTWARE) == 0,
 				adapterIt,

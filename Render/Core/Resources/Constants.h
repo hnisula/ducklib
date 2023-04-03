@@ -32,6 +32,12 @@ enum class PipelineBindPoint
 	COMPUTE
 };
 
+enum class ResourceState
+{
+	PRESENT,
+	RENDER_TARGET
+};
+
 enum class Format : uint32
 {
 	UNKNOWN = 0,

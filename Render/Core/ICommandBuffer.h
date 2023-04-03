@@ -6,7 +6,6 @@
 #include "Resources/ImageBuffer.h"
 #include "Resources/InputDescription.h"
 #include "Resources/PrimitiveTopology.h"
-#include "Resources/ResourceStates.h"
 #include "Resources/Viewport.h"
 #include "Resources/Rect.h"
 

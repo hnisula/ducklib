@@ -3,21 +3,21 @@
 
 #include "../IResourceCommandBuffer.h"
 
-namespace DuckLib::Render
+namespace DuckLib::Render::D3D12
 {
-class D3D12ResourceCommandBuffer : public IResourceCommandBuffer
+class ResourceCommandBuffer : public IResourceCommandBuffer
 {
 public:
-	friend class D3D12Device;
+	friend class Device;
 
 	Buffer* CreateBuffer() override;
 
 protected:
-	D3D12ResourceCommandBuffer(
+	ResourceCommandBuffer(
 		ID3D12Device* apiDevice,
 		ID3D12CommandList* apiCommandList,
 		ID3D12CommandAllocator* apiCommandAllocator);
-	~D3D12ResourceCommandBuffer();
+	~ResourceCommandBuffer() override;
 
 	ID3D12Device* apiDevice;
 	ID3D12CommandList* apiCommandList;
