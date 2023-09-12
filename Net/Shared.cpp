@@ -1,8 +1,7 @@
-﻿#include "Shared.h"
-
+﻿#include <winsock2.h>
 #include <string>
-#include <winsock2.h>
 #include <WS2tcpip.h>
+#include "Shared.h"
 
 namespace DuckLib
 {
@@ -17,25 +16,36 @@ Address::Address(const sockaddr_in& sockAddr)
 	port = ntohs(sockAddr.sin_port);
 }
 
-Address::Address(const char8* address)
+Address::Address(const char* address)
 {
 	// First split address into IP and port
-	char* portDelimiter = strchr(address, ':');
+	char addressCopy[64];
+	strcpy_s(addressCopy, 64, address);
+	char* portDelimiter = strchr(addressCopy, ':');
 	port = 0;	// TODO: Come up with some default?
 
 	if (portDelimiter)
+	{
 		port = (uint16)std::stoi(portDelimiter + 1);
+		*portDelimiter = '\0';
+	}
 
-	addrV4 = inet_pton(address);
+	IN_ADDR inAddr;
+	int result = inet_pton(AF_INET, addressCopy, &inAddr);
+
+	if (result != 1)
+		throw std::exception("Failed to parse address");
+
+	addrV4 = inAddr.S_un.S_addr;
 }
 
 sockaddr_in Address::AsSockAddrIn() const
 {
-	sockaddr_in sockAddr{
-		.sin_family = AF_INET,
-		.sin_port = htons(port),
-		.sin_addr.s_addr = addrV4
-	};
+	sockaddr_in sockAddr{};
+
+	sockAddr.sin_family = AF_INET;
+	sockAddr.sin_port = htons(port);
+	sockAddr.sin_addr.s_addr = addrV4;
 
 	return sockAddr;
 }

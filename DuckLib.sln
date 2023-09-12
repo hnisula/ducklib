@@ -63,7 +63,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net", "Net\Net.vcxproj", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0B4BAFAB-DFAD-43DB-BF42-3EE496986FE5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SocketPeer", "Net\SocketPeer\SocketPeer.vcxproj", "{F39810F5-792C-4436-BF9E-BF9C000963A8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.SocketPeer", "Net\Tests\Net.SocketPeer\Net.SocketPeer.vcxproj", "{F39810F5-792C-4436-BF9E-BF9C000963A8}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B3891D4E-41EE-4E02-A8ED-3F700AB22A83} = {B3891D4E-41EE-4E02-A8ED-3F700AB22A83}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

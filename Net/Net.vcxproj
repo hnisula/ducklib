@@ -19,11 +19,13 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Net.h" />
     <ClInclude Include="Server.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Socket.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Net.cpp" />
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="Socket.cpp" />
   </ItemGroup>
@@ -118,6 +120,8 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

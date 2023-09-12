@@ -8,12 +8,13 @@ namespace DuckLib
 class Address
 {
 public:
+	Address() = default;
 	Address(const Address& address, uint16 port);
 	Address(const sockaddr_in& sockAddr);
 	/**
 	 * @param address IP address and can contain port.
 	 */
-	Address(const char8* address);
+	Address(const char* address);
 
 	uint16 GetPort() const;
 
