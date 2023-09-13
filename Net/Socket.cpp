@@ -4,7 +4,7 @@
 #include <exception>
 #include <WS2tcpip.h>
 
-namespace DuckLib
+namespace ducklib
 {
 Socket::Socket(const Address* address, uint32 bufferSizes)
 	: socketHandle(INVALID_SOCKET)

@@ -2,7 +2,7 @@
 #include <cstring>
 #include "IAdapter.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 IAdapter::~IAdapter() = default;
 

@@ -2,7 +2,7 @@
 #include <atomic>
 #include "Core/Memory/IAlloc.h"
 
-namespace DuckLib
+namespace ducklib
 {
 constexpr uint32 CACHE_LINE_SIZE = 128;
 

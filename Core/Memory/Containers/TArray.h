@@ -1,7 +1,7 @@
 #pragma once
 #include "../IAlloc.h"
 
-namespace DuckLib
+namespace ducklib
 {
 template <typename T>
 class TArray

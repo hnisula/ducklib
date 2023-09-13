@@ -1,7 +1,7 @@
 #pragma once
 #include <dxgiformat.h>
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 // The order of these must match the one in the Format enum
 static DXGI_FORMAT dxgiFormatMap[] = {

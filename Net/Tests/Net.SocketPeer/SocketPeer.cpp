@@ -6,7 +6,7 @@
 int main(int, char*[])
 {
 	// Winsock init
-	DuckLib::InitilizeNet();
+	ducklib::InitilizeNet();
 
 	char listenAddressStr[32] = "127.0.0.1:";
 	char listenPortStr[32];
@@ -17,15 +17,15 @@ int main(int, char*[])
 	std::cin >> listenPortStr;
 
 	strcat_s(&listenAddressStr[10], 32, listenPortStr);
-	DuckLib::Address listenAddress(listenAddressStr);
-	DuckLib::Socket socket(&listenAddress);
+	ducklib::Address listenAddress(listenAddressStr);
+	ducklib::Socket socket(&listenAddress);
 	std::cout << "Bound to port: " << socket.GetPort() << "\n";
 
 	std::cout << "Enter address to send message to: ";
 	std::cin >> ipAddress;
 
-	DuckLib::Address destAddress(ipAddress);
-	DuckLib::Address fromAddress;
+	ducklib::Address destAddress(ipAddress);
+	ducklib::Address fromAddress;
 	char receiveBuffer[512];
 
 	while (true)
@@ -47,7 +47,7 @@ int main(int, char*[])
 		socket.Send(destAddress, message, 1 + (unsigned int)strlen(message));
 	}
 
-	DuckLib::ShutdownNet();
+	ducklib::ShutdownNet();
 
 	return 0;
 }

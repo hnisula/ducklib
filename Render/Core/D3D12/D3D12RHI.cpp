@@ -6,7 +6,7 @@
 #include "Core/Memory/IAlloc.h"
 #include "Core/Memory/Containers/Iterators.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 IRHI* D3D12RHI::GetInstance()
 {

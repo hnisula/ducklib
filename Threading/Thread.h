@@ -2,7 +2,7 @@
 #include <Windows.h>
 #include "Core/Types.h"
 
-namespace DuckLib
+namespace ducklib
 {
 class Thread
 {

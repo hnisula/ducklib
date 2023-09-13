@@ -3,7 +3,7 @@
 #include "ConcurrentQueue.h"
 #include "Thread.h"
 
-namespace DuckLib
+namespace ducklib
 {
 struct JobCounter;
 class JobQueue;

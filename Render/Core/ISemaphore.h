@@ -1,6 +1,6 @@
 #pragma once
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class ISemaphore
 {

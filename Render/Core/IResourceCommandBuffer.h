@@ -1,7 +1,7 @@
 #pragma once
 #include "Resources/Buffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class IResourceCommandBuffer
 {

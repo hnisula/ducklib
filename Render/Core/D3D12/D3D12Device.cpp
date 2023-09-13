@@ -8,7 +8,7 @@
 #include "D3D12SwapChain.h"
 #include "D3D12Formats.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 D3D12Device::~D3D12Device()
 {

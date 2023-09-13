@@ -5,7 +5,7 @@
 #include <hstring.h>
 #endif
 
-namespace DuckLib::Utility
+namespace ducklib::Utility
 {
 void CopyText(char* source, char* dest, uint32_t destSize)
 {

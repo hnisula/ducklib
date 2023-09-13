@@ -1,7 +1,9 @@
 #pragma once
 
-namespace DuckLib
+namespace ducklib
 {
+
+
 void InitilizeNet();
 void ShutdownNet();
 }

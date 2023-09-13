@@ -2,7 +2,7 @@
 #include "Core/Memory/Containers/TArray.h"
 #include "IAdapter.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class IRHI
 {

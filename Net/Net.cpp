@@ -3,7 +3,7 @@
 #include <winsock2.h>
 #include <exception>
 
-namespace DuckLib
+namespace ducklib
 {
 void InitilizeNet()
 {

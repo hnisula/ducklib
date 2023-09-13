@@ -2,7 +2,7 @@
 #include "HeapAllocator.h"
 #include "../Utility.h"
 
-namespace DuckLib
+namespace ducklib
 {
 using namespace Internal::Memory;
 

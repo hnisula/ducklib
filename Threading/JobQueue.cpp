@@ -5,7 +5,7 @@
 #include <mutex>
 #include <unordered_map>
 
-namespace DuckLib
+namespace ducklib
 {
 Job::Job()
 	: jobCounter(nullptr)

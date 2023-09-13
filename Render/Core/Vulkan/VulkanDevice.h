@@ -5,7 +5,7 @@
 #include "Core/Memory/IAlloc.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanDevice : IDevice
 {

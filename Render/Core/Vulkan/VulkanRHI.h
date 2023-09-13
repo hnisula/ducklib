@@ -4,7 +4,7 @@
 #include "../IRHI.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanRHI : IRHI
 {

@@ -1,6 +1,6 @@
 #include "HeapAllocator.h"
 
-namespace DuckLib
+namespace ducklib
 {
 IAlloc* DefAlloc()
 {

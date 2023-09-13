@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include "../Resources/PrimitiveTopology.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 #define DL_D3D12_CHECK(statement, errorText) \
 	if ((statement) != S_OK) \

@@ -2,7 +2,7 @@
 #include "Lib/vulkan.h"
 #include "Render/Core/IFence.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanFence : public IFence
 {

@@ -1,6 +1,6 @@
 #include "Thread.h"
 
-namespace DuckLib
+namespace ducklib
 {
 Thread::Thread(uint32 (* func)(void*), void* data)
 {

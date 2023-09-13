@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace DuckLib
+namespace ducklib
 {
 using int8 = int8_t;
 using int16 = int16_t;

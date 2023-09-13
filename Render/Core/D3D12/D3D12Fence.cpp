@@ -1,7 +1,7 @@
 #include "D3D12Fence.h"
 #include <stdexcept>
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 D3D12Fence::~D3D12Fence() {}
 

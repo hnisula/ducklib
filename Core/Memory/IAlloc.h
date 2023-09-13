@@ -1,7 +1,7 @@
 #pragma once
 #include "AllocTracker.h"
 
-namespace DuckLib
+namespace ducklib
 {
 class IAlloc;
 

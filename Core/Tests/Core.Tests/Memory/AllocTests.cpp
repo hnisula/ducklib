@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/HeapAllocator.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 class Foo
 {

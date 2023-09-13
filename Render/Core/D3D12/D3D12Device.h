@@ -8,7 +8,7 @@
 #include "../IDevice.h"
 #include "../Resources/Constants.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 

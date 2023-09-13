@@ -2,7 +2,7 @@
 #include <d3d12.h>
 #include "../ICommandBuffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class D3D12CommandBuffer : public ICommandBuffer
 {

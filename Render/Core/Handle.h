@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 struct Handle
 {

@@ -1,7 +1,7 @@
 #include "VulkanFence.h"
 #include "VulkanCommon.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 VulkanFence::~VulkanFence()
 {

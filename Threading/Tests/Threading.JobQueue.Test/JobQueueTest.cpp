@@ -3,7 +3,7 @@
 
 #include "Threading/JobQueue.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 std::atomic<uint32> numJobsCompleted {0};
 uint32* jobItems;

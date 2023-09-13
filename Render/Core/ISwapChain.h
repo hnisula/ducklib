@@ -3,7 +3,7 @@
 #include "Resources/Constants.h"
 #include "Resources/ImageBuffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class ISwapChain
 {

@@ -3,7 +3,7 @@
 
 #include "../Core/Types.h"
 
-namespace DuckLib
+namespace ducklib
 {
 class Address
 {

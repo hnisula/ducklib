@@ -4,7 +4,7 @@
 
 #include "Shared.h"
 
-namespace DuckLib
+namespace ducklib
 {
 class Socket
 {

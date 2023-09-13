@@ -2,7 +2,7 @@
 #include "VulkanCommon.h"
 #include "VulkanSemaphore.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 VulkanSwapChain::~VulkanSwapChain()
 {

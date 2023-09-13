@@ -8,7 +8,7 @@
 #include "Lib/vulkan_win32.h"
 #include "Lib/glfw3.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 VulkanDevice::~VulkanDevice()
 {

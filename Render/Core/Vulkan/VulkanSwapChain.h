@@ -3,7 +3,7 @@
 #include "Lib/vulkan.h"
 #include "Render/Core/ISwapChain.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanSwapChain : public ISwapChain
 {

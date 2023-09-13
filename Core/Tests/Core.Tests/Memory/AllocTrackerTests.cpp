@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/AllocTracker.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 using namespace Internal::Memory;
 
 TEST( TestAllocTest, Track )

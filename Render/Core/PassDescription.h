@@ -1,7 +1,7 @@
 #pragma once
 #include "Resources/Constants.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 struct FrameBufferDesc
 {

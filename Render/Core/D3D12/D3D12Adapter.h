@@ -4,7 +4,7 @@
 #include "D3D12Device.h"
 #include "../IAdapter.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class D3D12Adapter : public IAdapter
 {

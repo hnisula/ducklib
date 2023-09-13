@@ -3,7 +3,7 @@
 #include <WS2tcpip.h>
 #include "Shared.h"
 
-namespace DuckLib
+namespace ducklib
 {
 Address::Address(const Address& address, uint16 port)
 	: addrV4(address.addrV4)

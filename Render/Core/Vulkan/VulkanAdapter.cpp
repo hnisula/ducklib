@@ -3,7 +3,7 @@
 #include "VulkanDevice.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 void* VulkanAdapter::GetApiHandle() const
 {

@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/HeapAllocator.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 // TODO: Check if they've added support for x64 in the ASan support
 // Because ASan support for x64 is not added yet and the values checked for are only set in debug

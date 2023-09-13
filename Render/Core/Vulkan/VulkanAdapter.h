@@ -4,7 +4,7 @@
 #include "Core/Memory/IAlloc.h"
 #include "Render/Core/IAdapter.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanAdapter : public IAdapter
 {

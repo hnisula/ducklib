@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include "AllocTracker.h"
 
-namespace DuckLib::Internal::Memory
+namespace ducklib::Internal::Memory
 {
 AllocTracker& GetAllocTracker()
 {

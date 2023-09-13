@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/Containers/Iterators.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 class Foo
 {

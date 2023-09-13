@@ -3,7 +3,7 @@
 #include "../../Core/Types.h"
 #include "IDevice.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class IAdapter
 {

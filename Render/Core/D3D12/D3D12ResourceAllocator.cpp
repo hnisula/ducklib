@@ -1,7 +1,7 @@
 #include "D3D12ResourceAllocator.h"
 #include "Core/Memory/IAlloc.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 D3D12ResourceAllocator::D3D12ResourceAllocator()
 {
