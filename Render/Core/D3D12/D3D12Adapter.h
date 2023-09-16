@@ -1,5 +1,5 @@
 #pragma once
-#include "../../../Core/Memory/IAlloc.h"
+#include "../../../Core/Memory/IAllocator.h"
 #include <dxgi.h>
 #include "D3D12Device.h"
 #include "../IAdapter.h"
@@ -19,7 +19,7 @@ protected:
 	D3D12Adapter(const char* description, bool isHardware, IDXGIAdapter1* apiAdapter, IDXGIFactory4* factory);
 	~D3D12Adapter() override;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	IDXGIFactory4* factory;
 	IDXGIAdapter1* apiAdapter;

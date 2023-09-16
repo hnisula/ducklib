@@ -1,4 +1,4 @@
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 #include <cstring>
 #include "IAdapter.h"
 

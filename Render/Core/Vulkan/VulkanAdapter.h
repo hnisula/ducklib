@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Lib/vulkan.h"
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 #include "Render/Core/IAdapter.h"
 
 namespace ducklib::Render
@@ -21,7 +21,7 @@ private:
 
 	uint32_t GetGraphicsQueueFamilyIndex();
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	VkInstance vkInstance;
 	VkPhysicalDevice physicalDevice;

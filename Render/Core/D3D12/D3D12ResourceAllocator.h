@@ -19,7 +19,7 @@ public:
 	
 private:
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	TArray<D3D12Adapter*> adapters;
 };

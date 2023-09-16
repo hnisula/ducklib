@@ -110,7 +110,7 @@ private:
 	void TearDownFibers();
 	void TearDownCounters();
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	uint32 numCounters;
 	JobCounter* counters;

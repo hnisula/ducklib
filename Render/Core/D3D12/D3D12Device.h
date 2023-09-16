@@ -58,7 +58,7 @@ private:
 
 	static constexpr uint32_t NUM_FRAME_BUFFERS = 4;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	IDXGIFactory4* d3dFactory;
 	ID3D12Device* d3dDevice;

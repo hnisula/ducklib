@@ -1,6 +1,6 @@
 #include <exception>
 #include "Lib/d3dx12.h"
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 #include "D3D12Device.h"
 #include "D3D12CommandBuffer.h"
 #include "D3D12Common.h"

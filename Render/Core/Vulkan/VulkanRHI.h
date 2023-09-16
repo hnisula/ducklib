@@ -27,7 +27,7 @@ protected:
 
 	static constexpr uint32_t DEVICE_DESCRIPTION_BUFFER_SIZE = 256;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	VkInstance instance;
 

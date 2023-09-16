@@ -2,7 +2,7 @@
 #include "VulkanSemaphore.h"
 #include "Lib/vulkan.h"
 #include "../IDevice.h"
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 #include "Core/Memory/Containers/TArray.h"
 
 namespace ducklib::Render
@@ -54,7 +54,7 @@ protected:
 	uint32 SelectPresentModeIndex(const TArray<VkPresentModeKHR>& presentModes);
 	VkExtent2D GetSurfaceExtent(const VkSurfaceCapabilitiesKHR& surfaceCapabilities, uint32 width, uint32 height) const;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	VkInstance vkInstance;
 	VkPhysicalDevice physicalDevice;

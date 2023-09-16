@@ -3,15 +3,15 @@
 
 namespace ducklib
 {
-class IAlloc;
+class IAllocator;
 
-IAlloc* DefAlloc();
+IAllocator* DefAlloc();
 
-class IAlloc
+class IAllocator
 {
 public:
-	IAlloc();
-	virtual ~IAlloc() { }
+	IAllocator();
+	virtual ~IAllocator() { }
 
 	void* Allocate(uint64 size, uint8_t align = DEFAULT_ALIGN);
 	void* Reallocate(void* ptr, uint64 size);
@@ -45,19 +45,19 @@ protected:
 };
 
 template <typename T>
-T* IAlloc::Allocate(uint32 count)
+T* IAllocator::Allocate(uint32 count)
 {
 	return (T*)Allocate(sizeof(T) * count, alignof(T));
 }
 
 template <typename T, typename ... TArgs>
-T* IAlloc::New(TArgs&&... args)
+T* IAllocator::New(TArgs&&... args)
 {
 	return new (Allocate(sizeof(T), alignof(T))) T(std::forward<TArgs>(args)...);
 }
 
 template <typename T>
-void IAlloc::Delete(T* ptr)
+void IAllocator::Delete(T* ptr)
 {
 	ptr->~T();
 	Free(ptr);

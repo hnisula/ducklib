@@ -1,7 +1,10 @@
 ﻿#include <winsock2.h>
 #include <string>
 #include <WS2tcpip.h>
+#include <cassert>
+
 #include "Shared.h"
+
 
 namespace ducklib
 {
@@ -18,6 +21,8 @@ Address::Address(const sockaddr_in& sockAddr)
 
 Address::Address(const char* address)
 {
+	assert(address);
+
 	// First split address into IP and port
 	char addressCopy[64];
 	strcpy_s(addressCopy, 64, address);
@@ -41,6 +46,9 @@ Address::Address(const char* address)
 
 sockaddr_in Address::AsSockAddrIn() const
 {
+	assert(addrV4 != 0);
+	assert(port != 0);
+
 	sockaddr_in sockAddr{};
 
 	sockAddr.sin_family = AF_INET;

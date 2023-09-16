@@ -26,7 +26,7 @@ protected:
 	static constexpr uint32_t MAX_NUM_ADAPTERS = 16;
 	static constexpr uint32_t ADAPTER_DESCRIPTION_BUFFER_SIZE = 256;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	IDXGIFactory4* factory;
 #ifdef _DEBUG

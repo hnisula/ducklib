@@ -27,8 +27,8 @@ TEST(HeapAllocatorTest, AllocAndCheckHeader)
 	HeapAllocator malloc;
 	void* ptr = malloc.Allocate(16);
 	Internal::Memory::Header* header = Internal::Memory::GetHeader(ptr);
-	uint64 expectedAllocSize = 16 + sizeof(Internal::Memory::Header) + IAlloc::DEFAULT_ALIGN;
+	uint64 expectedAllocSize = 16 + sizeof(Internal::Memory::Header) + IAllocator::DEFAULT_ALIGN;
 
 	EXPECT_EQ(expectedAllocSize, header->totalSize);
-	EXPECT_EQ(IAlloc::DEFAULT_ALIGN, header->align);
+	EXPECT_EQ(IAllocator::DEFAULT_ALIGN, header->align);
 }
