@@ -14,7 +14,7 @@ public:
 	/**
 	 * @param address IP address and can contain port.
 	 */
-	Address(const char* address);
+	Address(const char* address); // TODO: Consider making it only the address and then take port in its own parameter.
 
 	uint16 GetPort() const;
 

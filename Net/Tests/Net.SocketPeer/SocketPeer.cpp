@@ -8,17 +8,14 @@ int main(int, char*[])
 	// Winsock init
 	ducklib::InitilizeNet();
 
-	char listenAddressStr[32] = "127.0.0.1:";
-	char listenPortStr[32];
+	uint16_t listenPort;
 	char ipAddress[32];
 	char message[512];
 
 	std::cout << "Enter which port to listen on (0 is any): ";
-	std::cin >> listenPortStr;
+	std::cin >> listenPort;
 
-	strcat_s(&listenAddressStr[10], 32, listenPortStr);
-	ducklib::Address listenAddress(listenAddressStr);
-	ducklib::Socket socket(&listenAddress);
+	ducklib::Socket socket(listenPort);
 	std::cout << "Bound to port: " << socket.GetPort() << "\n";
 
 	std::cout << "Enter address to send message to: ";
@@ -26,7 +23,7 @@ int main(int, char*[])
 
 	ducklib::Address destAddress(ipAddress);
 	ducklib::Address fromAddress;
-	char receiveBuffer[512];
+	uint8_t receiveBuffer[512];
 
 	while (true)
 	{
@@ -44,7 +41,7 @@ int main(int, char*[])
 		if (strcmp(message, "receive") == 0)
 			continue;
 
-		socket.Send(destAddress, message, 1 + (unsigned int)strlen(message));
+		socket.Send(&destAddress, (uint8_t*)message, 1 + (unsigned int)strlen(message) * sizeof(char));
 	}
 
 	ducklib::ShutdownNet();

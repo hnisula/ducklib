@@ -19,8 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="NetClient.cpp" />
+    <ClInclude Include="NetClient.h" />
     <ClInclude Include="Net.h" />
-    <ClInclude Include="Server.h" />
     <ClInclude Include="Shared.h" />
     <ClInclude Include="Socket.h" />
   </ItemGroup>
@@ -28,6 +29,9 @@
     <ClCompile Include="Net.cpp" />
     <ClCompile Include="Shared.cpp" />
     <ClCompile Include="Socket.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="DUMP.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

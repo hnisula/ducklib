@@ -1,4 +1,5 @@
 ﻿#include "Socket.h"
+#include "Net.h"
 
 #include <cassert>
 #include <exception>
@@ -6,48 +7,32 @@
 
 namespace ducklib
 {
-Socket::Socket(const Address* address, uint32 bufferSizes)
+Socket::Socket(uint16_t bindPort, uint32 bufferSizes)
 	: socketHandle(INVALID_SOCKET)
 {
+	assert(bufferSizes > 0);
+
 	// Create socket and set options
 	socketHandle = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (socketHandle == INVALID_SOCKET)
-		throw std::exception("Failed to create socket");
+		DL_NET_FAIL("Failed to create socket");
 
 	if (setsockopt(socketHandle, SOL_SOCKET, SO_RCVBUF, (char*)&bufferSizes, sizeof(uint32)) != 0)
-		throw std::exception("Failed to set receive buffer size on socket");
+		DL_NET_FAIL("Failed to set receive buffer size on socket");
 
 	if (setsockopt(socketHandle, SOL_SOCKET, SO_SNDBUF, (char*)&bufferSizes, sizeof(uint32)) != 0)
-		throw std::exception("Failed to set send buffer size on socket");
+		DL_NET_FAIL("Failed to set send buffer size on socket");
 
 	// Bind socket
 	sockaddr_in socketAddress;
 
-	if (address)
-	{
-		socketAddress = address->AsSockAddrIn();
-	}
-	else
-	{
-		addrinfo hints;
-		addrinfo* addressResult;
-
-		hints.ai_family = AF_INET;
-		hints.ai_socktype = SOCK_DGRAM;
-		hints.ai_flags = AI_PASSIVE;
-
-		if (getaddrinfo(nullptr, "0", &hints, &addressResult) != 0)
-			throw std::exception("Failed to get local address info");
-
-		const auto socketAddressResult = (sockaddr_in*)addressResult->ai_addr;
-		socketAddress.sin_family = AF_INET;
-		socketAddress.sin_port = socketAddressResult->sin_port;
-		socketAddress.sin_addr = socketAddressResult->sin_addr;
-	}
+	socketAddress.sin_addr.s_addr = INADDR_ANY;
+	socketAddress.sin_port = htons(bindPort);
+	socketAddress.sin_family = AF_INET;
 
 	if (bind(socketHandle, (sockaddr*)&socketAddress, sizeof socketAddress) < 0)
-		throw std::exception("Failed to bind socket");
+		DL_NET_FAIL("Failed to bind socket");
 
 	// Get which port was bound
 	sockaddr_in boundSocketAddress;
@@ -55,50 +40,50 @@ Socket::Socket(const Address* address, uint32 bufferSizes)
 	int boundNameResult = getsockname(socketHandle, (sockaddr*)&boundSocketAddress, &boundSocketAddressSize);
 
 	if (boundNameResult != 0)
-	{
-		int error = WSAGetLastError();
-		throw std::exception("Failed to get bound address of socket");
-	}
+		DL_NET_FAIL("Failed to get bound address of socket (%d)", WSAGetLastError());
 
 	this->address = Address(boundSocketAddress);
 
 	// Set non-blocking mode
 	DWORD nonBlockFlag = 1;
 	if (ioctlsocket(socketHandle, FIONBIO, &nonBlockFlag) != 0)
-		throw std::exception("Failed to set non-blocking mode on socket");
+		DL_NET_FAIL("Failed to set non-blocking mode on socket");
 }
+
 Socket::~Socket()
 {
-	if (socketHandle == INVALID_SOCKET)
-		return;
+	assert(socketHandle);
 
-	int result = closesocket(socketHandle);
-	int errorCode = WSAGetLastError();
+	closesocket(socketHandle);
 }
 
 int Socket::GetPort() const
 {
+	assert(socketHandle);
+
 	return address.GetPort();
 }
 
-int32 Socket::Send(const Address& address, const void* data, uint32 dataSize)
+int Socket::Send(const Address* dest, const uint8_t* data, uint32 dataSize)
 {
 	if (socketHandle == INVALID_SOCKET)
-		throw std::exception("Trying to send data over uninitialized socket");
+		DL_NET_FAIL("Trying to send data over uninitialized socket");
 
-	sockaddr_in socketAddress = address.AsSockAddrIn();
+	sockaddr_in socketAddress = dest->AsSockAddrIn();
 	HRESULT result = sendto(socketHandle, (const char*)data, (int)dataSize, 0, (sockaddr*)&socketAddress, sizeof socketAddress);
 
 	if (result == SOCKET_ERROR)
-		throw std::exception("Failed to send data over socket");
+		DL_NET_FAIL("Failed to send data over socket");
 
 	return result;
 }
 
-int32 Socket::Receive(Address* fromAddress, void* buffer, uint32 bufferSize)
+int Socket::Receive(Address* fromAddress, uint8_t* buffer, uint32 bufferSize)
 {
-	if (socketHandle == INVALID_SOCKET)
-		throw std::exception("Trying to receive data from uninitialized socket");
+	assert(socketHandle != INVALID_SOCKET);
+	assert(fromAddress);
+	assert(buffer);
+	assert(bufferSize > 0);
 
 	sockaddr_in socketAddress;
 	int socketAddressSize = sizeof socketAddress;
@@ -113,10 +98,10 @@ int32 Socket::Receive(Address* fromAddress, void* buffer, uint32 bufferSize)
 		if (errorCode == WSAEWOULDBLOCK)
 			return 0;
 
-		throw std::exception("Failed to receive data over socket");
+		DL_NET_FAIL("Failed to receive data over socket");
 	}
 
-	new (fromAddress) Address(socketAddress);
+	new(fromAddress) Address(socketAddress);
 
 	return result;
 }
