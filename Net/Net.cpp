@@ -5,7 +5,7 @@
 
 namespace ducklib
 {
-void InitilizeNet()
+void InitializeNet()
 {
 	WSAData data;
 

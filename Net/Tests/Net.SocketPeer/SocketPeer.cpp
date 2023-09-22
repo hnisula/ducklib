@@ -6,7 +6,7 @@
 int main(int, char*[])
 {
 	// Winsock init
-	ducklib::InitilizeNet();
+	ducklib::InitializeNet();
 
 	uint16_t listenPort;
 	char ipAddress[32];

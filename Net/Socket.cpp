@@ -7,22 +7,14 @@
 
 namespace ducklib
 {
-Socket::Socket(uint16_t bindPort, uint32 bufferSizes)
+Socket::Socket(uint16_t bindPort)
 	: socketHandle(INVALID_SOCKET)
 {
-	assert(bufferSizes > 0);
-
 	// Create socket and set options
 	socketHandle = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
 	if (socketHandle == INVALID_SOCKET)
 		DL_NET_FAIL("Failed to create socket");
-
-	if (setsockopt(socketHandle, SOL_SOCKET, SO_RCVBUF, (char*)&bufferSizes, sizeof(uint32)) != 0)
-		DL_NET_FAIL("Failed to set receive buffer size on socket");
-
-	if (setsockopt(socketHandle, SOL_SOCKET, SO_SNDBUF, (char*)&bufferSizes, sizeof(uint32)) != 0)
-		DL_NET_FAIL("Failed to set send buffer size on socket");
 
 	// Bind socket
 	sockaddr_in socketAddress;
@@ -31,7 +23,7 @@ Socket::Socket(uint16_t bindPort, uint32 bufferSizes)
 	socketAddress.sin_port = htons(bindPort);
 	socketAddress.sin_family = AF_INET;
 
-	if (bind(socketHandle, (sockaddr*)&socketAddress, sizeof socketAddress) < 0)
+	if (bind(socketHandle, (sockaddr*)&socketAddress, sizeof(socketAddress)) < 0)
 		DL_NET_FAIL("Failed to bind socket");
 
 	// Get which port was bound
@@ -70,7 +62,7 @@ int Socket::Send(const Address* dest, const uint8_t* data, uint32 dataSize)
 		DL_NET_FAIL("Trying to send data over uninitialized socket");
 
 	sockaddr_in socketAddress = dest->AsSockAddrIn();
-	HRESULT result = sendto(socketHandle, (const char*)data, (int)dataSize, 0, (sockaddr*)&socketAddress, sizeof socketAddress);
+	HRESULT result = sendto(socketHandle, (const char*)data, (int)dataSize, 0, (sockaddr*)&socketAddress, sizeof(socketAddress));
 
 	if (result == SOCKET_ERROR)
 		DL_NET_FAIL("Failed to send data over socket");
@@ -86,11 +78,12 @@ int Socket::Receive(Address* fromAddress, uint8_t* buffer, uint32 bufferSize)
 	assert(bufferSize > 0);
 
 	sockaddr_in socketAddress;
-	int socketAddressSize = sizeof socketAddress;
+	int socketAddressSize = sizeof(socketAddress);
 	HRESULT result = recvfrom(socketHandle, (char*)buffer, (int)bufferSize, 0, (sockaddr*)&socketAddress, &socketAddressSize);
 
 	// TODO: Check socket address size value?
 
+	// TODO: Propagate this out to the caller
 	if (result == SOCKET_ERROR)
 	{
 		int errorCode = WSAGetLastError();

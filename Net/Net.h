@@ -1,10 +1,11 @@
 #pragma once
 
+#include <winsock2.h>
 #include <cstdio>
 
 namespace ducklib
 {
-void InitilizeNet();
+void InitializeNet();
 void ShutdownNet();
 
 #define DL_NET_LOG
