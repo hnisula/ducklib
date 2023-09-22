@@ -5,7 +5,7 @@
 #ifdef DL_TRACK_ALLOCS
 #include <mutex>
 
-namespace DuckLib::Internal::Memory
+namespace ducklib::Internal::Memory
 {
 class AllocTracker;
 

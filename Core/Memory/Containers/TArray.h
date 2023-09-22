@@ -1,7 +1,7 @@
 #pragma once
-#include "../IAlloc.h"
+#include "../IAllocator.h"
 
-namespace DuckLib
+namespace ducklib
 {
 template <typename T>
 class TArray
@@ -34,14 +34,14 @@ public:
 	T* Data();
 	const T* Data() const;
 
-	static TArray Attach(T* externalArray, uint32 size, IAlloc* alloc = nullptr);
-	static TArray Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc = nullptr);
+	static TArray Attach(T* externalArray, uint32 size, IAllocator* alloc = nullptr);
+	static TArray Attach(T* externalArray, uint32 size, uint32 capacity, IAllocator* alloc = nullptr);
 
 protected:
 	bool EnsureCapacity(uint32 requiredCapacity);
 	void Destroy();
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 	T* array;
 	uint32 length;
 	uint32 capacity;
@@ -219,13 +219,13 @@ const T* TArray<T>::Data() const
 }
 
 template <typename T>
-TArray<T> TArray<T>::Attach(T* externalArray, uint32 size, IAlloc* alloc)
+TArray<T> TArray<T>::Attach(T* externalArray, uint32 size, IAllocator* alloc)
 {
 	return Attach(externalArray, size, size, alloc);
 }
 
 template <typename T>
-TArray<T> TArray<T>::Attach(T* externalArray, uint32 size, uint32 capacity, IAlloc* alloc)
+TArray<T> TArray<T>::Attach(T* externalArray, uint32 size, uint32 capacity, IAllocator* alloc)
 {
 	TArray tarray;
 

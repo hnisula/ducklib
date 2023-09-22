@@ -3,7 +3,7 @@
 #include "VulkanFrameBuffer.h"
 #include "VulkanPass.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 void* VulkanCommandBuffer::GetApiHandle() const
 {

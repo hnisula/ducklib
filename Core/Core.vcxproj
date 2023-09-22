@@ -23,7 +23,7 @@
     <ClInclude Include="Memory\AllocTracker.h" />
     <ClInclude Include="Memory\Containers\Iterators.h" />
     <ClInclude Include="Memory\Containers\TArray.h" />
-    <ClInclude Include="Memory\IAlloc.h" />
+    <ClInclude Include="Memory\IAllocator.h" />
     <ClInclude Include="Memory\HeapAllocator.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Utility.h" />

@@ -3,10 +3,10 @@
 #include "D3D12Common.h"
 #include "D3D12Device.h"
 #include "Core/Utility.h"
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 #include "Core/Memory/Containers/Iterators.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 IRHI* D3D12RHI::GetInstance()
 {

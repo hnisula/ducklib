@@ -1,9 +1,9 @@
 #pragma once
-#include "IAlloc.h"
+#include "IAllocator.h"
 
-namespace DuckLib
+namespace ducklib
 {
-class HeapAllocator final : public IAlloc
+class HeapAllocator final : public IAllocator
 {
 public:
 	~HeapAllocator() override;

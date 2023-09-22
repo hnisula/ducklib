@@ -2,7 +2,7 @@
 
 #include "Core/Types.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 enum class FrameBufferLoadOp
 {

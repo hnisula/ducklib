@@ -4,7 +4,7 @@
 #include "D3D12ResourceStates.h"
 #include "D3D12SwapChain.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 struct Buffer;
 

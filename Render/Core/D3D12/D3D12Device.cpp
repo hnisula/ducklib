@@ -1,6 +1,6 @@
 #include <exception>
 #include "Lib/d3dx12.h"
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 #include "D3D12Device.h"
 #include "D3D12CommandBuffer.h"
 #include "D3D12Common.h"
@@ -8,7 +8,7 @@
 #include "D3D12SwapChain.h"
 #include "D3D12Formats.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 D3D12Device::~D3D12Device()
 {

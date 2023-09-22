@@ -1,6 +1,6 @@
 #include "D3D12ResourceCommandBuffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 Buffer* D3D12ResourceCommandBuffer::CreateBuffer()
 {

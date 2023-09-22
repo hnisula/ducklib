@@ -2,7 +2,7 @@
 
 #include <d3d12.h>
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 enum class PrimitiveTopology
 {

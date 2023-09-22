@@ -10,7 +10,7 @@
 #include "Resources/Viewport.h"
 #include "Resources/Rect.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class ICommandBuffer
 {

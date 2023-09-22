@@ -1,0 +1,1 @@
+Used to send messages to other SocketPeer programs.

@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "Render/Core/PassDescription.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 #define DL_VK_CHECK(statement, errorText) \
 	if ((statement) != VK_SUCCESS) \

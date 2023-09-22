@@ -3,7 +3,7 @@
 #include "Lib/vulkan.h"
 #include "Render/Core/ICommandBuffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanCommandBuffer : public ICommandBuffer
 {

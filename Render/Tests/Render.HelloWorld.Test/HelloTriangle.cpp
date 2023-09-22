@@ -7,7 +7,7 @@
 #include "Render/Core/ISwapChain.h"
 #include "Render/Core/Vulkan/VulkanRHI.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 using namespace Render;
 
 constexpr int WND_WIDTH = 800;

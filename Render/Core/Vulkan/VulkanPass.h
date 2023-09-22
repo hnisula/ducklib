@@ -3,7 +3,7 @@
 #include "../../../Core/Memory/Containers/TArray.h"
 #include "Render/Core/IPass.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanPass : public IPass
 {

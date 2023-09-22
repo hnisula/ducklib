@@ -3,7 +3,7 @@
 #include "../Resources/ImageBuffer.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class D3D12ResourceAllocator
 {
@@ -19,7 +19,7 @@ public:
 	
 private:
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	TArray<D3D12Adapter*> adapters;
 };

@@ -3,7 +3,7 @@
 #include "Lib/d3d12.h"
 #include "Render/Core/IFence.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class D3D12Fence : public IFence
 {

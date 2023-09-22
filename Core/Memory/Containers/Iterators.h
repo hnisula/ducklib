@@ -2,7 +2,7 @@
 
 #include "TArray.h"
 
-namespace DuckLib
+namespace ducklib
 {
 template <typename T>
 class TArrayIt

@@ -1,7 +1,7 @@
 #include <stdexcept>
 #include "ISwapChain.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 ImageBuffer* ISwapChain::GetBuffer(uint32 index)
 {

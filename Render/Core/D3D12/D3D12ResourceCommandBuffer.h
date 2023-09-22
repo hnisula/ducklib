@@ -3,7 +3,7 @@
 
 #include "../IResourceCommandBuffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class D3D12ResourceCommandBuffer : public IResourceCommandBuffer
 {

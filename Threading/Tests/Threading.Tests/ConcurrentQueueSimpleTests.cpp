@@ -2,7 +2,7 @@
 #include "Threading/ConcurrentQueue.h"
 #include "Threading/Thread.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 constexpr uint32 pushValue = 420;
 

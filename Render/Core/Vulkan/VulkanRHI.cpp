@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "VulkanAdapter.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 VulkanRHI::~VulkanRHI() {}
 

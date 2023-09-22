@@ -3,7 +3,7 @@
 #include <stdexcept>
 #include "D3D12Common.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 D3D12SwapChain::D3D12SwapChain(
 	uint32 width,

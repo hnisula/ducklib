@@ -4,7 +4,7 @@
 #include "../IRHI.h"
 #include "Core/Memory/Containers/TArray.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanRHI : IRHI
 {
@@ -27,7 +27,7 @@ protected:
 
 	static constexpr uint32_t DEVICE_DESCRIPTION_BUFFER_SIZE = 256;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	VkInstance instance;
 

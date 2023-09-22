@@ -1,8 +1,8 @@
 #pragma once
 #include <atomic>
-#include "Core/Memory/IAlloc.h"
+#include "Core/Memory/IAllocator.h"
 
-namespace DuckLib
+namespace ducklib
 {
 constexpr uint32 CACHE_LINE_SIZE = 128;
 

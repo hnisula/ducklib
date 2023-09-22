@@ -5,13 +5,9 @@
 #include <hstring.h>
 #endif
 
-namespace DuckLib::Utility
+namespace ducklib::Utility
 {
-void CopyText(char* source, char* dest, uint32_t destSize)
-{
-	// TODO: Implements
-}
-
+// TODO: Replace with some standard function
 void WideToMultiByteText(const wchar_t* source, char* dest, uint32_t destSize)
 {
 	size_t convertedCount;

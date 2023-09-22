@@ -2,7 +2,7 @@
 #include "Lib/vulkan.h"
 #include "Render/Core/IFrameBuffer.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanFrameBuffer : public IFrameBuffer
 {

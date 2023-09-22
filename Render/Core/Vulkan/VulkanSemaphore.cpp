@@ -1,6 +1,6 @@
 #include "VulkanSemaphore.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 VulkanSemaphore::VulkanSemaphore(VkSemaphore vkSemaphore, VkDevice vkDevice)
 	: vkSemaphore(vkSemaphore)

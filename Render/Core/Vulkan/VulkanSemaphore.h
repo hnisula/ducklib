@@ -2,7 +2,7 @@
 #include "Lib/vulkan.h"
 #include "Render/Core/ISemaphore.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class VulkanSemaphore : public ISemaphore
 {

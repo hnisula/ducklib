@@ -6,7 +6,7 @@
 #include "ISwapChain.h"
 #include "PassDescription.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class IDevice
 {

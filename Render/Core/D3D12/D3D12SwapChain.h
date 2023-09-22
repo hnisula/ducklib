@@ -4,7 +4,7 @@
 #include "D3D12Fence.h"
 #include "../ISwapChain.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 class D3D12SwapChain : public ISwapChain
 {

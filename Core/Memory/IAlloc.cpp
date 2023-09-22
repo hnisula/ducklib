@@ -1,30 +1,30 @@
 #include "HeapAllocator.h"
 
-namespace DuckLib
+namespace ducklib
 {
-IAlloc* DefAlloc()
+IAllocator* DefAlloc()
 {
 	static HeapAllocator defaultHeapAllocator;
 
 	return &defaultHeapAllocator;
 }
 
-IAlloc::IAlloc()
+IAllocator::IAllocator()
 	: totalAllocatedSize(0)
 	, allocatedSize(0)
 	, allocationCount(0) {}
 
-void* IAlloc::Allocate(uint64 size, uint8_t align)
+void* IAllocator::Allocate(uint64 size, uint8_t align)
 {
 	return AllocateInternal(size, align);
 }
 
-void* IAlloc::Reallocate(void* ptr, uint64 size)
+void* IAllocator::Reallocate(void* ptr, uint64 size)
 {
 	return ReallocateInternal(ptr, size);
 }
 
-void IAlloc::Free(void* ptr)
+void IAllocator::Free(void* ptr)
 {
 	FreeInternal(ptr);
 }

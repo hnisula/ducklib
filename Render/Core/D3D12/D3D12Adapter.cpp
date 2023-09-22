@@ -4,7 +4,7 @@
 #include "D3D12Common.h"
 #include "D3D12Device.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 void* D3D12Adapter::GetApiHandle() const
 {

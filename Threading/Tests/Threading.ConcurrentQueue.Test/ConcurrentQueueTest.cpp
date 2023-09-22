@@ -4,7 +4,7 @@
 #include "Threading/ConcurrentQueue.h"
 #include "Threading/Thread.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 struct WorkerConfig
 {

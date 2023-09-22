@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "Core/Memory/Containers/TArray.h"
 
-using namespace DuckLib;
+using namespace ducklib;
 
 TEST(TArrayTests, Simple)
 {

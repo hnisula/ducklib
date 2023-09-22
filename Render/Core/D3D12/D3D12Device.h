@@ -8,7 +8,7 @@
 #include "../IDevice.h"
 #include "../Resources/Constants.h"
 
-namespace DuckLib::Render
+namespace ducklib::Render
 {
 constexpr D3D_FEATURE_LEVEL DL_D3D_FEATURE_LEVEL = D3D_FEATURE_LEVEL_12_1;
 
@@ -58,7 +58,7 @@ private:
 
 	static constexpr uint32_t NUM_FRAME_BUFFERS = 4;
 
-	IAlloc* alloc;
+	IAllocator* alloc;
 
 	IDXGIFactory4* d3dFactory;
 	ID3D12Device* d3dDevice;
