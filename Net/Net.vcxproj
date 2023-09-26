@@ -19,7 +19,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Connection.cpp" />
     <ClCompile Include="NetClient.cpp" />
+    <ClInclude Include="Connection.h" />
     <ClInclude Include="NetClient.h" />
     <ClInclude Include="Net.h" />
     <ClInclude Include="Shared.h" />
