@@ -9,7 +9,12 @@ void InitializeNet();
 void ShutdownNet();
 
 #define DL_NET_LOG
-#define DL_NET_LOG_ERROR(text, ...) (printf(text, __VA_ARGS__))
+#define DL_NET_LOG_ERROR(text, ...)				\
+	do											\
+	{											\
+		printf(text, __VA_ARGS__);				\
+		printf("\n");							\
+	} while (false)
 
 #define DL_NET_FAIL(text, ...)					\
 	do											\
