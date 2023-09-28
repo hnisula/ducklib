@@ -1,6 +1,6 @@
 ﻿#pragma once
-#include <ws2def.h>
 
+#include <ws2def.h>
 #include "../Core/Types.h"
 
 namespace ducklib
@@ -10,15 +10,16 @@ class Address
 public:
 	Address() = default;
 	Address(const Address& address, uint16 port);
-	Address(const sockaddr_in& sockAddr);
+	explicit Address(const sockaddr_in& sockAddr);
 	/**
 	 * @param address IP address and can contain port.
+	 * TODO: Consider making it only the address and then take port in its own parameter.
 	 */
-	Address(const char* address); // TODO: Consider making it only the address and then take port in its own parameter.
+	explicit Address(const char* address);
 
-	uint16 GetPort() const;
+	[[nodiscard]] uint16 GetPort() const;
 
-	sockaddr_in AsSockAddrIn() const;
+	[[nodiscard]] sockaddr_in AsSockAddrIn() const;
 
 protected:
 	uint32 addrV4;
