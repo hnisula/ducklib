@@ -1,30 +1,41 @@
 ﻿#pragma once
 
-#include <ws2def.h>
-#include "../Core/Types.h"
+#include <WinSock2.h>
+#include <string>
 
 namespace ducklib
 {
 class Address
 {
 public:
-	Address() = default;
-	Address(const Address& address, uint16 port);
-	explicit Address(const sockaddr_in& sockAddr);
-	/**
-	 * @param address IP address and can contain port.
-	 * TODO: Consider making it only the address and then take port in its own parameter.
-	 */
-	explicit Address(const char* address);
+	/// Constructs an address to 0.0.0.0 and is invalid
+	Address();
+	/// @param port If 0 it will be chosen by OS
+	explicit Address(const std::string& address, uint16_t port);
+	/// @param port If 0 it will be chosen by OS
+	explicit Address(uint32_t ip, uint16_t port);
+	Address(const Address& other) = default;
+	Address(Address&& other) = default;
+	~Address() = default;
 
-	[[nodiscard]] uint16 GetPort() const;
+	[[nodiscard]] uint16_t get_port() const;
+	[[nodiscard]] uint32_t get_ip() const;
+	[[nodiscard]] std::string to_string() const;
+	[[nodiscard]] bool is_valid() const;
 
-	[[nodiscard]] sockaddr_in AsSockAddrIn() const;
+	Address& operator = (const Address& other) = default;
+	Address& operator = (Address&& other) = default;
 
 protected:
-	uint32 addrV4;
-	uint16 port;
+	/// Stored as net (big) endian
+	uint32_t ip;
+	/// Stored as net (big) endian
+	uint16_t port;
 };
 
-inline uint16 Address::GetPort() const { return port; }
+inline uint16_t Address::get_port() const { return port; }
+inline uint32_t Address::get_ip() const { return ip; }
+inline bool Address::is_valid() const { return ip != 0; }
+
+std::pair<std::string, uint16_t> split_address(const std::string& addr);
 }

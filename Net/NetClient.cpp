@@ -13,9 +13,8 @@ NetClient::NetClient(uint16_t bindPort)
 		receivedFragmentPackets[i].sequence = -1;
 }
 
-bool NetClient::SendPacket(const Address* to, const uint8_t* data, int dataSize)
+bool NetClient::SendPacket(const Address& to, const uint8_t* data, int dataSize)
 {
-	assert(to);
 	assert(data);
 	assert(dataSize > 0);
 
@@ -46,7 +45,7 @@ bool NetClient::SendPacket(const Address* to, const uint8_t* data, int dataSize)
 				fragmentPayloadSize);
 
 			// Send packet
-			const int sizeSent = socket.Send(to, packetSendBuffer, packetSize);
+			const int sizeSent = socket.send(to, packetSendBuffer, packetSize);
 
 			if (sizeSent != packetSize)
 			{
@@ -64,7 +63,7 @@ bool NetClient::SendPacket(const Address* to, const uint8_t* data, int dataSize)
 		memcpy(&packetSendBuffer[BASE_HEADER_SIZE], data, dataSize);
 
 		// Send packet
-		const int sizeSent = socket.Send(to, packetSendBuffer, packetSize);
+		const int sizeSent = socket.send(to, packetSendBuffer, packetSize);
 
 		if (sizeSent != dataSize)
 			DL_NET_LOG_ERROR("Failed to send packet of size %d", packetSize);
@@ -85,7 +84,7 @@ void NetClient::ReceivePacket()
 
 	Address from;
 	uint8_t packetReceiveBuffer[MAX_PACKET_SIZE];
-	const int packetSize = socket.Receive(&from, packetReceiveBuffer, sizeof(packetReceiveBuffer));
+	const int packetSize = socket.receive(from, packetReceiveBuffer, sizeof(packetReceiveBuffer));
 
 	if (packetSize == 0)
 		return; // TODO: Come up with how to handle all of these exit cases

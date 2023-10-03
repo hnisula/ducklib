@@ -1,6 +1,5 @@
 ﻿#pragma once
 
-#include <winsock2.h>
 #include "Shared.h"
 
 namespace ducklib
@@ -14,14 +13,17 @@ public:
 	explicit Socket(uint16_t bindPort = 0);
 	~Socket();
 
-	int GetPort() const;
+	int get_port() const;
 
-	int Send(const Address* dest, const uint8_t* data, uint32 dataSize);
-	int Receive(Address* fromAddress, uint8_t* buffer, uint32 bufferSize);
+	int send(const Address& dest, const uint8_t* data, uint32_t dataSize);
+	int receive(Address& fromAddress, uint8_t* buffer, uint32_t bufferSize);
 
 	// TODO: Consider adding a Close() function
 
-protected:
+private:
+	static Address sockaddr_to_address(const sockaddr_in& sock_addr);
+	static sockaddr_in address_to_sockaddr(const Address& address);
+	
 	SOCKET socketHandle;
 	Address address;
 };

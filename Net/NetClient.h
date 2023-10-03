@@ -11,7 +11,7 @@ class NetClient
 public:
 	NetClient(uint16_t bindPort = 0);
 
-	bool SendPacket(const Address* to, const uint8_t* data, int dataSize);
+	bool SendPacket(const Address& to, const uint8_t* data, int dataSize);
 	void ReceivePacket();
 
 private:

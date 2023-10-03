@@ -1,60 +1,55 @@
 ﻿#include <winsock2.h>
-#include <string>
 #include <WS2tcpip.h>
-#include <cassert>
+#include <string>
+#include <array>
 
 #include "Shared.h"
 
-
 namespace ducklib
 {
-Address::Address(const Address& address, uint16 port)
-	: addrV4(address.addrV4)
-	, port(port)
-{}
+Address::Address()
+	: ip(0)
+	, port(0) {}
 
-Address::Address(const sockaddr_in& sockAddr)
+Address::Address(const std::string& address, uint16_t port)
+	: port(port)
 {
-	addrV4 = sockAddr.sin_addr.s_addr;
-	port = ntohs(sockAddr.sin_port);
-}
-
-Address::Address(const char* address)
-{
-	assert(address);
-
-	// First split address into IP and port
-	char addressCopy[64];
-	strcpy_s(addressCopy, 64, address);
-	char* portDelimiter = strchr(addressCopy, ':');
-	port = 0;	// TODO: Come up with some default?
-
-	if (portDelimiter)
-	{
-		port = (uint16)std::stoi(portDelimiter + 1);
-		*portDelimiter = '\0';
-	}
-
-	IN_ADDR inAddr;
-	int result = inet_pton(AF_INET, addressCopy, &inAddr);
+	IN_ADDR in_addr;
+	const int result = inet_pton(AF_INET, address.data(), &in_addr);
 
 	if (result != 1)
 		throw std::exception("Failed to parse address");
 
-	addrV4 = inAddr.S_un.S_addr;
+	ip = in_addr.S_un.S_addr;
 }
 
-sockaddr_in Address::AsSockAddrIn() const
+Address::Address(uint32_t ip, uint16_t port)
+	: ip(ip)
+	, port(port)
+{}
+
+std::string Address::to_string() const
 {
-	assert(addrV4 != 0);
-	assert(port != 0);
+	auto ip_buffer = std::array<char, INET_ADDRSTRLEN>{};
+	in_addr addr_struct;
 
-	sockaddr_in sockAddr{};
+	addr_struct.S_un.S_addr = ip;
 
-	sockAddr.sin_family = AF_INET;
-	sockAddr.sin_port = htons(port);
-	sockAddr.sin_addr.s_addr = addrV4;
+	if (!inet_ntop(AF_INET, &addr_struct, ip_buffer.data(), INET_ADDRSTRLEN))
+		throw std::exception("Failed to convert network address to string");
 
-	return sockAddr;
+	auto result = std::string{ INET_ADDRSTRLEN, '\0' };
+
+	return std::string{ ip_buffer.data() };
+}
+
+std::pair<std::string, uint16_t> split_address(const std::string& addr)
+{
+	auto split_index = addr.find(':');
+
+	if (split_index == std::string::npos)
+		throw std::exception("Invalid address");
+
+	return { addr.substr(0, split_index), stoi(addr.substr(split_index + 1)) };
 }
 }

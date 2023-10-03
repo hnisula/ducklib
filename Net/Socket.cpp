@@ -34,7 +34,7 @@ Socket::Socket(uint16_t bindPort)
 	if (boundNameResult != 0)
 		DL_NET_FAIL("Failed to get bound address of socket (%d)", WSAGetLastError());
 
-	this->address = Address(boundSocketAddress);
+	this->address = sockaddr_to_address(boundSocketAddress);
 
 	// Set non-blocking mode
 	DWORD nonBlockFlag = 1;
@@ -49,19 +49,35 @@ Socket::~Socket()
 	closesocket(socketHandle);
 }
 
-int Socket::GetPort() const
+int Socket::get_port() const
 {
 	assert(socketHandle);
 
-	return address.GetPort();
+	return address.get_port();
 }
 
-int Socket::Send(const Address* dest, const uint8_t* data, uint32 dataSize)
+Address Socket::sockaddr_to_address(const sockaddr_in& sock_addr)
+{
+	return Address{ (uint32_t)sock_addr.sin_addr.S_un.S_addr, sock_addr.sin_port };
+}
+
+sockaddr_in Socket::address_to_sockaddr(const Address& address)
+{
+	sockaddr_in sock_addr{};
+
+	sock_addr.sin_family = AF_INET;
+	sock_addr.sin_port = address.get_port();
+	sock_addr.sin_addr.S_un.S_addr = address.get_ip();
+
+	return sock_addr;
+}
+
+int Socket::send(const Address& dest, const uint8_t* data, uint32_t dataSize)
 {
 	if (socketHandle == INVALID_SOCKET)
 		DL_NET_FAIL("Trying to send data over uninitialized socket");
 
-	sockaddr_in socketAddress = dest->AsSockAddrIn();
+	sockaddr_in socketAddress = address_to_sockaddr(dest);
 	HRESULT result = sendto(socketHandle, (const char*)data, (int)dataSize, 0, (sockaddr*)&socketAddress, sizeof(socketAddress));
 
 	if (result == SOCKET_ERROR)
@@ -70,10 +86,9 @@ int Socket::Send(const Address* dest, const uint8_t* data, uint32 dataSize)
 	return result;
 }
 
-int Socket::Receive(Address* fromAddress, uint8_t* buffer, uint32 bufferSize)
+int Socket::receive(Address& fromAddress, uint8_t* buffer, uint32_t bufferSize)
 {
 	assert(socketHandle != INVALID_SOCKET);
-	assert(fromAddress);
 	assert(buffer);
 	assert(bufferSize > 0);
 
@@ -94,7 +109,7 @@ int Socket::Receive(Address* fromAddress, uint8_t* buffer, uint32 bufferSize)
 		DL_NET_FAIL("Failed to receive data over socket");
 	}
 
-	new(fromAddress) Address(socketAddress);
+	fromAddress = sockaddr_to_address(socketAddress);
 
 	return result;
 }
