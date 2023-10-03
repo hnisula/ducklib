@@ -63,17 +63,17 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net", "Net\Net.vcxproj", "{
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{0B4BAFAB-DFAD-43DB-BF42-3EE496986FE5}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.SocketPeer", "Net\Tests\Net.SocketPeer\Net.SocketPeer.vcxproj", "{F39810F5-792C-4436-BF9E-BF9C000963A8}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.Test.SocketPeer", "Net\Tests\Net.Test.SocketPeer\Net.Test.SocketPeer.vcxproj", "{F39810F5-792C-4436-BF9E-BF9C000963A8}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B3891D4E-41EE-4E02-A8ED-3F700AB22A83} = {B3891D4E-41EE-4E02-A8ED-3F700AB22A83}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.FragmentSender", "Net\Tests\Net.FragmentSender\Net.FragmentSender.vcxproj", "{D980E6AE-2EE4-4629-99AA-69A30281C7AF}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.Test.FragmentSender", "Net\Tests\Net.Test.FragmentSender\Net.Test.FragmentSender.vcxproj", "{D980E6AE-2EE4-4629-99AA-69A30281C7AF}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B3891D4E-41EE-4E02-A8ED-3F700AB22A83} = {B3891D4E-41EE-4E02-A8ED-3F700AB22A83}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.FragmentReceiver", "Net\Tests\Net.FragmentReceiver\Net.FragmentReceiver.vcxproj", "{CFC77619-80EF-4C5A-8C7E-F83D18362619}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Net.Test.FragmentReceiver", "Net\Tests\Net.Test.FragmentReceiver\Net.Test.FragmentReceiver.vcxproj", "{CFC77619-80EF-4C5A-8C7E-F83D18362619}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B3891D4E-41EE-4E02-A8ED-3F700AB22A83} = {B3891D4E-41EE-4E02-A8ED-3F700AB22A83}
 	EndProjectSection
