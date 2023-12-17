@@ -8,7 +8,7 @@ class Socket
 {
 public:
 	/**
-	 *\param bindPort Port to bind socket to. 0 = OS chooses.
+	 *\param bindPort Port to bind socket to. 0 lets OS choose.
 	 */
 	explicit Socket(uint16_t bindPort = 0);
 	~Socket();
@@ -23,7 +23,7 @@ public:
 private:
 	static Address sockaddr_to_address(const sockaddr_in& sock_addr);
 	static sockaddr_in address_to_sockaddr(const Address& address);
-	
+
 	SOCKET socketHandle;
 	Address address;
 };
