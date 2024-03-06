@@ -16,18 +16,19 @@ int main(int, char*[])
 	std::cin >> listenPort;
 
 	ducklib::Socket socket(listenPort);
-	std::cout << "Bound to port: " << socket.GetPort() << "\n";
+	std::cout << "Bound to port: " << socket.get_port() << "\n";
 
 	std::cout << "Enter address to send message to: ";
 	std::cin >> ipAddress;
 
-	ducklib::Address destAddress(ipAddress);
+	auto [ip, port] = ducklib::split_address(ipAddress);
+	ducklib::Address destAddress(ip, port);
 	ducklib::Address fromAddress;
 	uint8_t receiveBuffer[512];
 
 	while (true)
 	{
-		const int bytesReceived = socket.Receive(&fromAddress, receiveBuffer, sizeof receiveBuffer);
+		const int bytesReceived = socket.receive(fromAddress, receiveBuffer, sizeof receiveBuffer);
 
 		if (bytesReceived > 0)
 			std::cout << "Incoming message: " << receiveBuffer << "\n";
@@ -41,7 +42,7 @@ int main(int, char*[])
 		if (strcmp(message, "receive") == 0)
 			continue;
 
-		socket.Send(&destAddress, (uint8_t*)message, 1 + (unsigned int)strlen(message) * sizeof(char));
+		socket.send(destAddress, (uint8_t*)message, 1 + (unsigned int)strlen(message) * sizeof(char));
 	}
 
 	ducklib::ShutdownNet();

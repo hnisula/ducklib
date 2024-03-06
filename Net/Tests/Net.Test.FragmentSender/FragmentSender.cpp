@@ -15,7 +15,8 @@ int main()
     std::cout << "Enter address to send fragmented packets to: ";
     std::cin >> ipAddress;
 
-    ducklib::Address destAddress(ipAddress);
+    auto [ip, port] = ducklib::split_address(ipAddress);
+    ducklib::Address destAddress(ip, port);
     ducklib::NetClient netClient;
     char message[1042];
     uint8_t testPacket[1600];
@@ -32,7 +33,7 @@ int main()
 
         if (strcmp(message, "send") == 0)
         {
-            netClient.SendPacket(&destAddress, testPacket, sizeof testPacket);
+            netClient.SendPacket(destAddress, testPacket, sizeof testPacket);
         }
         else if (strcmp(message, "quit") == 0)
             break;
