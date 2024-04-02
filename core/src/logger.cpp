@@ -1,7 +1,7 @@
 #include <iostream>
 #include <mutex>
 #include <iterator>
-#include "../../include/core/logging/Logger.h"
+#include "core/Logger.h"
 
 namespace ducklib
 {

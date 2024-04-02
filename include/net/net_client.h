@@ -1,11 +1,13 @@
-﻿#pragma once
+﻿#ifndef NET_CLIENT_H
+#define NET_CLIENT_H
+
 #include <array>
 #include <cstdint>
 
-#include "Shared.h"
-#include "Socket.h"
+#include "shared.h"
+#include "socket.h"
 
-namespace ducklib
+namespace ducklib::net
 {
 class NetClient
 {
@@ -22,7 +24,8 @@ private:
     static constexpr int MAX_PAYLOAD_SIZE = MAX_PACKET_SIZE - BASE_HEADER_SIZE;
     static constexpr int MAX_FRAGMENT_PAYLOAD_SIZE = MAX_PACKET_SIZE - BASE_HEADER_SIZE - FRAGMENT_SUB_HEADER_SIZE;
     static constexpr int MAX_FRAGMENTS = 256;
-    static constexpr int MAX_FRAGMENT_PACKET_BUFFER_SIZE = 512; // TODO: Rename
+    static constexpr int MAX_FRAGMENT_PACKETS = 512;
+    static constexpr int MAX_FRAGMENT_PACKET_SIZE = 512; // TODO: Rename
 
     enum class PacketType
     {
@@ -69,6 +72,9 @@ private:
     void InitNewFragmentPacketData(uint16_t sequence, uint8_t fragmentCount);
 
     uint16_t nextSequence = 0;
-    ReceivedFragmentPacketData receivedFragmentPackets[MAX_FRAGMENT_PACKET_BUFFER_SIZE];
+    std::array<ReceivedFragmentPacketData, MAX_FRAGMENT_PACKETS> receivedFragmentPackets;
+    Socket socket;
 };
 }
+
+#endif // NET_CLIENT_H
