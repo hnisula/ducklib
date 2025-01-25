@@ -3,6 +3,8 @@
 #include <span>
 #include <net/socket.h>
 
+#include "net_buffer_writer.h"
+
 namespace ducklib::net
 {
     class NetClient2
@@ -12,7 +14,7 @@ namespace ducklib::net
         auto receive_packet() -> bool;
 
     private:
-        enum class PacketType
+        enum class PacketType : uint16_t
         {
             REGULAR = 0,
             FRAGMENT = 1
@@ -23,8 +25,8 @@ namespace ducklib::net
             uint16_t sequence;
             PacketType packet_type;
 
-            auto serialize(std::span<std::byte> packet_buffer) const -> std::span<std::byte>;
-            static auto deserialize(std::span<std::byte> packet_buffer) -> PacketHeader;
+            auto serialize(NetBufferWriter buffer_writer) const -> void;
+            // static auto deserialize(NetBufferReader buffer_reader) -> PacketHeader;
         };
 
         auto send_fragment_packets(Address to, std::span<std::byte> data) -> bool;

@@ -14,7 +14,9 @@ add_library(${PROJECT_NAME} STATIC
         src/Shared.cpp
         src/Socket.cpp
         src/net_client2.cpp
-        ../include/net/net_client2.h)
+        ../include/net/net_client2.h
+        ../include/net/net_buffer_writer.h
+        src/net_buffer_writer.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ../include)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         PREFIX ""
