@@ -23,9 +23,12 @@ add_executable(
         main.cpp
 )
 target_include_directories(${PROJECT_NAME} PRIVATE ../../../include)
+link_directories(${CMAKE_SOURCE_DIR}/bin)
 target_link_libraries(
         ${PROJECT_NAME}
         GTest::gtest_main
+        ducklib-net
+        Ws2_32
 )
 
 include(GoogleTest)

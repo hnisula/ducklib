@@ -1,7 +1,8 @@
 #include "net/Net.h"
 
 #include <winsock2.h>
-#include <exception>
+#include <format>
+#include <stdexcept>
 #include <core/Logger.h>
 
 namespace ducklib::net
@@ -29,15 +30,15 @@ void net_shutdown()
 template <typename... Args>
 void net_log_error(const char* text, Args... args)
 {
-    static Logger logger;
-
-    logger.log_error(text, args...);
+    // static Logger logger;
+    //
+    // logger.log_error(text, args...);
 }
 
 template <typename... Args>
 void net_fail(const std::string& text, Args... args)
 {
-    net_log_error(text, args...);
-    exit(0);
+    // net_log_error(text, args...);
+    // exit(0);
 }
 }

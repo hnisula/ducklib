@@ -19,10 +19,12 @@ public:
     explicit Socket(uint16_t bindPort = 0);
     ~Socket();
 
-    [[nodiscard]] auto get_port() const -> int;
+    [[nodiscard]]
+    auto get_port() const -> uint16_t;
 
-    [[nodiscard]] auto send(Address to, std::span<const std::byte> data) const -> int;
-    auto receive(Address* from, std::span<std::byte> receive_buffer) const -> int;
+    [[nodiscard]]
+    auto send(Address to, std::span<const std::byte> data) const -> size_t;
+    auto receive(Address& from, std::span<std::byte> receive_buffer) const -> size_t;
 
     // TODO: Consider adding a Close() function
 

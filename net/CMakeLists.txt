@@ -10,13 +10,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(${PROJECT_NAME} STATIC
         src/Net.cpp
-        src/net_client.cpp
         src/Shared.cpp
         src/Socket.cpp
-        src/net_client2.cpp
-        ../include/net/net_client2.h
+        src/net_client.cpp
+        ../include/net/net_client.h
         ../include/net/net_buffer_writer.h
-        src/net_buffer_writer.cpp)
+        src/net_buffer_writer.cpp
+        ../include/net/net_buffer_reader.h
+        src/net_buffer_reader.cpp)
 target_include_directories(${PROJECT_NAME} PRIVATE ../include)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         PREFIX ""

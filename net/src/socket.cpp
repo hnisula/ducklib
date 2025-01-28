@@ -5,11 +5,9 @@
 #include <exception>
 #include <WS2tcpip.h>
 
-namespace ducklib::net
-{
+namespace ducklib::net {
 Socket::Socket(uint16_t bindPort)
-    : socket_handle(INVALID_SOCKET)
-{
+    : socket_handle(INVALID_SOCKET) {
     // Create socket and set options
     socket_handle = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP);
 
@@ -45,26 +43,23 @@ Socket::Socket(uint16_t bindPort)
         net_log_error("Failed to set non-blocking mode on socket");
 }
 
-Socket::~Socket()
-{
+Socket::~Socket() {
     assert(socket_handle != INVALID_SOCKET);
 
     closesocket(socket_handle);
 }
 
-auto Socket::get_port() const -> int
-{
+auto Socket::get_port() const -> uint16_t {
     assert(socket_handle != INVALID_SOCKET);
 
     return address.get_port();
 }
 
-auto Socket::send(Address to, std::span<const std::byte> data) const -> int
-{
+auto Socket::send(Address to, std::span<const std::byte> data) const -> size_t {
     assert(socket_handle != INVALID_SOCKET);
 
     auto socketAddress = to.as_sockaddr_in();
-    auto result = sendto(
+    auto sent_bytes = sendto(
         socket_handle,
         reinterpret_cast<const char*>(data.data()),
         static_cast<int>(data.size()),
@@ -72,20 +67,19 @@ auto Socket::send(Address to, std::span<const std::byte> data) const -> int
         reinterpret_cast<sockaddr*>(&socketAddress),
         sizeof(socketAddress));
 
-    if (result == SOCKET_ERROR)
+    if (sent_bytes == SOCKET_ERROR)
         net_log_error("Failed to send data over socket");
 
-    return result;
+    return sent_bytes;
 }
 
-auto Socket::receive(Address* from, std::span<std::byte> receive_buffer) const -> int
-{
+auto Socket::receive(Address& from, std::span<std::byte> receive_buffer) const -> size_t {
     assert(socket_handle != INVALID_SOCKET);
-    assert(from);
+    assert(&from);
 
     sockaddr_in socketAddress{};
     int socketAddressSize = sizeof(socketAddress);
-    HRESULT result = recvfrom(
+    HRESULT received_bytes = recvfrom(
         socket_handle,
         reinterpret_cast<char*>(receive_buffer.data()),
         static_cast<int>(receive_buffer.size()),
@@ -96,8 +90,7 @@ auto Socket::receive(Address* from, std::span<std::byte> receive_buffer) const -
     // TODO: Check socket address size value?
 
     // TODO: Propagate this out to the caller
-    if (result == SOCKET_ERROR)
-    {
+    if (received_bytes == SOCKET_ERROR) {
         int errorCode = WSAGetLastError();
 
         if (errorCode == WSAEWOULDBLOCK)
@@ -106,8 +99,8 @@ auto Socket::receive(Address* from, std::span<std::byte> receive_buffer) const -
         net_log_error("Failed to receive data over socket");
     }
 
-    new(from) Address(socketAddress);
+    new(&from) Address(socketAddress);
 
-    return result;
+    return received_bytes;
 }
 }

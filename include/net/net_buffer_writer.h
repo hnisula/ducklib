@@ -1,5 +1,5 @@
-#ifndef BUFFER_WRITER_H
-#define BUFFER_WRITER_H
+#ifndef NET_BUFFER_WRITER_H
+#define NET_BUFFER_WRITER_H
 #include <cstdint>
 #include <functional>
 #include <span>
@@ -13,17 +13,22 @@ public:
     
     template <typename T>
     auto write(T value) -> void;
-    auto write(std::span<std::byte> data_buffer) -> void;
+    auto write(std::span<const std::byte> data_buffer) -> void;
 
     [[nodiscard]]
     auto bytes_written() const -> size_t;
+    [[nodiscard]]
+    auto remaining_bytes() const -> size_t;
+    /// @return Span that covers only the data written to the buffer
+    [[nodiscard]]
+    auto data() const -> std::span<const std::byte>;
 
 private:
     std::span<std::byte> buffer;
     std::size_t byte_position = 0;
 
     [[nodiscard]]
-    auto can_write(size_t bytes) const -> bool;
+    auto can_write(size_t bytes_to_write) const -> bool;
 };
 
 template <typename T>
@@ -33,4 +38,4 @@ auto NetBufferWriter::write(T value) -> void {
 }
 }
 
-#endif //BUFFER_WRITER_H
+#endif //NET_BUFFER_WRITER_H

@@ -2,6 +2,7 @@
 #define NET_H
 
 #include <string>
+#include <bit>
 
 namespace ducklib::net {
 void net_initialize();

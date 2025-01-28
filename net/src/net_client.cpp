@@ -1,212 +1,67 @@
-﻿#include <winsock2.h>
-#include <cassert>
+#include <cstring>
+
+#include <stdexcept>
+#include <array>
+
 #include "net/net_client.h"
-#include "net/net.h"
+#include "net/net_buffer_writer.h"
 
-namespace ducklib
-{
-NetClient::NetClient(uint16_t bindPort)
-    : socket(bindPort)
-{
-    // Init sequence numbers to never match possible packet sequence numbers (16 bits)
-    for (auto& receivedFragmentPacket : receivedFragmentPackets)
-        receivedFragmentPacket.sequence = -1; // TOOD: Why the hell would this work?
-}
-
-bool NetClient::send_packet(const Address* to, const uint8_t* data, int dataSize)
-{
-    assert(to);
-    assert(data);
-    assert(dataSize > 0);
-
-    uint8_t packetSendBuffer[MAX_PACKET_SIZE];
-
-    if (dataSize > MAX_PAYLOAD_SIZE)
-    {
-        // Ceiling function from Number Conversion (2001) by Roland Backhouse
-        const int fragmentCount = (dataSize + MAX_FRAGMENT_PAYLOAD_SIZE - 1) / MAX_FRAGMENT_PAYLOAD_SIZE;
-
-        for (int i = 0; i < fragmentCount; ++i)
-        {
-            // Construct fragment packet
-            const int remainingDataSize = dataSize - i * MAX_FRAGMENT_PAYLOAD_SIZE;
-            const int fragmentPayloadSize = remainingDataSize > MAX_FRAGMENT_PAYLOAD_SIZE
-                                                ? MAX_FRAGMENT_PAYLOAD_SIZE
-                                                : remainingDataSize;
-            const int packetSize = fragmentPayloadSize + BASE_HEADER_SIZE + FRAGMENT_SUB_HEADER_SIZE;
-
-            assert(packetSize <= MAX_PACKET_SIZE);
-
-            const BasePacketHeader header{nextSequence, PacketType::FRAGMENT};
-            const FragmentPacketSubHeader fragmentHeader{(uint8_t)fragmentCount, (uint8_t)i};
-
-            WriteBasePacketHeader(packetSendBuffer, &header);
-            WriteFragmentPacketHeader(&packetSendBuffer[BASE_HEADER_SIZE], &fragmentHeader);
-            memcpy(
-                &packetSendBuffer[BASE_HEADER_SIZE + FRAGMENT_SUB_HEADER_SIZE],
-                &data[(uint64_t)i * MAX_FRAGMENT_PAYLOAD_SIZE],
-                fragmentPayloadSize);
-
-            // Send packet
-            const int sizeSent = socket.send(to, packetSendBuffer);
-
-            if (sizeSent != packetSize)
-            {
-                DL_NET_LOG_ERROR("Failed to send fragment (#%d) packet of size %d", i, packetSize);
-                return false;
-            }
-        }
-    }
-    else
-    {
-        // Construct regular packet
-        const int packetSize = BASE_HEADER_SIZE + dataSize;
-        const BasePacketHeader header{nextSequence, PacketType::REGULAR};
-        WriteBasePacketHeader(packetSendBuffer, &header);
-        memcpy(&packetSendBuffer[BASE_HEADER_SIZE], data, dataSize);
-
-        // Send packet
-        const int sizeSent = socket.send(to, packetSendBuffer);
-
-        if (sizeSent != dataSize)
-            DL_NET_LOG_ERROR("Failed to send packet of size %d", packetSize);
-    }
-
-    // TODO: Store sequence and timestamp of when this packet was sent to track RTT
-
-    ++nextSequence;
-
-    return true;
-}
-
-void NetClient::receive_packet()
-{
-    // TODO: Add asserts on socket?
-    // assert(from);
-    // assert(dataPtr);
-
-    Address from;
-    uint8_t packetReceiveBuffer[MAX_PACKET_SIZE];
-    const int packetSize = socket.receive(&from, packetReceiveBuffer, sizeof(packetReceiveBuffer));
-
-    if (packetSize == 0)
-        return; // TODO: Come up with how to handle all of these exit cases
-
-    const auto [sequence, packetType] = ReadBasePacketHeader(packetReceiveBuffer);
-
-    switch (packetType)
-    {
-    case PacketType::REGULAR:
-        HandlePacket(packetReceiveBuffer, packetSize);
-        break;
-    case PacketType::FRAGMENT:
-        const auto [fragmentCount, fragmentIndex] = ReadFragmentPacketSubHeader(&packetReceiveBuffer[BASE_HEADER_SIZE]);
-        ReceivedFragmentPacketData* fragmentPacketData = &receivedFragmentPackets[sequence %
-            MAX_FRAGMENT_PACKET_SIZE];
-
-        if ((int)fragmentCount > MAX_FRAGMENTS || fragmentCount == 0 || fragmentIndex >= fragmentCount)
-        {
-            // TODO: Log?
-            // TODO: Metrics?
-            return;
-        }
-
-        if (fragmentPacketData->sequence != sequence)
-            InitNewFragmentPacketData(sequence, fragmentCount);
-
-        if (!fragmentPacketData->fragmentReceived[fragmentIndex])
-        {
-            memcpy(
-                &fragmentPacketData->packetData[(uint64_t)fragmentIndex * MAX_FRAGMENT_PAYLOAD_SIZE],
-                &packetReceiveBuffer[BASE_HEADER_SIZE + FRAGMENT_SUB_HEADER_SIZE],
-                packetSize - BASE_HEADER_SIZE - FRAGMENT_SUB_HEADER_SIZE);
-            fragmentPacketData->fragmentReceived[fragmentIndex] = true;
-            ++fragmentPacketData->fragmentReceivedCount;
-
-            if (fragmentIndex == fragmentCount - 1)
-            {
-                const int lastFragmentSize = packetSize - BASE_HEADER_SIZE - FRAGMENT_SUB_HEADER_SIZE;
-                fragmentPacketData->totalSize = (fragmentCount - 1) * MAX_FRAGMENT_PAYLOAD_SIZE + lastFragmentSize;
-            }
-        }
-
-        if (fragmentPacketData->fragmentReceivedCount == fragmentPacketData->fragmentCount)
-            HandlePacket(fragmentPacketData->packetData, fragmentPacketData->totalSize);
-
-        break;
+namespace ducklib::net {
+auto NetClient::send_packet(Address to, std::span<std::byte> data) -> size_t {
+    if (data.size() > MAX_REGULAR_PAYLOAD_SIZE) {
+        throw std::runtime_error("Data size exceeds maximum regular payload size");
+    } else {
+        return send_regular_packet(to, data);
     }
 }
 
-void NetClient::WriteBasePacketHeader(uint8_t* packetBuffer, const BasePacketHeader* header)
-{
-    assert(packetBuffer);
-    assert(header);
+auto NetClient::receive_packet(std::span<std::byte> dest_buffer, Address& from) -> size_t {
+    std::array<std::byte, MAX_PACKET_SIZE> packet_buffer;
+    auto bytes_read{ socket.receive(from, packet_buffer) };
+    auto packet_reader{ NetBufferReader({ packet_buffer.data(), bytes_read }) };
+    auto packet_header{ PacketHeader::deserialize(packet_reader) };
+    auto bytes_received{ 0 };
 
-    const uint16_t netSequence = htons(header->sequence);
-    packetBuffer[0] = (netSequence >> 8) & 0xFF;
-    packetBuffer[1] = netSequence & 0xFF;
+    if (packet_header.packet_type == PacketType::REGULAR) {
+        bytes_received = receive_regular_packet(packet_reader, dest_buffer);
+    }
 
-    packetBuffer[2] = (uint8_t)header->packetType;
+    total_bytes_received += bytes_received;
+    return bytes_received;
 }
 
-void NetClient::WriteFragmentPacketHeader(uint8_t* packetBuffer, const FragmentPacketSubHeader* header)
-{
-    assert(packetBuffer);
-    assert(header);
-
-    packetBuffer[0] = header->fragmentCount;
-    packetBuffer[1] = header->fragmentIndex;
+auto NetClient::PacketHeader::serialize(NetBufferWriter buffer_writer) const -> void {
+    buffer_writer.write(sequence);
+    buffer_writer.write(static_cast<uint16_t>(packet_type));
 }
 
-NetClient::BasePacketHeader NetClient::ReadBasePacketHeader(const uint8_t* packetBuffer)
-{
-    BasePacketHeader baseHeader;
-    const auto packetType = (PacketType)packetBuffer[2];
-    const uint16_t hostSequence = (uint16_t)(packetBuffer[0] << 8) | packetBuffer[1];
+auto NetClient::PacketHeader::deserialize(NetBufferReader buffer_reader) -> PacketHeader {
+    auto sequence{ buffer_reader.read<uint16_t>() };
+    auto packet_type{ buffer_reader.read<uint16_t>() };
 
-    baseHeader.sequence = ntohs(hostSequence);
-    baseHeader.packetType = packetType;
-
-    return baseHeader;
+    return PacketHeader{ sequence, static_cast<PacketType>(packet_type) };
 }
 
-NetClient::FragmentPacketSubHeader NetClient::ReadFragmentPacketSubHeader(const uint8_t* packetBuffer)
-{
-    FragmentPacketSubHeader fragmentHeader;
+auto NetClient::send_regular_packet(Address to, std::span<const std::byte> data) -> size_t {
+    std::array<std::byte, MAX_PACKET_SIZE> packet_buffer;
+    auto packet_writer{ NetBufferWriter{ packet_buffer } };
 
-    fragmentHeader.fragmentCount = packetBuffer[0];
-    fragmentHeader.fragmentIndex = packetBuffer[1];
+    packet_writer.write({ data.data(), data.size() });
+    auto bytes_sent{ socket.send(to, packet_writer.data()) };
+    total_bytes_sent += bytes_sent;
 
-    return fragmentHeader;
+    return bytes_sent;
 }
 
-void NetClient::HandlePacket(uint8_t* packet, int packetSize)
-{
-    // TEST
-    for (uint32_t i = 0; (uint64_t)i < packetSize / sizeof(int); ++i)
-        if (i != ((uint32_t*)packet)[i])
-        {
-            DL_NET_LOG_ERROR("Error in packet data");
-            return;
-        }
+auto NetClient::receive_regular_packet(NetBufferReader packet_reader, std::span<std::byte> dest_buffer) -> size_t {
+    if (dest_buffer.size_bytes() < packet_reader.remaining_bytes()) {
+        throw std::runtime_error("Insufficient destination net buffer for read");
+    }
 
-    net_log_error("Success!");
-}
+    auto bytes_to_read{ packet_reader.remaining_bytes() };
+    packet_reader.read(dest_buffer, bytes_to_read);
+    total_bytes_received += bytes_to_read;
 
-void NetClient::InitNewFragmentPacketData(uint16_t sequence, uint8_t fragmentCount)
-{
-    const int index = sequence % MAX_FRAGMENT_PACKET_SIZE;
-    ReceivedFragmentPacketData* data = &receivedFragmentPackets[index];
-
-    data->sequence = sequence;
-    data->fragmentCount = fragmentCount;
-    data->fragmentReceivedCount = 0;
-
-    for (int i = 0; i < MAX_FRAGMENTS; ++i)
-        data->fragmentReceived[i] = false;
-
-    // Will be adjusted when last fragment is received as it may be smaller than MAX_FRAGMENT_PAYLOAD_SIZE
-    data->totalSize = fragmentCount * MAX_FRAGMENT_PAYLOAD_SIZE;
-    data->packetData = (uint8_t*)malloc(data->totalSize);
+    return bytes_to_read;
 }
 }
