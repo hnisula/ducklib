@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.31)
 
 project(ducklib-core)
 
@@ -9,7 +9,8 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(${PROJECT_NAME} STATIC
-        src/Logger.cpp)
+        ../include/core/logger.h
+        src/logger.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../include)
 set_target_properties(${PROJECT_NAME} PROPERTIES

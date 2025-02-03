@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RHI_H
+#define RHI_H
 #include "Core/Memory/Containers/TArray.h"
 #include "IAdapter.h"
 
@@ -8,6 +9,7 @@ class IRHI
 {
 public:
 	virtual ~IRHI() = default;
-	virtual const TArray<IAdapter*>& GetAdapters() const = 0;
+	virtual const std::vector<IAdapter*>& GetAdapters() const = 0;
 };
 }
+#endif
