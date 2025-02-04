@@ -10,7 +10,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(${PROJECT_NAME} STATIC
         ../include/core/logger.h
-        src/logger.cpp)
+        ../include/core/app_window.h
+        ../include/core/win/win_app_window.h
+        src/logger.cpp
+        src/win/win_app_window.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../include)
 set_target_properties(${PROJECT_NAME} PROPERTIES

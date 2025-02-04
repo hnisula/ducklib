@@ -10,11 +10,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_library(${PROJECT_NAME} STATIC
         ../include/render/core/rhi.h
-        src/core/d3d12/d3d12_rhi.cpp
-        ../include/render/core/swap_chain.h)
+        ../include/render/core/swap_chain.h
+        src/core/d3d12/d3d12_rhi.cpp)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ../include)
 set_target_properties(${PROJECT_NAME} PROPERTIES
         PREFIX ""
         OUTPUT_NAME ${PROJECT_NAME}
         SUFFIX ".lib")
+
+add_subdirectory(test/render_hello_world)

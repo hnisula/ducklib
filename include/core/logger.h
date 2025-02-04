@@ -11,7 +11,6 @@ namespace ducklib {
 class Logger {
 public:
     enum class Level {
-        OFF,
         ERROR,
         WARNING,
         INFO,
