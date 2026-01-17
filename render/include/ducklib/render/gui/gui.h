@@ -6,8 +6,8 @@
 #include "font.h"
 #include "ducklib/input/input.h"
 #include "ducklib/core/math.h"
-#include "ducklib/render/rhi/device.h"
-#include "ducklib/render/rhi/types.h"
+#include "../rhi/d3d12/device.h"
+#include "../rhi/d3d12/types.h"
 
 namespace ducklib::gui {
 constexpr uint32_t GUI_INVALID_ID = -1;

@@ -2,13 +2,13 @@
 #include <print>
 #include <thread>
 
-#include "ducklib/core/win/win_app_window.h"
+#include "../../../core/include/ducklib/core/win_app_window.h"
 #include "ducklib/core/math.h"
-#include "ducklib/render/render_util.h"
-#include "ducklib/render/resource_manager.h"
-#include "ducklib/render/rhi/rhi.h"
+#include "../../include/ducklib/render/rhi/d3d12/render_util.h"
+#include "../../include/ducklib/render/rhi/d3d12/resource_manager.h"
+#include "../../include/ducklib/render/rhi/d3d12/rhi.h"
 #include "ducklib/render/rhi/types.h"
-#include "ducklib/render/rhi/shader.h"
+#include "../../include/ducklib/render/rhi/d3d12/shader.h"
 
 using namespace ducklib;
 

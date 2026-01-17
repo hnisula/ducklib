@@ -1,10 +1,11 @@
 #include <iostream>
+#include <cstring>
+#include <functional>
 
 #include "ducklib/render/gui/gui.h"
 #include "ducklib/core/unicode.h"
-#include "ducklib/render/resource_manager.h"
 #include "ducklib/render/gui/font.h"
-#include "ducklib/render/rhi/shader.h"
+#include "ducklib/render/rhi/rhi.h"
 
 namespace ducklib::gui {
 render::GlyphRange default_codepoint_ranges[] = { { 0x21, 0x7e } };

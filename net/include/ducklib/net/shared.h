@@ -3,7 +3,12 @@
 
 #include <string>
 #include <cstdint>
+#if defined(_WIN32)
 #include <winsock.h>
+#include <WS2tcpip.h>
+#elif defined(__unix__)
+#include <arpa/inet.h>
+#endif
 
 namespace ducklib::net {
 constexpr uint16_t MTU = 1200;
@@ -14,9 +19,11 @@ public:
     Address(std::string_view address, uint16_t port);
     explicit Address(const sockaddr_in &sock_addr);
 
-    [[nodiscard]] auto get_port() const -> uint16_t;
-    [[nodiscard]] auto get_address() const -> std::string;
-    [[nodiscard]] auto as_sockaddr_in() const -> sockaddr_in; // TODO: Consider moving these to NetClient
+    [[nodiscard]] uint16_t get_port() const;
+    [[nodiscard]] std::string get_address() const;
+    [[nodiscard]] sockaddr_in as_sockaddr_in() const; // TODO: Consider moving these to NetClient
+    
+    bool is_valid() const { return addr_v4_int != 0; }
 
 private:
     uint32_t addr_v4_int;

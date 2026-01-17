@@ -9,7 +9,7 @@ char32_t utf16_to_cp(const char16_t* str, uint32_t word_len) {
         if (word_len < 2) {
             return UNICODE_INVALID;
         }
-        return 0x10000 + ((str[0] & 0x3ff) << 10) | (str[1] & 0x3ff);
+        return 0x10000 + (((str[0] & 0x3ff) << 10) | (str[1] & 0x3ff));
     }
     return static_cast<char32_t>(str[0]);
 }
@@ -52,25 +52,25 @@ uint8_t cp_to_utf8(char32_t cp, char8_t* str, uint32_t buffer_len) {
         if (buffer_len < 2) {
             return 0;
         }
-        str[0] = 0xc0 | (cp >> 6) & 0x7f;
-        str[1] = 0x80 | cp & 0x3f;
+        str[0] = 0xc0 | ((cp >> 6) & 0x7f);
+        str[1] = 0x80 | (cp & 0x3f);
         return 2;
     } else if (cp < 0x10000) {
         if (buffer_len < 2) {
             return 0;
         }
-        str[0] = 0xe0 | (cp >> 12) & 0x1f;
-        str[1] = 0x80 | (cp >> 6) & 0x3f;
-        str[2] = 0x80 | cp & 0x3f;
+        str[0] = 0xe0 | ((cp >> 12) & 0x1f);
+        str[1] = 0x80 | ((cp >> 6) & 0x3f);
+        str[2] = 0x80 | (cp & 0x3f);
         return 3;
     } else {
         if (buffer_len < 2) {
             return 0;
         }
-        str[0] = 0xf0 | (cp >> 18) & 0x0f;
-        str[1] = 0x80 | (cp >> 12) & 0x1f;
-        str[2] = 0x80 | (cp >> 6) & 0x3f;
-        str[3] = 0x80 | cp & 0x3f;
+        str[0] = 0xf0 | ((cp >> 18) & 0x0f);
+        str[1] = 0x80 | ((cp >> 12) & 0x1f);
+        str[2] = 0x80 | ((cp >> 6) & 0x3f);
+        str[3] = 0x80 | (cp & 0x3f);
         return 4;
     }
 }

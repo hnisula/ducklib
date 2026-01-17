@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <vector>
 
-#include "ducklib/core/app_window.h"
+#include "../../../../core/include/ducklib/core/platform/app_window.h"
 
 namespace ducklib {
 struct InputButtonState {
