@@ -1,24 +1,32 @@
 #ifndef APP_WINDOW_H
 #define APP_WINDOW_H
-#include <functional>
 #include <cstdint>
+#ifdef _WIN32
+#include <Windows.h>
+#else
+#include <GLFW/glfw3.h>
+#endif
+
+#include "ducklib/core/math.h"
 
 namespace ducklib {
 class AppWindow {
 public:
-    enum class Type {
-        WINDOWS
-    };
-    
-    virtual ~AppWindow() {}
+    AppWindow(std::string_view title, uint32_t width, uint32_t height);
+    ~AppWindow();
 
-    virtual void process_messages() = 0;
-    virtual void close() = 0;
-    virtual bool is_open() const = 0;
-    virtual Type type() const = 0;
+    void process_messages();
+    void close();
+    bool is_open() const;
 
-    virtual uint32_t border_size() const = 0;
-    virtual uint32_t title_bar_height() const = 0;
+    Rect get_client_area() const;
+
+private:
+#if defined(_WIN32)
+    HWND window_handle;
+#else
+    GLFWwindow* window_handle;
+#endif
 };
 }
 

@@ -52,22 +52,22 @@ inline auto Logger::set_log_level(LogLevel new_log_level) -> void {
 
 template <typename... Args>
 auto Logger::log_error(std::string_view text, const Args&... args) -> void {
-    return Log(LogLevel::ERROR, text, args...);
+    return log(LogLevel::ERROR, text, args...);
 }
 
 template <typename... Args>
 auto Logger::log_warn(std::string_view text, const Args&... args) -> void {
-    return Log(LogLevel::WARNING, text, args...);
+    return log(LogLevel::WARNING, text, args...);
 }
 
 template <typename... Args>
 auto Logger::log_info(std::string_view text, const Args&... args) -> void {
-    return Log(LogLevel::INFO, text, args...);
+    return log(LogLevel::INFO, text, args...);
 }
 
 template <typename... Args>
 auto Logger::log_debug(std::string_view text, const Args&... args) -> void {
-    return Log(LogLevel::DEBUG, text, args...);
+    return log(LogLevel::DEBUG, text, args...);
 }
 
 template <typename... Args>

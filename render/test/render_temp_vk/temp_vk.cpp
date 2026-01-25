@@ -2,12 +2,15 @@
 
 #include "ducklib/render/rhi/vk.h"
 #include "../src/render_util.h"
+#include "ducklib/core/logging/logger.h"
 #include "ducklib/render/result.h"
 
 using namespace ducklib;
 
+Logger logger{};
 void log(LogLevel level, render::Result status, std::string_view message) {
     auto status_message = to_string(status);
+    std::array<char, 1024> buffer{};
     std::cerr << to_string(level) << ": " << message << "(" << status_message << ")" << "\n";
     std::cerr.flush();
 }

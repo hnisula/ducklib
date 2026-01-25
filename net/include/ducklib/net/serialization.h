@@ -1,5 +1,6 @@
 #ifndef DUCKLIB_SERIALIZATION_H
 #define DUCKLIB_SERIALIZATION_H
+#include <cstdint>
 #include <cassert>
 #include <concepts>
 #include <span>

@@ -1,9 +1,8 @@
 #ifndef DUCKLIB_INPUT_H
 #define DUCKLIB_INPUT_H
-#include <Windows.h>
 #include <vector>
 
-#include "../../../../core/include/ducklib/core/platform/app_window.h"
+#include "ducklib/core/platform/app_window.h"
 
 namespace ducklib {
 struct InputButtonState {
@@ -27,9 +26,8 @@ struct InputState {
     bool mouse_released(uint8_t button) const;
 };
 
-void register_raw_win_input(HWND hwnd);
-void unregister_raw_win_input();
-void process_win_input(AppWindow* app_window, InputState& input_state, uint32_t msg, WPARAM wParam, LPARAM lParam);
+void initialize_raw_input(AppWindow& window);
+void shutdown_raw_input();
 void frame_input_reset(InputState& input_state);
 }
 

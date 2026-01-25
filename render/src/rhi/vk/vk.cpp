@@ -16,11 +16,11 @@ void Device::create_queue(QueueType type, CommandQueue& out_queue) {
     uint32_t copy_family_index = -1;
     uint32_t compute_family_index = -1;
     VkQueueFamilyProperties2 family_props[MAX_QUEUE_FAMILIES]{};
-    
+
     for (auto & family_prop : family_props) {
         family_prop.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
     }
-    
+
     vkGetPhysicalDeviceQueueFamilyProperties2(vk_adapter, &family_count, nullptr);
     vkGetPhysicalDeviceQueueFamilyProperties2(vk_adapter, &family_count, family_props);
     
@@ -51,11 +51,14 @@ void Device::create_queue(QueueType type, CommandQueue& out_queue) {
     case QueueType::COPY: family = copy_family_index; break;
     }
     
-    VkDeviceQueueInfo2 queue_info{};
-    queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
-    queue_info.queueFamilyIndex = family;
+    auto queue_priority = 1.0f;
+    VkDeviceQueueCreateInfo queue_create_info{};
+    queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
+    queue_create_info.queueFamilyIndex = family;
+    queue_create_info.queueCount = 1;
+    queue_create_info.pQueuePriorities = &queue_priority;
+    THIS MUST BE DONE WHEN CREATING DEVICE INSTEAD. Must be updated for d3d12, too
     
-    vkGetDeviceQueue2(vk_device, &queue_info, &out_queue.vk_queue);
     out_queue.type = type;
 }
 

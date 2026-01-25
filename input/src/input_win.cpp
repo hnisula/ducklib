@@ -1,3 +1,4 @@
+#ifdef _WIN32
 #include <Windows.h>
 #include <cstdint>
 #include <stdexcept>
@@ -5,7 +6,7 @@
 #include <span>
 #include <cassert>
 
-#include "ducklib/input/input.h"
+#include "ducklib/input/input_win.h"
 
 #include <iostream>
 #include <print>
@@ -152,3 +153,4 @@ void frame_input_reset(InputState& input_state) {
     input_state.previous = input_state.current;
 }
 }
+#endif

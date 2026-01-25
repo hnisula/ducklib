@@ -21,6 +21,7 @@ target_link_libraries(ducklib-net-unit-tests
         ducklib-net
         $<$<PLATFORM_ID:Windows>:Ws2_32>
 )
+target_include_directories(ducklib-net-unit-tests PUBLIC include)
 
 include(GoogleTest)
 gtest_discover_tests(ducklib-net-unit-tests)

@@ -17,7 +17,7 @@ target_compile_options(ducklib-compile-flags INTERFACE
         $<$<AND:$<CXX_COMPILER_ID:GNU,Clang>,$<CONFIG:Debug>>:-g -O0>
         $<$<AND:$<CXX_COMPILER_ID:GNU,Clang>,$<CONFIG:Release>>:-O2>
 )
-
+target_include_directories(ducklib-compile-flags INTERFACE ${CMAKE_SOURCE_DIR})
 target_compile_definitions(ducklib-compile-flags INTERFACE
         $<$<CONFIG:Release>:NDEBUG>
 )
