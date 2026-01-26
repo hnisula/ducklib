@@ -26,6 +26,7 @@ out/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+build/
 cmake-build-debug/
 cmake-build-release/
 cmake-build-debug-mingw/

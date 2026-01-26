@@ -1,6 +1,4 @@
-#ifndef DUCKLIB_SHARED_H
-#define DUCKLIB_SHARED_H
-
+#pragma once
 namespace ducklib::render {
 enum class AdapterType {
     DISCRETE_GPU,
@@ -127,5 +125,3 @@ enum class PrimitiveTopology {
     PATCH
 };
 }
-
-#endif //DUCKLIB_SHARED_H

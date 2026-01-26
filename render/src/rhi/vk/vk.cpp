@@ -10,56 +10,44 @@
 namespace ducklib::render {
 constexpr auto MAX_QUEUE_FAMILIES = 32U;
 
-void Device::create_queue(QueueType type, CommandQueue& out_queue) {
+struct QueueFamily {
+    uint32_t graphics_index = -1;
+    uint32_t compute_index = -1;
+    uint32_t copy_index = -1;
+};
+
+QueueFamily get_supported_queue_indices(VkPhysicalDevice vk_device) {
+    VkQueueFamilyProperties2 family_prop_sets[MAX_QUEUE_FAMILIES]{};
     uint32_t family_count = 0;
-    uint32_t graphics_family_index = -1;
-    uint32_t copy_family_index = -1;
-    uint32_t compute_family_index = -1;
-    VkQueueFamilyProperties2 family_props[MAX_QUEUE_FAMILIES]{};
-
-    for (auto & family_prop : family_props) {
-        family_prop.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
-    }
-
-    vkGetPhysicalDeviceQueueFamilyProperties2(vk_adapter, &family_count, nullptr);
-    vkGetPhysicalDeviceQueueFamilyProperties2(vk_adapter, &family_count, family_props);
     
-    // Find which queue families to choose for the different queues.
+    for (auto& family_props : family_prop_sets) {
+        family_props.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
+    }
+    
+    vkGetPhysicalDeviceQueueFamilyProperties2(vk_device, &family_count, family_prop_sets);
+    
+    QueueFamily family_indices{};
+    
     for (auto i = 0U; i < family_count; ++i) {
-        auto graphics = family_props[i].queueFamilyProperties.queueFlags & VK_QUEUE_GRAPHICS_BIT;
-        auto compute = family_props[i].queueFamilyProperties.queueFlags & VK_QUEUE_COMPUTE_BIT;
-        auto copy = family_props[i].queueFamilyProperties.queueFlags & VK_QUEUE_TRANSFER_BIT;
+        auto flags = family_prop_sets[i].queueFamilyProperties.queueFlags;
+        auto graphics = flags & VK_QUEUE_GRAPHICS_BIT;
+        auto compute = flags & VK_QUEUE_COMPUTE_BIT;
+        auto copy = flags & VK_QUEUE_TRANSFER_BIT;
         
-        if (graphics && compute && copy) {
-            graphics_family_index = i;
+        if (family_indices.graphics_index == -1U && graphics && compute && copy) {
+            family_indices.graphics_index = i;
         }
         
-        if (!graphics && compute) {
-            compute_family_index = i;
+        if (family_indices.compute_index == -1U && flags == VK_QUEUE_COMPUTE_BIT) {
+            family_indices.compute_index = i;
         }
         
-        if (!graphics && !compute && copy) {
-            copy_family_index = i;
+        if (family_indices.copy_index == -1U && flags == VK_QUEUE_TRANSFER_BIT) {
+            family_indices.copy_index = i;
         }
     }
     
-    uint32_t family = -1;
-    
-    switch (type) {
-    case QueueType::GRAPHICS: family = graphics_family_index; break;
-    case QueueType::COMPUTE: family = compute_family_index; break;
-    case QueueType::COPY: family = copy_family_index; break;
-    }
-    
-    auto queue_priority = 1.0f;
-    VkDeviceQueueCreateInfo queue_create_info{};
-    queue_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
-    queue_create_info.queueFamilyIndex = family;
-    queue_create_info.queueCount = 1;
-    queue_create_info.pQueuePriorities = &queue_priority;
-    THIS MUST BE DONE WHEN CREATING DEVICE INSTEAD. Must be updated for d3d12, too
-    
-    out_queue.type = type;
+    return family_indices;
 }
 
 void create_rhi(Rhi& out_rhi) {
@@ -125,7 +113,10 @@ Result Rhi::enumerate_adapters(uint32_t& adapter_count, AdapterInfo* out_adapter
 
             out_adapters[i].device_id = vk_device_props.properties.deviceID;
             out_adapters[i].vendor_id = vk_device_props.properties.vendorID;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
             snprintf(out_adapters[i].device_name, sizeof(out_adapters[i].device_name), "%s", vk_device_props.properties.deviceName);
+#pragma GCC diagnostic pop
             out_adapters[i].type = map_vk_adapter_type(vk_device_props.properties.deviceType);
             memcpy(&out_adapters[i].device_luid, vk_device_ids.deviceLUID, sizeof(out_adapters[i].device_luid));
         }
@@ -135,7 +126,7 @@ Result Rhi::enumerate_adapters(uint32_t& adapter_count, AdapterInfo* out_adapter
 }
 
 Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const {
-    // Choose adapter
+    // Find selected adapter
     uint32_t adapter_count = MAX_VK_ADAPTERS;
     VkPhysicalDevice all_adapters[MAX_VK_ADAPTERS]{};
     VkPhysicalDevice vk_adapter = nullptr;
@@ -158,15 +149,59 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
             vk_adapter = all_adapters[i];
         }
     }
+    
+    // Set up queue infos to create
+    auto queue_indices = get_supported_queue_indices(vk_adapter);
+    auto queue_prio = 1.0f;
+    VkDeviceQueueCreateInfo queue_infos[3]{};
+    
+    queue_infos[0].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_infos[0].queueCount = 1;
+    queue_infos[0].pQueuePriorities = &queue_prio;
+    queue_infos[0].queueFamilyIndex = queue_indices.graphics_index;
+    queue_infos[1].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_infos[1].queueCount = 1;
+    queue_infos[1].pQueuePriorities = &queue_prio;
+    queue_infos[1].queueFamilyIndex = queue_indices.compute_index;
+    queue_infos[2].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_infos[2].queueCount = 1;
+    queue_infos[2].pQueuePriorities = &queue_prio;
+    queue_infos[2].queueFamilyIndex = queue_indices.copy_index;
 
     // Create device
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    VK_CHECK(vkCreateDevice(vk_adapter, &create_info, nullptr, &out_device.vk_device), "Failed to create vk device");
-    out_device.vk_adapter = vk_adapter;
+    create_info.pQueueCreateInfos = queue_infos;
+    create_info.queueCreateInfoCount = 3;
+    create_info.enabledExtensionCount = 0; // TODO: Swap chain extension
+    create_info.enabledLayerCount = 0;
 
-    out_device.create_queue(QueueType::GRAPHICS, out_device.graphics_queue);
-    out_device.create_queue(QueueType::COPY, out_device.graphics_queue);
+    VK_CHECK(vkCreateDevice(vk_adapter, &create_info, nullptr, &out_device.vk_device), "Failed to create vk device");
+
+    out_device.vk_adapter = vk_adapter;
+    
+    // Get created queues
+    VkDeviceQueueInfo2 graphics_queue_info{};
+    graphics_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
+    graphics_queue_info.queueFamilyIndex = queue_indices.graphics_index;
+    graphics_queue_info.queueIndex = 0;
+    vkGetDeviceQueue2(out_device.vk_device, &graphics_queue_info, &out_device.graphics_queue.vk_queue);
+    out_device.graphics_queue.type = QueueType::GRAPHICS;
+    
+    VkDeviceQueueInfo2 compute_queue_info{};
+    compute_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
+    compute_queue_info.queueFamilyIndex = queue_indices.compute_index;
+    compute_queue_info.queueIndex = 0;
+    vkGetDeviceQueue2(out_device.vk_device, &compute_queue_info, &out_device.compute_queue.vk_queue);
+    out_device.graphics_queue.type = QueueType::COMPUTE;
+    
+    
+    VkDeviceQueueInfo2 copy_queue_info{};
+    copy_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
+    copy_queue_info.queueFamilyIndex = queue_indices.copy_index;
+    copy_queue_info.queueIndex = 0;
+    vkGetDeviceQueue2(out_device.vk_device, &copy_queue_info, &out_device.copy_queue.vk_queue);
+    out_device.graphics_queue.type = QueueType::COPY;
 
     return Result::SUCCESS;
 }

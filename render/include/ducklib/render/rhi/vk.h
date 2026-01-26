@@ -21,6 +21,7 @@ struct Device {
     VkDevice vk_device;
     VkPhysicalDevice vk_adapter;
     CommandQueue graphics_queue;
+    CommandQueue compute_queue;
     CommandQueue copy_queue;
     
     void create_queue(QueueType type, CommandQueue& out_queue);

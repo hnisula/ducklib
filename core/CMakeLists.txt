@@ -13,7 +13,8 @@ add_library(ducklib-core STATIC
         src/platform/linux_platform.cpp
         src/platform/win_platform.cpp
         src/platform/glfw_app_window.cpp
-        include/ducklib/core/shared.h)
+        include/ducklib/core/shared.h
+        src/shared.cpp)
 
 target_link_libraries(ducklib-core PRIVATE ducklib-compile-flags)
 target_include_directories(ducklib-core PUBLIC include)

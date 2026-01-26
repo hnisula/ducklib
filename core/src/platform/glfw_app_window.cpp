@@ -9,7 +9,7 @@ namespace ducklib {
 void glfw_error_callback(int error, const char* description) {
     std::array<char, 1024> buffer{};
     snprintf(buffer.data(), buffer.size(), "%s (%d)", description, error);
-    core::log(LogLevel::ERROR, buffer.data());
+    core::log_callback(LogLevel::ERROR, buffer.data());
     return;
 }
 AppWindow::AppWindow(std::string_view title, uint32_t width, uint32_t height) {
