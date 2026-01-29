@@ -26,7 +26,8 @@ add_library(ducklib-render STATIC
         src/render_util.cpp
         src/result.cpp
         include/ducklib/render/rhi/vk.h
-        include/ducklib/render/rhi/rhi.h)
+        include/ducklib/render/rhi/rhi.h
+        include/ducklib/render/rhi/vk/shared_vk.h)
 
 option(D3D12_RENDERER "Use D3D12 renderer instead of Vulkan" OFF)
 

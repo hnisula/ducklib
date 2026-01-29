@@ -24,6 +24,8 @@ QueueFamily get_supported_queue_indices(VkPhysicalDevice vk_device) {
         family_props.sType = VK_STRUCTURE_TYPE_QUEUE_FAMILY_PROPERTIES_2;
     }
     
+    vkGetPhysicalDeviceQueueFamilyProperties2(vk_device, &family_count, nullptr);
+    assert(family_count <= MAX_QUEUE_FAMILIES);
     vkGetPhysicalDeviceQueueFamilyProperties2(vk_device, &family_count, family_prop_sets);
     
     QueueFamily family_indices{};
@@ -38,14 +40,18 @@ QueueFamily get_supported_queue_indices(VkPhysicalDevice vk_device) {
             family_indices.graphics_index = i;
         }
         
-        if (family_indices.compute_index == -1U && flags == VK_QUEUE_COMPUTE_BIT) {
+        if (family_indices.compute_index == -1U && !graphics && compute && copy) {
             family_indices.compute_index = i;
         }
         
-        if (family_indices.copy_index == -1U && flags == VK_QUEUE_TRANSFER_BIT) {
+        if (family_indices.copy_index == -1U && !graphics && !compute && copy) {
             family_indices.copy_index = i;
         }
     }
+    
+    assert(family_indices.graphics_index != -1U);
+    assert(family_indices.compute_index != -1U);
+    assert(family_indices.copy_index != -1U);
     
     return family_indices;
 }
@@ -193,7 +199,7 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
     compute_queue_info.queueFamilyIndex = queue_indices.compute_index;
     compute_queue_info.queueIndex = 0;
     vkGetDeviceQueue2(out_device.vk_device, &compute_queue_info, &out_device.compute_queue.vk_queue);
-    out_device.graphics_queue.type = QueueType::COMPUTE;
+    out_device.compute_queue.type = QueueType::COMPUTE;
     
     
     VkDeviceQueueInfo2 copy_queue_info{};
@@ -201,7 +207,7 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
     copy_queue_info.queueFamilyIndex = queue_indices.copy_index;
     copy_queue_info.queueIndex = 0;
     vkGetDeviceQueue2(out_device.vk_device, &copy_queue_info, &out_device.copy_queue.vk_queue);
-    out_device.graphics_queue.type = QueueType::COPY;
+    out_device.copy_queue.type = QueueType::COPY;
 
     return Result::SUCCESS;
 }

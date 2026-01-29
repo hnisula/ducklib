@@ -1,5 +1,4 @@
-#ifndef DUCKLIB_LOG_LEVEL_H
-#define DUCKLIB_LOG_LEVEL_H
+#pragma once
 #include <cstdint>
 #include <cassert>
 
@@ -30,5 +29,3 @@ inline const char* to_string(LogLevel level) {
     assert(false);
 }
 }
-
-#endif //DUCKLIB_LOG_LEVEL_H

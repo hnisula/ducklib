@@ -38,6 +38,7 @@ struct Rhi {
     // When out_adapters is set, it will be used as the max count of out_adapters.
     Result enumerate_adapters(uint32_t& adapter_count, AdapterInfo* out_adapters) const;
     Result create_device(const AdapterInfo& adapter, Device& out_device) const;
+    Result create_swap_chain_glfw(Device& device, void* window_handle, uint32_t width, uint32_t height, Format format, SwapChain& out_swap_chain);
     
     static constexpr uint32_t MAX_VK_ADAPTERS = 32;
 };
