@@ -6,7 +6,7 @@
 namespace ducklib::render {
 void render_log(LogLevel level, Result status, std::string_view message) {
     auto status_message = to_string(status);
-    std::cerr << to_string(level) << ": " << message << "(" << status_message << ")" << "\n";
+    std::cerr << to_string(level) << ": " << message << " (" << status_message << ")" << "\n";
     std::cerr.flush();
 }
 }

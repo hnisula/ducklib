@@ -6,6 +6,7 @@ enum class Result {
     SUCCESS = 0,
     ERROR = 1,
     INSUFFICIENT_SPACE,
+    EXTENSION_NOT_FOUND
 };
 
 const char* to_string(Result result);

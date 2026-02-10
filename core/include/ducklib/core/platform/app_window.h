@@ -20,6 +20,10 @@ public:
     bool is_open() const;
 
     Rect get_client_area() const;
+    uint32_t client_width() const;
+    uint32_t client_height() const;
+    
+    void* handle() const { return window_handle; }
 
 private:
 #if defined(_WIN32)
@@ -27,6 +31,8 @@ private:
 #else
     GLFWwindow* window_handle;
 #endif
+    uint32_t width;
+    uint32_t height;
 };
 }
 

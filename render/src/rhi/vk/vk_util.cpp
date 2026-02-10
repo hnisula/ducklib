@@ -5,6 +5,7 @@ Result map_vk_result(VkResult vk_result) {
     switch (vk_result) {
     case VK_SUCCESS: return Result::SUCCESS;
     case VK_INCOMPLETE: return Result::INSUFFICIENT_SPACE;
+    case VK_ERROR_EXTENSION_NOT_PRESENT: return Result::EXTENSION_NOT_FOUND;
     default: return Result::ERROR;
     }
 }

@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdint>
 
+#if defined(DL_VK)
+#include "vk/shared_vk.h"
+#elif defined(DL_D3D12)
 namespace ducklib::render {
 enum class AdapterType {
     DISCRETE_GPU,
@@ -230,3 +233,4 @@ enum class Format : uint32_t {
     ENTRY_COUNT // what else can you do? :'(
 };
 }
+#endif

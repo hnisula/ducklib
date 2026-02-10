@@ -201,4 +201,8 @@ enum class Format : uint32_t {
     B5G5R5A1_UNORM = VK_FORMAT_B5G5R5A1_UNORM_PACK16,
     R10G10B10_XR_BIAS_A2_UNORM
 };
+
+inline VkFormat map_vk_format(Format format) {
+    return (VkFormat)format;
+}
 }
