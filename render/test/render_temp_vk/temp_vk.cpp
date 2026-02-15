@@ -1,5 +1,6 @@
 #include <iostream>
 #include <functional>
+#include <unistd.h>
 
 #include "ducklib/core/shared.h"
 #include "ducklib/render/rhi/vk.h"
@@ -40,6 +41,8 @@ int main() {
     render::Device device{};
     render::Swapchain swapchain{};
     AppWindow window{"glfw-vk-test", 800, 600};
+    render::CommandList cmd_list{};
+    constexpr float clear_color[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 
     render::create_rhi(rhi);
     uint32_t adapter_count = 0;
@@ -49,10 +52,16 @@ int main() {
     CHECK(rhi.create_device(adapters[0], device), "Failed to create rhi device");
     CHECK(
         rhi.create_swapchain_glfw(device, (GLFWwindow*)window.handle(), window.client_width(), window.client_height(),
-            render::Format::B8G8R8A8_UNORM, swapchain), "Failed to create swap chain");
+            render::Format::B8G8R8A8_UNORM, 2, swapchain),
+        "Failed to create swap chain");
+    CHECK(device.create_command_list(render::QueueType::GRAPHICS, cmd_list), "Failed to create command buffer");
 
     while (running) {
         window.process_messages();
+        swapchain.acquire_next_image();
+        cmd_list.clear_rt(swapchain.get_current_image(), render::ImageLayout::COLOR_ATTACHMENT, clear_color);
+        swapchain.present();
+        sleep(20);
     }
 
     terminate_platform();

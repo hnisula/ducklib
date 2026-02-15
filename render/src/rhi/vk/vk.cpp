@@ -13,13 +13,13 @@
 namespace ducklib::render {
 constexpr auto MAX_QUEUE_FAMILIES = 32U;
 
-struct QueueFamily {
+struct QueueFamilyIndices {
     uint32_t graphics_index = -1;
     uint32_t compute_index = -1;
     uint32_t copy_index = -1;
 };
 
-QueueFamily get_supported_queue_indices(VkPhysicalDevice vk_device) {
+QueueFamilyIndices get_supported_queue_indices(VkPhysicalDevice vk_device) {
     VkQueueFamilyProperties2 family_prop_sets[MAX_QUEUE_FAMILIES]{};
     uint32_t family_count = 0;
 
@@ -31,7 +31,7 @@ QueueFamily get_supported_queue_indices(VkPhysicalDevice vk_device) {
     assert(family_count <= MAX_QUEUE_FAMILIES);
     vkGetPhysicalDeviceQueueFamilyProperties2(vk_device, &family_count, family_prop_sets);
 
-    QueueFamily family_indices{};
+    QueueFamilyIndices family_indices{};
 
     for (auto i = 0U; i < family_count; ++i) {
         auto flags = family_prop_sets[i].queueFamilyProperties.queueFlags;
@@ -95,6 +95,123 @@ void create_rhi(Rhi& out_rhi) {
     if (vkCreateInstance(&create_info, nullptr, &out_rhi.vk_instance)) {
         throw std::runtime_error("Failed to create vk instance");
     }
+}
+
+void CommandList::clear_rt(Image image, ImageLayout current_image_layout, const float color_rgba[4]) {
+    auto vk_current_image_layout = map_vk_image_layout(current_image_layout);
+    VkClearColorValue vk_color{};
+    vk_color.float32[0] = color_rgba[0];
+    vk_color.float32[1] = color_rgba[1];
+    vk_color.float32[2] = color_rgba[2];
+    vk_color.float32[3] = color_rgba[3];
+    vkCmdClearColorImage(vk_cmd_buffer, image.vk_image, vk_current_image_layout, &vk_color, 0, nullptr);
+}
+
+void CommandList::transition_barrier(Image image, ImageLayout current_layout, ImageLayout new_layout) {
+    auto vk_current_layout = map_vk_image_layout(current_layout);
+    auto vk_new_layout = map_vk_image_layout(new_layout);
+    VkImageMemoryBarrier barrier{};
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+    barrier.oldLayout = vk_current_layout;
+    barrier.newLayout = vk_new_layout;
+    barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.dstQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
+    barrier.image = image.vk_image;
+    barrier.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    barrier.subresourceRange.baseMipLevel = 0;
+    barrier.subresourceRange.levelCount = 1;
+    barrier.subresourceRange.baseArrayLayer = 0;
+    barrier.subresourceRange.layerCount = 1;
+    vkCmdPipelineBarrier(
+        vk_cmd_buffer,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        VK_PIPELINE_STAGE_ALL_COMMANDS_BIT,
+        0,
+        0,
+        nullptr,
+        0,
+        nullptr,
+        1,
+        &barrier);
+}
+
+Result Device::create_command_list(QueueType queue_type, CommandList& out_command_list) {
+    auto queue_family_index = get_queue_type_family_index(queue_type);
+    VkCommandPoolCreateInfo pool_create_info{};
+    pool_create_info.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+    pool_create_info.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+    pool_create_info.queueFamilyIndex = queue_family_index;
+    VK_CHECK(
+        vkCreateCommandPool(vk_device, &pool_create_info, nullptr, &out_command_list.vk_cmd_pool),
+        "Failed to create vk command pool");
+
+    VkCommandBufferAllocateInfo alloc_info{};
+    alloc_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+    alloc_info.commandPool = out_command_list.vk_cmd_pool;
+    alloc_info.commandBufferCount = 1;
+    alloc_info.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    VK_CHECK(vkAllocateCommandBuffers(vk_device, &alloc_info, &out_command_list.vk_cmd_buffer), "Failed to create vk command list");
+
+    return Result::SUCCESS;
+}
+
+Result Device::create_image_view(VkImage image, Format format, ImageView& out_image_view) {
+    auto vk_format = map_vk_format(format);
+    VkImageViewCreateInfo create_info{};
+    create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+    create_info.format = vk_format;
+    create_info.image = image;
+    create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
+    create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+    create_info.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    create_info.subresourceRange.baseMipLevel = 0;
+    create_info.subresourceRange.levelCount = 1;
+    create_info.subresourceRange.baseArrayLayer = 0;
+    create_info.subresourceRange.layerCount = 1;
+    VK_CHECK(vkCreateImageView(vk_device, &create_info, nullptr, &out_image_view.vk_image_view), "Failed to create vk image view");
+
+    return Result::SUCCESS;
+}
+
+uint32_t Device::get_queue_type_family_index(QueueType queue_type) {
+    switch (queue_type) {
+    case QueueType::GRAPHICS: return graphics_queue.queue_family_index;
+    case QueueType::COMPUTE: return compute_queue.queue_family_index;
+    case QueueType::COPY: return copy_queue.queue_family_index;
+    default: return -1; // TODO: Better handling of invalid values
+    }
+}
+
+void Swapchain::acquire_next_image() {
+    VkAcquireNextImageInfoKHR acquire_info{};
+    acquire_info.sType = VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR;
+    acquire_info.swapchain = vk_swapchain;
+    acquire_info.timeout = UINT64_MAX;
+    acquire_info.deviceMask = 1;
+    VK_CHECK_V(vkAcquireNextImage2KHR(device->vk_device, &acquire_info, &current_image_index), "Failed to acquire vk swap chain image");
+}
+
+void Swapchain::present() {
+    auto current_index = frame_number % buffer_count;
+    VkResult vk_result;
+    VkPresentInfoKHR present_info{};
+    present_info.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+    present_info.waitSemaphoreCount = 1;
+    present_info.pWaitSemaphores = &sync_data[current_index].render_completed;
+    present_info.swapchainCount = 1;
+    present_info.pSwapchains = &vk_swapchain;
+    present_info.pImageIndices = &current_image_index;
+    present_info.pResults = &vk_result;
+    VK_CHECK_V(vkQueuePresentKHR(device->copy_queue.vk_queue, &present_info), "Failed to present vk swap chain");
+
+    ++frame_number;
+}
+
+Image Swapchain::get_current_image() {
+    return images[current_image_index];
 }
 
 void destroy_rhi(Rhi& rhi) {
@@ -198,6 +315,7 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
     graphics_queue_info.queueIndex = 0;
     vkGetDeviceQueue2(out_device.vk_device, &graphics_queue_info, &out_device.graphics_queue.vk_queue);
     out_device.graphics_queue.type = QueueType::GRAPHICS;
+    out_device.graphics_queue.queue_family_index = queue_indices.graphics_index;
 
     VkDeviceQueueInfo2 compute_queue_info{};
     compute_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
@@ -205,6 +323,7 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
     compute_queue_info.queueIndex = 0;
     vkGetDeviceQueue2(out_device.vk_device, &compute_queue_info, &out_device.compute_queue.vk_queue);
     out_device.compute_queue.type = QueueType::COMPUTE;
+    out_device.compute_queue.queue_family_index = queue_indices.compute_index;
 
     VkDeviceQueueInfo2 copy_queue_info{};
     copy_queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_INFO_2;
@@ -212,6 +331,7 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
     copy_queue_info.queueIndex = 0;
     vkGetDeviceQueue2(out_device.vk_device, &copy_queue_info, &out_device.copy_queue.vk_queue);
     out_device.copy_queue.type = QueueType::COPY;
+    out_device.copy_queue.queue_family_index = queue_indices.copy_index;
 
     return Result::SUCCESS;
 }
@@ -222,6 +342,7 @@ Result Rhi::create_swapchain_glfw(
     uint32_t width,
     uint32_t height,
     Format format,
+    uint8_t image_count,
     Swapchain& out_swapchain) {
     if (glfwCreateWindowSurface(vk_instance, window_handle, nullptr, &out_swapchain.vk_surface)) {
         return Result::ERROR;
@@ -232,7 +353,7 @@ Result Rhi::create_swapchain_glfw(
     VkSwapchainCreateInfoKHR sc_create_info{};
     sc_create_info.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
     sc_create_info.surface = out_swapchain.vk_surface;
-    sc_create_info.minImageCount = 2;
+    sc_create_info.minImageCount = image_count;
     sc_create_info.imageFormat = vk_format;
     sc_create_info.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
     sc_create_info.imageExtent = vk_extent;
@@ -249,20 +370,45 @@ Result Rhi::create_swapchain_glfw(
         vkCreateSwapchainKHR(device.vk_device, &sc_create_info, nullptr, &out_swapchain.vk_swapchain),
         "Failed to create vk swap chain");
 
-    auto image_count = 0U;
+    auto vk_image_count = 0U;
+    VkImage vk_images[Swapchain::MAX_IMAGE_COUNT]{};
     VK_CHECK(
-        vkGetSwapchainImagesKHR(device.vk_device, out_swapchain.vk_swapchain, &image_count, nullptr),
+        vkGetSwapchainImagesKHR(device.vk_device, out_swapchain.vk_swapchain, &vk_image_count, nullptr),
         "Failed to retrieve swap chain image count");
-    assert(image_count <= Swapchain::MAX_IMAGE_COUNT);
+    assert(vk_image_count == image_count);
     VK_CHECK(
-        vkGetSwapchainImagesKHR(device.vk_device, out_swapchain.vk_swapchain, &image_count, out_swapchain.buffers),
+        vkGetSwapchainImagesKHR(device.vk_device, out_swapchain.vk_swapchain, &vk_image_count, vk_images),
         "Failed to retrieve swap chain images");
-    
+
+    for (auto i = 0; i < image_count; ++i) {
+        VkSemaphoreCreateInfo semaphore_create_info{};
+        semaphore_create_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+        VkFenceCreateInfo fence_create_info{};
+        fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+        fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+        out_swapchain.images[i].vk_image = vk_images[i];
+        VK_CHECK(
+            vkCreateSemaphore(device.vk_device, &semaphore_create_info, nullptr, &out_swapchain.sync_data[i].image_available),
+            "Failed to create vk semaphore for swap chain");
+        VK_CHECK(
+            vkCreateSemaphore(device.vk_device, &semaphore_create_info, nullptr, &out_swapchain.sync_data[i].render_completed),
+            "Failed to create vk semaphore for swap chain");
+        VK_CHECK(
+            vkCreateFence(device.vk_device, &fence_create_info, nullptr, &out_swapchain.sync_data[i].in_flight),
+            "Failed to create vk fence for swap chain");
+    }
+
     out_swapchain.width = width;
     out_swapchain.height = height;
     out_swapchain.buffer_count = image_count;
+    out_swapchain.device = &device;
 
     return Result::SUCCESS;
+}
+
+void Rhi::destroy_swapchain(Device& device, Swapchain& swapchain) {
+    vkDestroySurfaceKHR(vk_instance, swapchain.vk_surface, nullptr);
+    vkDestroySwapchainKHR(device.vk_device, swapchain.vk_swapchain, nullptr);
 }
 }
 

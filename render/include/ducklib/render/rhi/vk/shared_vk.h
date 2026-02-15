@@ -43,6 +43,18 @@ enum class DescriptorSetRangeType {
     SAMPLER
 };
 
+enum class ImageLayout {
+    UNDEFINED = 0,
+    GENERAL = 1,
+    COLOR_ATTACHMENT = 2,
+    DEPTH_STENCIL_ATTACHMENT = 3,
+    DEPTH_STENCIL_READ_ONLY = 4,
+    SHADER_READ_ONLY = 5,
+    TRANSFER_SRC = 6,
+    TRANSFER_DST = 7,
+    PRESENT_SRC = 1000001002
+};
+
 #undef DOMAIN
 enum class BindingStage {
     VERTEX = 1,
@@ -204,5 +216,9 @@ enum class Format : uint32_t {
 
 inline VkFormat map_vk_format(Format format) {
     return (VkFormat)format;
+}
+
+inline VkImageLayout map_vk_image_layout(ImageLayout layout) {
+    return (VkImageLayout)layout;
 }
 }

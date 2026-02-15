@@ -19,6 +19,15 @@ AdapterType map_vk_adapter_type(VkPhysicalDeviceType vk_type);
             return dl_error; \
         } \
     } while (false)
+#define VK_CHECK_V(expr, err_msg) \
+    do { \
+        auto vk_error = (expr); \
+        if (vk_error != VK_SUCCESS) { \
+            auto dl_error = map_vk_result(vk_error); \
+            render_log(LogLevel::ERROR, dl_error, err_msg); \
+            return; \
+        } \
+    } while (false)
 }
 
 #endif //DUCKLIB_VK_UTIL_H
