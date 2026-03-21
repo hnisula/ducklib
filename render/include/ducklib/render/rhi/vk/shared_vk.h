@@ -127,6 +127,19 @@ enum class DepthComparison {
     NEVER
 };
 
+enum class LoadOp {
+    LOAD = 0,
+    CLEAR = 1,
+    DONT_CARE = 2,
+    NONE = 1000400000
+};
+
+enum class StoreOp {
+    STORE = 0,
+    DONT_CARE = 1,
+    NONE = 1000301000
+};
+
 enum class InputSlotType {
     PER_VERTEX_DATA,
     PER_INSTANCE_DATA
@@ -220,5 +233,13 @@ inline VkFormat map_vk_format(Format format) {
 
 inline VkImageLayout map_vk_image_layout(ImageLayout layout) {
     return (VkImageLayout)layout;
+}
+
+inline VkAttachmentStoreOp map_vk_store_op(StoreOp store_op) {
+    return (VkAttachmentStoreOp)store_op;
+}
+
+inline VkAttachmentLoadOp map_vk_load_op(LoadOp load_op) {
+    return (VkAttachmentLoadOp)load_op;
 }
 }

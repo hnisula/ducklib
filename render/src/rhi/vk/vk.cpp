@@ -97,21 +97,71 @@ void create_rhi(Rhi& out_rhi) {
     }
 }
 
-void CommandList::clear_rt(Image image, ImageLayout current_image_layout, const float color_rgba[4]) {
+void Fence::wait() {
+    uint64_t wait_value = counter;
+    VkSemaphoreWaitInfo wait_info{};
+    wait_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_WAIT_INFO;
+    wait_info.semaphoreCount = 1;
+    wait_info.pSemaphores = &vk_semaphore;
+    wait_info.pValues = &wait_value;
+    VK_CHECK_V(vkWaitSemaphores(vk_device, &wait_info, UINT64_MAX), "Failed to wait for vk semaphore");
+}
+
+void CommandList::open() {
+    VkCommandBufferBeginInfo begin_info{};
+    begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+    begin_info.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+    VK_CHECK_V(vkBeginCommandBuffer(vk_cmd_buffer, &begin_info), "Failed to begin vk command buffer");
+}
+
+void CommandList::close() {
+    VK_CHECK_V(vkEndCommandBuffer(vk_cmd_buffer), "Failed to end vk command buffer");
+}
+
+void CommandList::begin_render(Rect render_area, const Attachment* attachments, uint32_t attachment_count) {
+    assert(attachment_count <= Attachment::MAX_ATTACHMENT_COUNT);
+    VkRenderingAttachmentInfo color_attachment[Attachment::MAX_ATTACHMENT_COUNT]{};
+
+    for (auto i = 0U; i < attachment_count; ++i) {
+        auto& clear_color = attachments[i].clear_color;
+        color_attachment[i].sType = VK_STRUCTURE_TYPE_RENDERING_ATTACHMENT_INFO;
+        color_attachment[i].imageView = attachments[i].image_view.vk_image_view;
+        color_attachment[i].imageLayout = map_vk_image_layout(attachments[i].image_layout);
+        color_attachment[i].loadOp = map_vk_load_op(attachments[i].load_op);
+        color_attachment[i].storeOp = map_vk_store_op(attachments[i].store_op);
+        color_attachment[i].clearValue = {{{clear_color.r, clear_color.g, clear_color.b, clear_color.a}}};
+    }
+
+    VkRenderingInfo render_info{};
+    render_info.sType = VK_STRUCTURE_TYPE_RENDERING_INFO;
+    render_info.renderArea = {{render_area.x, render_area.y}, {render_area.width, render_area.height}};
+    render_info.layerCount = 1;
+    render_info.colorAttachmentCount = attachment_count;
+    render_info.pColorAttachments = color_attachment;
+    vkCmdBeginRendering(vk_cmd_buffer, &render_info);
+}
+
+void CommandList::end_render() {
+    vkCmdEndRendering(vk_cmd_buffer);
+}
+
+void CommandList::clear_rt(Image image, ImageLayout current_image_layout, Color color_rgba) {
     auto vk_current_image_layout = map_vk_image_layout(current_image_layout);
-    VkClearColorValue vk_color{};
-    vk_color.float32[0] = color_rgba[0];
-    vk_color.float32[1] = color_rgba[1];
-    vk_color.float32[2] = color_rgba[2];
-    vk_color.float32[3] = color_rgba[3];
-    vkCmdClearColorImage(vk_cmd_buffer, image.vk_image, vk_current_image_layout, &vk_color, 0, nullptr);
+    VkClearColorValue vk_color{{color_rgba.r, color_rgba.g, color_rgba.b, color_rgba.a}};
+    VkImageSubresourceRange range{};
+    range.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+    range.baseMipLevel = 0;
+    range.levelCount = 1;
+    range.baseArrayLayer = 0;
+    range.layerCount = 1;
+    vkCmdClearColorImage(vk_cmd_buffer, image.vk_image, vk_current_image_layout, &vk_color, 1, &range);
 }
 
 void CommandList::transition_barrier(Image image, ImageLayout current_layout, ImageLayout new_layout) {
     auto vk_current_layout = map_vk_image_layout(current_layout);
     auto vk_new_layout = map_vk_image_layout(new_layout);
     VkImageMemoryBarrier barrier{};
-    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER_2;
+    barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
     barrier.oldLayout = vk_current_layout;
     barrier.newLayout = vk_new_layout;
     barrier.srcQueueFamilyIndex = VK_QUEUE_FAMILY_IGNORED;
@@ -135,6 +185,34 @@ void CommandList::transition_barrier(Image image, ImageLayout current_layout, Im
         &barrier);
 }
 
+void FrameSyncData::wait_for_render() {
+    VK_CHECK_V(vkWaitForFences(vk_device, 1, &in_flight, VK_TRUE, UINT64_MAX), "Failed to wait for swapchain fence");
+}
+
+void CommandQueue::submit(CommandList& list, FrameSyncData& swpachain_sync_data) {
+    VkCommandBufferSubmitInfo buffer_info{};
+    buffer_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_SUBMIT_INFO;
+    buffer_info.deviceMask = 1;
+    buffer_info.commandBuffer = list.vk_cmd_buffer;
+    VkSemaphoreSubmitInfo wait_semaphore_info{};
+    wait_semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    wait_semaphore_info.deviceIndex = 0;
+    wait_semaphore_info.semaphore = swpachain_sync_data.render_completed;
+    VkSemaphoreSubmitInfo finish_semaphore_info{};
+    finish_semaphore_info.sType = VK_STRUCTURE_TYPE_SEMAPHORE_SUBMIT_INFO;
+    finish_semaphore_info.deviceIndex = 0;
+    finish_semaphore_info.semaphore = swpachain_sync_data.image_available;
+    VkSubmitInfo2 submit_info{};
+    submit_info.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO_2;
+    submit_info.waitSemaphoreInfoCount = 1;
+    submit_info.pWaitSemaphoreInfos = &wait_semaphore_info;
+    submit_info.signalSemaphoreInfoCount = 1;
+    submit_info.pSignalSemaphoreInfos = &finish_semaphore_info;
+    submit_info.commandBufferInfoCount = 1;
+    submit_info.pCommandBufferInfos = &buffer_info;
+    VK_CHECK_V(vkQueueSubmit2(vk_queue, 1, &submit_info, VK_NULL_HANDLE), "Failed to submit vk command buffer to queue");
+}
+
 Result Device::create_command_list(QueueType queue_type, CommandList& out_command_list) {
     auto queue_family_index = get_queue_type_family_index(queue_type);
     VkCommandPoolCreateInfo pool_create_info{};
@@ -155,12 +233,12 @@ Result Device::create_command_list(QueueType queue_type, CommandList& out_comman
     return Result::SUCCESS;
 }
 
-Result Device::create_image_view(VkImage image, Format format, ImageView& out_image_view) {
+Result Device::create_image_view(const Image& image, Format format, ImageView& out_image_view) {
     auto vk_format = map_vk_format(format);
     VkImageViewCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
     create_info.format = vk_format;
-    create_info.image = image;
+    create_info.image = image.vk_image;
     create_info.viewType = VK_IMAGE_VIEW_TYPE_2D;
     create_info.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
     create_info.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
@@ -186,12 +264,15 @@ uint32_t Device::get_queue_type_family_index(QueueType queue_type) {
 }
 
 void Swapchain::acquire_next_image() {
+    auto sync_primitives = get_current_sync();
     VkAcquireNextImageInfoKHR acquire_info{};
     acquire_info.sType = VK_STRUCTURE_TYPE_ACQUIRE_NEXT_IMAGE_INFO_KHR;
     acquire_info.swapchain = vk_swapchain;
     acquire_info.timeout = UINT64_MAX;
     acquire_info.deviceMask = 1;
-    VK_CHECK_V(vkAcquireNextImage2KHR(device->vk_device, &acquire_info, &current_image_index), "Failed to acquire vk swap chain image");
+    acquire_info.semaphore = sync_primitives.image_available;
+    VK_CHECK_V(vkAcquireNextImage2KHR(device->vk_device, &acquire_info, &current_image_index), "Failed to acquire vk swapchain image");
+    VK_CHECK_V(vkResetFences(device->vk_device, 1, &sync_primitives.in_flight), "Failed to reset vk swapchain fence");
 }
 
 void Swapchain::present() {
@@ -205,13 +286,21 @@ void Swapchain::present() {
     present_info.pSwapchains = &vk_swapchain;
     present_info.pImageIndices = &current_image_index;
     present_info.pResults = &vk_result;
-    VK_CHECK_V(vkQueuePresentKHR(device->copy_queue.vk_queue, &present_info), "Failed to present vk swap chain");
+    VK_CHECK_V(vkQueuePresentKHR(device->copy_queue.vk_queue, &present_info), "Failed to present vk swapchain");
 
     ++frame_number;
 }
 
-Image Swapchain::get_current_image() {
+Image& Swapchain::get_current_image() {
     return images[current_image_index];
+}
+
+ImageView& Swapchain::get_current_image_view() {
+    return image_views[current_image_index];
+}
+
+FrameSyncData& Swapchain::get_current_sync() {
+    return sync_data[frame_number % buffer_count];
 }
 
 void destroy_rhi(Rhi& rhi) {
@@ -295,13 +384,21 @@ Result Rhi::create_device(const AdapterInfo& adapter, Device& out_device) const 
     queue_infos[2].queueFamilyIndex = queue_indices.copy_index;
 
     // Create device
-    auto extension_names = VK_KHR_SWAPCHAIN_EXTENSION_NAME;
+    const char* extension_names[] = {VK_KHR_SWAPCHAIN_EXTENSION_NAME, VK_KHR_DYNAMIC_RENDERING_EXTENSION_NAME};
+    VkPhysicalDeviceSynchronization2Features sync2_feature{};
+    sync2_feature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_SYNCHRONIZATION_2_FEATURES;
+    sync2_feature.synchronization2 = VK_TRUE;
+    VkPhysicalDeviceDynamicRenderingFeatures dynamic_rendering_feature{};
+    dynamic_rendering_feature.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DYNAMIC_RENDERING_FEATURES;
+    dynamic_rendering_feature.dynamicRendering = VK_TRUE;
+    dynamic_rendering_feature.pNext = &sync2_feature;
     VkDeviceCreateInfo create_info{};
     create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    create_info.pNext = &dynamic_rendering_feature;
     create_info.pQueueCreateInfos = queue_infos;
     create_info.queueCreateInfoCount = 3;
-    create_info.enabledExtensionCount = 1;
-    create_info.ppEnabledExtensionNames = &extension_names;
+    create_info.enabledExtensionCount = 2;
+    create_info.ppEnabledExtensionNames = extension_names;
     create_info.enabledLayerCount = 0;
 
     VK_CHECK(vkCreateDevice(vk_adapter, &create_info, nullptr, &out_device.vk_device), "Failed to create vk device");
@@ -387,6 +484,8 @@ Result Rhi::create_swapchain_glfw(
         fence_create_info.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
         fence_create_info.flags = VK_FENCE_CREATE_SIGNALED_BIT;
         out_swapchain.images[i].vk_image = vk_images[i];
+        device.create_image_view(out_swapchain.images[i], format, out_swapchain.image_views[i]);
+
         VK_CHECK(
             vkCreateSemaphore(device.vk_device, &semaphore_create_info, nullptr, &out_swapchain.sync_data[i].image_available),
             "Failed to create vk semaphore for swap chain");
@@ -396,6 +495,7 @@ Result Rhi::create_swapchain_glfw(
         VK_CHECK(
             vkCreateFence(device.vk_device, &fence_create_info, nullptr, &out_swapchain.sync_data[i].in_flight),
             "Failed to create vk fence for swap chain");
+        out_swapchain.sync_data[i].vk_device = device.vk_device;
     }
 
     out_swapchain.width = width;

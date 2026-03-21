@@ -37,12 +37,14 @@ int main() {
     core::log_callback = [](LogLevel level, std::string_view message) {
         logger.log(level, message);
     };
+    auto width = 800U;
+    auto height = 600U;
     render::Rhi rhi{};
     render::Device device{};
     render::Swapchain swapchain{};
-    AppWindow window{"glfw-vk-test", 800, 600};
+    Rect render_area{0, 0, width, height};
+    AppWindow window{"glfw-vk-test", width, height};
     render::CommandList cmd_list{};
-    constexpr float clear_color[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 
     render::create_rhi(rhi);
     uint32_t adapter_count = 0;
@@ -58,8 +60,27 @@ int main() {
 
     while (running) {
         window.process_messages();
+        
+        constexpr render::Color clear_color = {0.0f, 0.2f, 0.4f, 1.0f};
+        
+        auto sync = swapchain.get_current_sync();
+        sync.wait_for_render();
         swapchain.acquire_next_image();
-        cmd_list.clear_rt(swapchain.get_current_image(), render::ImageLayout::COLOR_ATTACHMENT, clear_color);
+        cmd_list.open();
+        render::Attachment attachments = {
+            swapchain.get_current_image_view(),
+            render::ImageLayout::COLOR_ATTACHMENT,
+            render::LoadOp::CLEAR,
+            render::StoreOp::NONE,
+            clear_color
+        };
+        cmd_list.transition_barrier(swapchain.get_current_image(), render::ImageLayout::UNDEFINED, render::ImageLayout::COLOR_ATTACHMENT);
+        cmd_list.begin_render(render_area, &attachments, 1);
+        // Do stuff later
+        cmd_list.end_render();
+        cmd_list.transition_barrier(swapchain.get_current_image(), render::ImageLayout::COLOR_ATTACHMENT, render::ImageLayout::PRESENT_SRC);
+        cmd_list.close();
+        device.graphics_queue.submit(cmd_list, swapchain.get_current_sync());
         swapchain.present();
         sleep(20);
     }
