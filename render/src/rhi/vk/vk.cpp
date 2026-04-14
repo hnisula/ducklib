@@ -286,7 +286,7 @@ void Swapchain::present() {
     present_info.pSwapchains = &vk_swapchain;
     present_info.pImageIndices = &current_image_index;
     present_info.pResults = &vk_result;
-    VK_CHECK_V(vkQueuePresentKHR(device->copy_queue.vk_queue, &present_info), "Failed to present vk swapchain");
+    VK_CHECK_V(vkQueuePresentKHR(device->graphics_queue.vk_queue, &present_info), "Failed to present vk swapchain");
 
     ++frame_number;
 }
