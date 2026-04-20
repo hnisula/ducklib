@@ -5,8 +5,8 @@
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
 
-#include "../result.h"
-#include "shared.h"
+#include "../../result.h"
+#include "shared_vk.h"
 
 #include "ducklib/core/math.h"
 
@@ -17,6 +17,11 @@ struct Fence {
     uint64_t counter = 0;
 
     void wait();
+};
+
+struct Buffer {
+    VkBuffer vk_buffer{};
+    uint64_t size = 0;
 };
 
 struct Image {
@@ -38,7 +43,7 @@ struct Color {
 
 struct Attachment {
     static constexpr auto MAX_ATTACHMENT_COUNT = 8U;
-    
+
     ImageView image_view;
     ImageLayout image_layout;
     LoadOp load_op;
@@ -46,10 +51,15 @@ struct Attachment {
     Color clear_color;
 };
 
+struct Shader {
+    void* bytecode;
+    uint32_t bytecode_size;
+};
+
 struct CommandList {
     VkCommandBuffer vk_cmd_buffer;
     VkCommandPool vk_cmd_pool;
-    
+
     void open();
     void close();
 
@@ -57,7 +67,7 @@ struct CommandList {
     void end_render();
 
     void clear_rt(Image image, ImageLayout current_image_layout, Color color_rgba);
-    
+
     void transition_barrier(Image image, ImageLayout current_layout, ImageLayout new_layout);
 };
 
@@ -137,6 +147,9 @@ struct Rhi {
 
     static constexpr uint32_t MAX_VK_ADAPTERS = 32;
 };
+
+void compile_shader(const std::byte* bytecode, uint32_t bytecode_size, ShaderType shader_type, const char* entry_point,
+    Shader* shader_out);
 }
 
 #endif

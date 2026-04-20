@@ -11,12 +11,7 @@ add_library(ducklib-render STATIC
         src/rhi/d3d12/shader.cpp
         src/rhi/d3d12/types.cpp
         include/ducklib/render/rhi/d3d12/render_util.h
-#        include/ducklib/render/gui/font.h
-#        src/gui/font.cpp
         src/rhi/d3d12/render_util.cpp
-#        include/ducklib/render/gui/gui.h
-#        src/gui/gui.cpp
-        include/ducklib/render/rhi/vk.h
         src/rhi/vk/vk.cpp
         include/ducklib/render/rhi/shared.h
         src/rhi/vk/vk_util.h
@@ -25,9 +20,10 @@ add_library(ducklib-render STATIC
         src/render_util.h
         src/render_util.cpp
         src/result.cpp
-        include/ducklib/render/rhi/vk.h
         include/ducklib/render/rhi/rhi.h
-        include/ducklib/render/rhi/vk/shared_vk.h)
+        include/ducklib/render/rhi/vk/shared_vk.h
+        include/ducklib/render/rhi/vk/vk.h
+        src/rhi/vk/shader.cpp)
 
 option(D3D12_RENDERER "Use D3D12 renderer instead of Vulkan" OFF)
 

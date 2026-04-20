@@ -92,6 +92,7 @@ enum class BindingType {
     DESCRIPTOR_SET
 };
 
+// Remove?
 enum class ResourceType {
     BUFFER,
     TEXTURE_1D,
