@@ -27,5 +27,6 @@ add_subdirectory(net)
 add_subdirectory(net/test/net_shared_unit_tests)
 add_subdirectory(render)
 add_subdirectory(input)
+add_subdirectory(platform)
 
 #add_subdirectory(threading)
