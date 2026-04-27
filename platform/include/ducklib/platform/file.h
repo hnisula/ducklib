@@ -2,8 +2,7 @@
 #include <cstdint>
 #include <span>
 #include <string_view>
-#define _FILE_OFFSET_BITS=64
-#define _LARGEFILE_SOURCE
+#define _FILE_OFFSET_BITS 64
 #include <stdio.h>
 
 namespace ducklib {
@@ -21,7 +20,7 @@ enum class SeekOrigin {
 class File {
 public:
     void open(std::string_view filename, FileMode mode);
-    void read_all(std::span<std::byte> buffer);
+    uint64_t read_all(std::span<std::byte> buffer);
     void seek(uint64_t offset, SeekOrigin origin);
     uint64_t tell();
     uint64_t size();

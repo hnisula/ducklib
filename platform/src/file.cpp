@@ -11,9 +11,9 @@ void File::open(std::string_view filename, FileMode mode) {
 #endif
 }
 
-void File::read_all(std::span<std::byte> buffer) {
+uint64_t File::read_all(std::span<std::byte> buffer) {
     auto file_size = size();
-    fread(buffer.data(), sizeof(std::byte), file_size, file);
+    return fread(buffer.data(), sizeof(std::byte), file_size, file);
 }
 
 void File::seek(uint64_t offset, SeekOrigin origin) {
