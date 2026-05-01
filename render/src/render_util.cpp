@@ -4,7 +4,7 @@
 #include "../include/ducklib/render/result.h"
 
 namespace ducklib::render {
-void render_log(LogLevel level, Result status, std::string_view message) {
+void log(LogLevel level, Result status, std::string_view message) {
     auto status_message = to_string(status);
     std::cerr << to_string(level) << ": " << message << " (" << status_message << ")" << "\n";
     std::cerr.flush();

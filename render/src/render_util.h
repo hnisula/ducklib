@@ -6,7 +6,7 @@
 #include "ducklib/render/result.h"
 
 namespace ducklib::render {
-void render_log(LogLevel level, Result result, std::string_view message);
+void log(LogLevel level, Result result, std::string_view message);
 }
 
 #endif //DUCKLIB_RENDER_UTIL_H

@@ -1,5 +1,5 @@
-#ifndef DUCKLIB_ERRORS_H
-#define DUCKLIB_ERRORS_H
+#pragma once
+#include <dxc/WinAdapter.h>
 
 namespace ducklib::render {
 enum class Result {
@@ -10,6 +10,5 @@ enum class Result {
 };
 
 const char* to_string(Result result);
+Result map_hresult(HRESULT hresult);
 }
-
-#endif //DUCKLIB_ERRORS_H

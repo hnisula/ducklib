@@ -243,4 +243,16 @@ inline VkAttachmentStoreOp map_vk_store_op(StoreOp store_op) {
 inline VkAttachmentLoadOp map_vk_load_op(LoadOp load_op) {
     return (VkAttachmentLoadOp)load_op;
 }
+
+inline const char* map_vk_shader_type(ShaderType type) {
+    switch (type) {
+    case ShaderType::VERTEX: return "vs_6_0";
+    case ShaderType::PIXEL: return "ps_6_0";
+    case ShaderType::GEOMETRY: return "gs_6_0";
+    case ShaderType::HULL: return "gs_6_0";
+    case ShaderType::DOMAIN: return "ds_6_0";
+    case ShaderType::COMPUTE: return "cs_6_0";
+    default: throw std::runtime_error("Unexpected shader type enum value");
+    }
+}
 }

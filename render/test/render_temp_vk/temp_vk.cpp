@@ -1,9 +1,8 @@
 #include <iostream>
-#include <functional>
 #include <unistd.h>
 
 #include "ducklib/core/shared.h"
-#include "ducklib/render/rhi/vk.h"
+#include "ducklib/render/rhi/vk/vk.h"
 #include "../src/render_util.h"
 #include "ducklib/core/logging/logger.h"
 #include "ducklib/core/platform/app_window.h"
@@ -13,13 +12,6 @@
 using namespace ducklib;
 
 Logger logger{};
-
-void log(LogLevel level, render::Result status, std::string_view message) {
-    auto status_message = to_string(status);
-    // std::array<char, 1024> buffer{};
-    std::cerr << to_string(level) << ": " << message << "(" << status_message << ")" << "\n";
-    std::cerr.flush();
-}
 
 #define CHECK(expr, err_msg) \
     do { \
@@ -42,8 +34,8 @@ int main() {
     render::Rhi rhi{};
     render::Device device{};
     render::Swapchain swapchain{};
-    Rect render_area{0, 0, width, height};
-    AppWindow window{"glfw-vk-test", width, height};
+    Rect render_area{ 0, 0, width, height };
+    AppWindow window{ "glfw-vk-test", width, height };
     render::CommandList cmd_list{};
 
     render::create_rhi(rhi);
@@ -60,9 +52,9 @@ int main() {
 
     while (running) {
         window.process_messages();
-        
-        constexpr render::Color clear_color = {0.0f, 0.2f, 0.4f, 1.0f};
-        
+
+        constexpr render::Color clear_color = { 0.0f, 0.2f, 0.4f, 1.0f };
+
         auto sync = swapchain.get_current_sync();
         sync.wait_for_render();
         swapchain.acquire_next_image();
@@ -74,11 +66,15 @@ int main() {
             render::StoreOp::NONE,
             clear_color
         };
-        cmd_list.transition_barrier(swapchain.get_current_image(), render::ImageLayout::UNDEFINED, render::ImageLayout::COLOR_ATTACHMENT);
+        cmd_list.transition_barrier(swapchain.get_current_image(),
+                                    render::ImageLayout::UNDEFINED,
+                                    render::ImageLayout::COLOR_ATTACHMENT);
         cmd_list.begin_render(render_area, &attachments, 1);
         // Do stuff later
         cmd_list.end_render();
-        cmd_list.transition_barrier(swapchain.get_current_image(), render::ImageLayout::COLOR_ATTACHMENT, render::ImageLayout::PRESENT_SRC);
+        cmd_list.transition_barrier(swapchain.get_current_image(),
+                                    render::ImageLayout::COLOR_ATTACHMENT,
+                                    render::ImageLayout::PRESENT_SRC);
         cmd_list.close();
         device.graphics_queue.submit(cmd_list, swapchain.get_current_sync());
         swapchain.present();

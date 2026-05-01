@@ -11,6 +11,8 @@
 #include "ducklib/render/gui/font.h"
 #include "ducklib/input/input.h"
 #include "ducklib/render/gui/gui.h"
+#include "platform/include/ducklib/platform/file.h"
+#include "render/src/render_util.h"
 
 using namespace ducklib;
 
@@ -29,6 +31,7 @@ void output(std::string_view message, LogLevel level, std::source_location sourc
 
 #ifdef _WIN32
 int __stdcall WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* cmdLine, int cmdShow) {
+
 
 #else
 int main() {
@@ -59,7 +62,6 @@ int main() {
     uint32_t frame_index = 0;
     ID3D12Resource* back_buffer = nullptr;
 
-    render::log = output;
     InputState input_state = {};
     initialize_raw_input(window.hwnd());
     window.register_message_callback(
@@ -73,7 +75,8 @@ int main() {
     device.create_command_list(render::QueueType::GRAPHICS, command_list);
     device.create_command_list(render::QueueType::COPY, copy_list);
 
-
+    File shader_file;
+    shader_file.open("shaders.hlsl", FileMode::READ);
     compile_shader(L"shaders.hlsl", render::ShaderType::VERTEX, "vs_main", &vertex_shader);
     compile_shader(L"shaders.hlsl", render::ShaderType::PIXEL, "ps_main", &pixel_shader);
 

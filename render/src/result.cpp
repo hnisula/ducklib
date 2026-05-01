@@ -12,4 +12,11 @@ const char* to_string(Result result) {
     default: assert(false);
     }
 }
+
+Result map_hresult(HRESULT hresult) {
+    switch (hresult) {
+    case S_OK: return Result::SUCCESS;
+    default: throw std::runtime_error("Unexpected hresult value when mapping");
+    }
+}
 }
