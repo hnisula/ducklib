@@ -19,7 +19,7 @@ enum class SeekOrigin {
 
 class File {
 public:
-    void open(std::string_view filename, FileMode mode);
+    static File open(std::string_view filename, FileMode mode);
     uint64_t read_all(std::span<std::byte> buffer);
     void seek(uint64_t offset, SeekOrigin origin);
     uint64_t tell();
@@ -29,6 +29,6 @@ public:
 private:
     static const char* map_file_mode(FileMode mode);
     static int map_seek_origin(SeekOrigin origin);
-    FILE* file = nullptr;
+    FILE* handle = nullptr;
 };
 }

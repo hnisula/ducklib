@@ -75,9 +75,13 @@ int main() {
     device.create_command_list(render::QueueType::GRAPHICS, command_list);
     device.create_command_list(render::QueueType::COPY, copy_list);
 
-    File shader_file;
-    shader_file.open("shaders.hlsl", FileMode::READ);
-    compile_shader(L"shaders.hlsl", render::ShaderType::VERTEX, "vs_main", &vertex_shader);
+    std::span<char> shader_source{};
+    auto shader_file = shader_file.open("shaders.hlsl", FileMode::READ);
+    auto shader_source_size = shader_file.read_all(shader_source);
+    compile_shader(std::span<char>(shader_source, strlen(shader_source)),
+                   render::ShaderType::VERTEX,
+                   "vs_main",
+                   &vertex_shader);
     compile_shader(L"shaders.hlsl", render::ShaderType::PIXEL, "ps_main", &pixel_shader);
 
     binding_set_desc.binding_count = 1;

@@ -1,30 +1,29 @@
 #include "ducklib/platform/file.h"
 
 namespace ducklib {
-void File::open(std::string_view filename, FileMode mode) {
-    if (file) {
-        close();
-    }
-
-#ifndef _WIN32
-    file = fopen(filename.data(), map_file_mode(mode));
+File File::open(std::string_view filename, FileMode mode) {
+#ifdef __unix__
+    auto handle = fopen(filename.data(), map_file_mode(mode));
+    File file;
+    file.handle = handle;
+    return file;
 #endif
 }
 
 uint64_t File::read_all(std::span<std::byte> buffer) {
     auto file_size = size();
-    return fread(buffer.data(), sizeof(std::byte), file_size, file);
+    return fread(buffer.data(), sizeof(std::byte), file_size, handle);
 }
 
 void File::seek(uint64_t offset, SeekOrigin origin) {
 #ifdef __unix__
-    fseeko(file, offset, map_seek_origin(origin));
+    fseeko(handle, offset, map_seek_origin(origin));
 #endif
 }
 
 uint64_t File::tell() {
 #ifdef __unix__
-    return ftello(file);
+    return ftello(handle);
 #endif
 }
 
@@ -37,9 +36,9 @@ uint64_t File::size() {
 }
 
 void File::close() {
-    if (file) {
-        fclose(file);
-        file = nullptr;
+    if (handle) {
+        fclose(handle);
+        handle = nullptr;
     }
 }
 
