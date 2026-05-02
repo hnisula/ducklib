@@ -2,7 +2,21 @@
 #define SOCKET_H
 
 #include <span>
+
+#if defined(_WIN32)
 #include <winsock2.h>
+#include <WS2tcpip.h>
+using SocketHandle = SOCKET;
+constexpr SocketHandle INVALID_SOCK = INVALID_SOCKET;
+#elif defined(__unix__)
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <unistd.h>
+#include <fcntl.h>
+using SocketHandle = int;
+constexpr SocketHandle INVALID_SOCKET_VALUE = -1;
+#endif
+
 #include "shared.h"
 
 namespace ducklib::net
@@ -32,7 +46,7 @@ public:
     auto operator=(Socket&& other) noexcept -> Socket& = delete;
 
 private:
-    SOCKET socket_handle;
+    SocketHandle socket_handle;
     Address address;
 };
 }

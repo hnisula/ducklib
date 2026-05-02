@@ -1,19 +1,18 @@
 #include <array>
 #include <iostream>
 #include <print>
+#include <source_location>
 #include <thread>
 
-#include "ducklib/core/win/win_app_window.h"
+#include "ducklib/core/logging/log_level.h"
 #include "ducklib/core/math.h"
-#include "ducklib/render/gui/font.h"
-#include "ducklib/core/unicode.h"
-#include "ducklib/input/input.h"
-#include "ducklib/render/render_util.h"
-#include "ducklib/render/resource_manager.h"
-#include "ducklib/render/gui/gui.h"
+#include "ducklib/core/win_app_window.h"
 #include "ducklib/render/rhi/rhi.h"
-#include "ducklib/render/rhi/types.h"
-#include "ducklib/render/rhi/shader.h"
+#include "ducklib/render/gui/font.h"
+#include "ducklib/input/input.h"
+#include "ducklib/render/gui/gui.h"
+#include "platform/include/ducklib/platform/file.h"
+#include "render/src/render_util.h"
 
 using namespace ducklib;
 
@@ -30,11 +29,18 @@ void output(std::string_view message, LogLevel level, std::source_location sourc
     std::cout.flush();
 }
 
+#ifdef _WIN32
 int __stdcall WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* cmdLine, int cmdShow) {
-    WinAppWindow window{ "Hello world!", width, height };
+
+
+#else
+int main() {
+#endif
+    AppWindow window{ "Hello world!", width, height };
     render::Rhi rhi = {};
-    render::SwapChain swap_chain = {};
-    render::Adapter adapters[1] = {};
+    render::Swapchain swap_chain = {};
+    uint32_t adapter_count = 1;
+    render::AdapterInfo adapters[1] = {};
     render::Device device = {};
     render::CommandList command_list = {};
     render::CommandList copy_list = {};
@@ -56,21 +62,26 @@ int __stdcall WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char*
     uint32_t frame_index = 0;
     ID3D12Resource* back_buffer = nullptr;
 
-    render::log = output;
     InputState input_state = {};
-    register_raw_win_input(window.hwnd());
+    initialize_raw_input(window.hwnd());
     window.register_message_callback(
         [&input_state](AppWindow* app_window, uint32_t msg, WPARAM wParam, LPARAM lParam) {
             process_win_input(app_window, input_state, msg, wParam, lParam);
         });
 
     create_rhi(rhi);
-    rhi.enumerate_adapters(adapters, 1);
+    rhi.enumerate_adapters(adapter_count, adapters);
     rhi.create_device(adapters[0], device);
     device.create_command_list(render::QueueType::GRAPHICS, command_list);
     device.create_command_list(render::QueueType::COPY, copy_list);
 
-    compile_shader(L"shaders.hlsl", render::ShaderType::VERTEX, "vs_main", &vertex_shader);
+    std::span<char> shader_source{};
+    auto shader_file = shader_file.open("shaders.hlsl", FileMode::READ);
+    auto shader_source_size = shader_file.read_all(shader_source);
+    compile_shader(std::span<char>(shader_source, strlen(shader_source)),
+                   render::ShaderType::VERTEX,
+                   "vs_main",
+                   &vertex_shader);
     compile_shader(L"shaders.hlsl", render::ShaderType::PIXEL, "ps_main", &pixel_shader);
 
     binding_set_desc.binding_count = 1;
@@ -103,7 +114,14 @@ int __stdcall WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char*
     device.create_fence(frame_index, fence);
     device.create_fence(0, copy_fence);
 
-    rhi.create_swap_chain(device, rt_descriptor_heap, 2, width, height, render::Format::R8G8B8A8_UNORM, window.hwnd(), swap_chain);
+    rhi.create_swap_chain(device,
+                          rt_descriptor_heap,
+                          2,
+                          width,
+                          height,
+                          render::Format::R8G8B8A8_UNORM,
+                          window.hwnd(),
+                          swap_chain);
     rt_descriptors[0] = rt_descriptor_heap.allocate();
     swap_chain.d3d12_swap_chain->GetBuffer(0, IID_PPV_ARGS(&back_buffer));
     device.create_rt_descriptor(back_buffer, nullptr, rt_descriptors[0]);
@@ -190,7 +208,7 @@ int __stdcall WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, char*
         std::this_thread::sleep_for(std::chrono::milliseconds(16));
     }
 
-    unregister_raw_win_input();
+    shutdown_raw_input();
 
     return 0;
 }

@@ -1,6 +1,7 @@
 #ifndef MATH_H
 #define MATH_H
 #include <cmath>
+#include <cstdint>
 #include <numbers>
 #include <initializer_list>
 
@@ -89,7 +90,7 @@ private:
 
 struct Rect {
     int x, y;
-    int width, height;
+    uint32_t width, height;
 };
 }
 #endif

@@ -1,0 +1,258 @@
+#pragma once
+#include <vulkan/vulkan.h>
+#include <cstdint>
+
+namespace ducklib::render {
+enum class AdapterType {
+    DISCRETE_GPU,
+    INTEGRATED_GPU,
+    CPU,
+    OTHER
+};
+
+struct AdapterInfo {
+    uint64_t device_luid;
+    uint32_t device_id;
+    uint32_t vendor_id;
+    char device_name[64];
+    AdapterType type;
+};
+
+enum class QueueType {
+    GRAPHICS,
+    COPY,
+    COMPUTE
+};
+
+enum class HeapType {
+    DEFAULT,
+    UPLOAD
+};
+
+enum class DescriptorHeapType {
+    CBV_SRV_UAV,
+    SAMPLER,
+    RT,
+    DS
+};
+
+enum class DescriptorSetRangeType {
+    SRV,
+    UAV,
+    CBV,
+    SAMPLER
+};
+
+enum class ImageLayout {
+    UNDEFINED = 0,
+    GENERAL = 1,
+    COLOR_ATTACHMENT = 2,
+    DEPTH_STENCIL_ATTACHMENT = 3,
+    DEPTH_STENCIL_READ_ONLY = 4,
+    SHADER_READ_ONLY = 5,
+    TRANSFER_SRC = 6,
+    TRANSFER_DST = 7,
+    PRESENT_SRC = 1000001002
+};
+
+#undef DOMAIN
+enum class BindingStage {
+    VERTEX = 1,
+    PIXEL = 2,
+    GEOMETRY = 4,
+    HULL = 8,
+    DOMAIN = 16,
+    COMPUTE = 32,
+    ALL = 255
+};
+
+enum class ShaderType {
+    VERTEX,
+    PIXEL,
+    GEOMETRY,
+    HULL,
+    DOMAIN,
+    COMPUTE
+};
+
+enum class ShaderVisibility {
+    ALL,
+    VERTEX,
+    HULl,
+    DOMAIN,
+    GEOMETRY,
+    PIXEL
+};
+
+enum class BindingType {
+    CONSTANT,
+    BUFFER_DESCRIPTOR, // "BUFFER_DESCRIPTOR"?
+    SRV_DESCRIPTOR, // TODO: Rename? "READ_DESCRIPTOR"?
+    UAV_DESCRIPTOR, // "WRITE_DESCRIPTOR"?
+    DESCRIPTOR_SET
+};
+
+// Remove?
+enum class ResourceType {
+    BUFFER,
+    TEXTURE_1D,
+    TEXTURE_2D,
+    TEXTURE_3D,
+    TEXTURE_CUBE
+};
+
+enum class FillMode {
+    SOLID,
+    WIREFRAME
+};
+
+enum class CullMode {
+    BACK,
+    FRONT,
+    NONE
+};
+
+enum class FrontFace {
+    CLOCKWISE,
+    COUNTER_CLOCKWISE
+};
+
+enum class DepthComparison {
+    LTEQ,
+    LT,
+    GTEQ,
+    GT,
+    EQ,
+    NEQ,
+    ALWAYS,
+    NEVER
+};
+
+enum class LoadOp {
+    LOAD = 0,
+    CLEAR = 1,
+    DONT_CARE = 2,
+    NONE = 1000400000
+};
+
+enum class StoreOp {
+    STORE = 0,
+    DONT_CARE = 1,
+    NONE = 1000301000
+};
+
+enum class InputSlotType {
+    PER_VERTEX_DATA,
+    PER_INSTANCE_DATA
+};
+
+enum class PrimitiveTopology {
+    UNDEFINED,
+    POINT,
+    LINE,
+    TRIANGLE,
+    PATCH
+};
+
+enum class Format : uint32_t {
+    UNKNOWN = 0,
+    R32G32B32A32_FLOAT = VK_FORMAT_R32G32B32A32_SFLOAT,
+    R32G32B32A32_UINT = VK_FORMAT_R32G32B32A32_UINT,
+    R32G32B32A32_SINT = VK_FORMAT_R32G32B32A32_SINT,
+    R32G32B32_FLOAT = VK_FORMAT_R32G32B32_SFLOAT,
+    R32G32B32_UINT = VK_FORMAT_R32G32B32_UINT,
+    R32G32B32_SINT = VK_FORMAT_R32G32B32_SINT,
+    R16G16B16A16_FLOAT = VK_FORMAT_R16G16B16A16_SFLOAT,
+    R16G16B16A16_UINT = VK_FORMAT_R16G16B16A16_UINT,
+    R16G16B16A16_SINT = VK_FORMAT_R16G16B16A16_SINT,
+    R16G16B16A16_UNORM = VK_FORMAT_R16G16B16A16_UNORM,
+    R16G16B16A16_SNORM = VK_FORMAT_R16G16B16A16_SNORM,
+    R32G32_FLOAT = VK_FORMAT_R32G32_SFLOAT,
+    R32G32_UINT = VK_FORMAT_R32G32_UINT,
+    R32G32_SINT = VK_FORMAT_R32G32_SINT,
+    D32_FLOAT_S8X24_UINT = VK_FORMAT_D32_SFLOAT_S8_UINT,
+    R10G10B10A2_UNORM = VK_FORMAT_A2B10G10R10_UNORM_PACK32,
+    R10G10B10A2_UINT = VK_FORMAT_A2B10G10R10_UINT_PACK32,
+    R11G11B10_FLOAT = VK_FORMAT_B10G11R11_UFLOAT_PACK32,
+    R8G8B8A8_UNORM = VK_FORMAT_R8G8B8A8_UNORM,
+    R8G8B8A8_UNORM_SRGB = VK_FORMAT_R8G8B8A8_UNORM,
+    R8G8B8A8_UINT = VK_FORMAT_R8G8B8A8_UINT,
+    R8G8B8A8_SNORM = VK_FORMAT_R8G8B8A8_SNORM,
+    R8G8B8A8_SINT = VK_FORMAT_R8G8B8A8_SINT,
+    R16G16_FLOAT = VK_FORMAT_R16G16_SFLOAT,
+    R16G16_UNORM = VK_FORMAT_R16G16_UNORM,
+    R16G16_UINT = VK_FORMAT_R16G16_UINT,
+    R16G16_SNORM = VK_FORMAT_R16G16_SNORM,
+    R16G16_SINT = VK_FORMAT_R16G16_SINT,
+    D32_FLOAT = VK_FORMAT_D32_SFLOAT,
+    R32_FLOAT = VK_FORMAT_R32_SFLOAT,
+    R32_UINT = VK_FORMAT_R32_UINT,
+    R32_SINT = VK_FORMAT_R32_SINT,
+    D24_UNORM_S8_UINT = VK_FORMAT_D24_UNORM_S8_UINT,
+    B8G8R8A8_UNORM = VK_FORMAT_B8G8R8A8_UNORM,
+    B8G8R8A8_UNORM_SRGB = VK_FORMAT_B8G8R8A8_SRGB,
+    R8G8_UNORM = VK_FORMAT_R8G8_UNORM,
+    R8G8_UINT = VK_FORMAT_R8G8_UINT,
+    R8G8_SNORM = VK_FORMAT_R8G8_SNORM,
+    R8G8_SINT = VK_FORMAT_R8G8_SINT,
+    R16_FLOAT = VK_FORMAT_R16_SFLOAT,
+    D16_UNORM = VK_FORMAT_D16_UNORM,
+    R16_UNORM = VK_FORMAT_R16_UNORM,
+    R16_UINT = VK_FORMAT_R16_UINT,
+    R16_SNORM = VK_FORMAT_R16_SNORM,
+    R16_SINT = VK_FORMAT_R16_SINT,
+    R8_UNORM = VK_FORMAT_R8_UNORM,
+    R8_UINT = VK_FORMAT_R8_UINT,
+    R8_SNORM = VK_FORMAT_R8_SNORM,
+    R8_SINT = VK_FORMAT_R8_SINT,
+    A8_UNORM = VK_FORMAT_A8_UNORM,
+    R9G9B9E5_SHAREDEXP = VK_FORMAT_E5B9G9R9_UFLOAT_PACK32,
+    R8G8_B8G8_UNORM = VK_FORMAT_G8B8G8R8_422_UNORM,
+    G8R8_G8B8_UNORM = VK_FORMAT_B8G8R8G8_422_UNORM,
+    BC1_UNORM = VK_FORMAT_BC1_RGBA_UNORM_BLOCK,
+    BC1_UNORM_SRGB = VK_FORMAT_BC1_RGBA_SRGB_BLOCK,
+    BC2_UNORM = VK_FORMAT_BC2_UNORM_BLOCK,
+    BC2_UNORM_SRGB = VK_FORMAT_BC2_SRGB_BLOCK,
+    BC3_UNORM = VK_FORMAT_BC3_UNORM_BLOCK,
+    BC3_UNORM_SRGB = VK_FORMAT_BC3_SRGB_BLOCK,
+    BC4_UNORM = VK_FORMAT_BC4_UNORM_BLOCK,
+    BC4_SNORM = VK_FORMAT_BC4_SNORM_BLOCK,
+    BC5_UNORM = VK_FORMAT_BC5_UNORM_BLOCK,
+    BC5_SNORM = VK_FORMAT_BC5_SNORM_BLOCK,
+    BC6H_UF16 = VK_FORMAT_BC6H_UFLOAT_BLOCK,
+    BC6H_SF16 = VK_FORMAT_BC6H_SFLOAT_BLOCK,
+    BC7_UNORM = VK_FORMAT_BC7_UNORM_BLOCK,
+    BC7_UNORM_SRGB = VK_FORMAT_BC7_SRGB_BLOCK,
+    B5G6R5_UNORM = VK_FORMAT_B5G6R5_UNORM_PACK16,
+    B5G5R5A1_UNORM = VK_FORMAT_B5G5R5A1_UNORM_PACK16,
+    R10G10B10_XR_BIAS_A2_UNORM
+};
+
+inline VkFormat map_vk_format(Format format) {
+    return (VkFormat)format;
+}
+
+inline VkImageLayout map_vk_image_layout(ImageLayout layout) {
+    return (VkImageLayout)layout;
+}
+
+inline VkAttachmentStoreOp map_vk_store_op(StoreOp store_op) {
+    return (VkAttachmentStoreOp)store_op;
+}
+
+inline VkAttachmentLoadOp map_vk_load_op(LoadOp load_op) {
+    return (VkAttachmentLoadOp)load_op;
+}
+
+inline const wchar_t* map_vk_shader_type(ShaderType type) {
+    switch (type) {
+    case ShaderType::VERTEX: return L"vs_6_0";
+    case ShaderType::PIXEL: return L"ps_6_0";
+    case ShaderType::GEOMETRY: return L"gs_6_0";
+    case ShaderType::HULL: return L"gs_6_0";
+    case ShaderType::DOMAIN: return L"ds_6_0";
+    case ShaderType::COMPUTE: return L"cs_6_0";
+    default: throw std::runtime_error("Unexpected shader type enum value");
+    }
+}
+}

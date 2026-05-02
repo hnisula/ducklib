@@ -2,6 +2,7 @@
 #define DUCKLIB_CONNECTION_H
 #include <cstdint>
 #include <map>
+#include <memory>
 #include <queue>
 #include <span>
 #include <unordered_map>

@@ -1,13 +1,3 @@
-cmake_minimum_required(VERSION 3.31)
-
-project(ducklib-net-unit-tests)
-
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
-set(CMAKE_CXX_STANDARD 23)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 include(FetchContent)
 FetchContent_Declare(
         googletest
@@ -20,20 +10,18 @@ FetchContent_MakeAvailable(googletest)
 enable_testing()
 
 add_executable(
-        ${PROJECT_NAME}
+        ducklib-net-unit-tests
         address_tests.cpp
         serialization_tests.cpp
 )
 
-target_compile_options(${PROJECT_NAME} PRIVATE
-        $<$<CXX_COMPILER_ID:MSVC>:/W4>
-)
-target_include_directories(${PROJECT_NAME} PRIVATE ../../../include)
-target_link_libraries(${PROJECT_NAME}
+target_link_libraries(ducklib-net-unit-tests
+        ducklib-compile-flags
         GTest::gtest_main
         ducklib-net
-        Ws2_32
+        $<$<PLATFORM_ID:Windows>:Ws2_32>
 )
+target_include_directories(ducklib-net-unit-tests PUBLIC include)
 
 include(GoogleTest)
-gtest_discover_tests(${PROJECT_NAME})
+gtest_discover_tests(ducklib-net-unit-tests)

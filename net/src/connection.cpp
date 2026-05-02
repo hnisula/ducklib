@@ -1,4 +1,5 @@
 #include <array>
+#include <cstring>
 
 #include "ducklib/net/connection.h"
 #include "ducklib/net/serialization.h"
