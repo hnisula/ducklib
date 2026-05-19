@@ -1,6 +1,7 @@
 const std = @import("std");
 const posix = std.posix;
 const linux = std.os.linux;
+const expectEqual = std.testing.expectEqual;
 const Socket = @This();
 const Address = @import("Address.zig");
 
@@ -44,8 +45,7 @@ pub fn close(self: *Socket) void {
 const SendError = error{Unknown};
 
 pub fn sendTo(self: *Socket, data: []const u8, to: Address) SendError!usize {
-    const sock_addr, const sock_addr_len = sockAddr(to);
-    const sent_bytes = linux.sendto(self.fd, data.ptr, data.len, 0, sock_addr, sock_addr_len);
+    const sent_bytes = linux.sendto(self.fd, data.ptr, data.len, 0, @ptrCast(&to.sa), to.sa_len);
     switch (std.posix.errno(sent_bytes)) {
         .SUCCESS => return sent_bytes,
         else => return SendError.Unknown,
@@ -53,17 +53,10 @@ pub fn sendTo(self: *Socket, data: []const u8, to: Address) SendError!usize {
 }
 
 pub fn receive(self: *Socket, buffer: []u8) !usize {
-    var addr: linux.sockaddr.storage = undefined; // TODO: Fix
+    var from: linux.sockaddr.storage = undefined; // TODO: Fix
     var addr_len: linux.socklen_t = 0;
-    const received_bytes = linux.recvfrom(self.fd, buffer.ptr, buffer.len, 0, &addr, &addr_len);
+    const received_bytes = linux.recvfrom(self.fd, buffer.ptr, buffer.len, 0, @ptrCast(&from), &addr_len);
     return received_bytes;
-}
-
-fn sockAddr(addr: Address) struct { ptr: *const linux.sockaddr, len: linux.socklen_t } {
-    return switch (addr.sa) {
-        .ip4 => return .{ addr.ip4, @sizeOf(linux.sockaddr.in) },
-        .ip6 => return .{ addr.ip6, @sizeOf(linux.sockaddr.in6) },
-    };
 }
 
 test "open socket" {
@@ -72,9 +65,11 @@ test "open socket" {
     defer sender.close();
     var receiver = try Socket.open(12601);
     defer receiver.close();
-    const buffer: [512]u8 = @splat(0);
+    var buffer: [512]u8 = @splat(0);
 
-    try sender.sendTo(&.{ 1, 2, 3, 4 }, addr);
-    try receiver.receive(buffer);
+    const sent = try sender.sendTo(&.{ 1, 2, 3, 4 }, addr);
+    try expectEqual(4, sent);
+    const received = try receiver.receive(&buffer);
+    try expectEqual(4, received);
     return;
 }

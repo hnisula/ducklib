@@ -1,10 +1,14 @@
 const std = @import("std");
 const linux = std.os.linux;
+const Connection = @This();
+const Address = @import("Address.zig");
 
-pub const Connection = struct {
-    address: []const u8 = undefined,
+address: Address,
 
-    pub fn open(address: []u8) !Connection {
-        return .{ .address = address };
-    }
-};
+pub fn connect(address: Address) !Connection {
+    return .{ .address = address };
+}
+
+pub fn close(self: *Connection) void {
+    _ = self;
+}
