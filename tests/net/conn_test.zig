@@ -35,16 +35,15 @@ fn clientSock(io: std.Io) !void {
 }
 
 fn serverSock(io: std.Io) !void {
-    // const from = net.Address.ip4(.{ 127, 0, 0, 1 }, 12801);
     var socket = try net.Socket.open(12800);
     var buffer: [1024]u8 = undefined;
     var i: u32 = 0;
-    var addr: net.Address = undefined;
+    var from: net.Address = undefined;
 
     while (true) {
-        const bytes_received = try socket.receive(&buffer, &addr);
+        const bytes_received = try socket.receive(&buffer, &from);
         if (bytes_received > 0) {
-            std.debug.print("[{d}]: Received bytes: {d} from {f}\n", .{ i, bytes_received, addr });
+            std.debug.print("[{d}]: Received bytes: {d} from {f}\n", .{ i, bytes_received, from });
             i += 1;
         }
 
