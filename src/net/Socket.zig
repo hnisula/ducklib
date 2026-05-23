@@ -2,6 +2,7 @@ const std = @import("std");
 const posix = std.posix;
 const linux = std.os.linux;
 const expectEqual = std.testing.expectEqual;
+const expectError = std.testing.expectError;
 const Socket = @This();
 const Address = @import("Address.zig");
 
@@ -53,14 +54,15 @@ pub fn close(self: *Socket) void {
     _ = linux.close(self.fd);
 }
 
-const SendError = error{Unknown};
+const SendError = error{ Unknown, InvalidSocket };
 
 pub fn sendTo(self: *Socket, data: []const u8, to: Address) SendError!usize {
     const sent_bytes = linux.sendto(self.fd, data.ptr, data.len, 0, @ptrCast(&to.sa), Address.sa_len);
-    switch (std.posix.errno(sent_bytes)) {
-        .SUCCESS => return sent_bytes,
-        else => return SendError.Unknown,
-    }
+    return switch (std.posix.errno(sent_bytes)) {
+        .SUCCESS => sent_bytes,
+        .BADF => SendError.InvalidSocket,
+        else => SendError.Unknown,
+    };
 }
 
 const ReceiveError = error{ InvalidArgument, Unknown };
@@ -69,28 +71,27 @@ pub fn receive(self: *Socket, buffer: []u8, from: *Address) ReceiveError!usize {
     var sa_len: linux.socklen_t = Address.sa_len;
     const received_bytes = linux.recvfrom(self.fd, buffer.ptr, buffer.len, 0, @ptrCast(&from.sa), &sa_len);
     std.debug.assert(sa_len == @sizeOf(linux.sockaddr.in6));
-    switch (std.posix.errno(received_bytes)) {
-        .SUCCESS => return received_bytes,
-        .AGAIN => return 0,
-        .INVAL => return ReceiveError.InvalidArgument,
-        else => |err| { // TODO: Map errors and just return
-            std.log.err("Failed to receive socket bytes ({s})", .{@tagName(err)});
-            return ReceiveError.Unknown;
-        },
-    }
+    return switch (std.posix.errno(received_bytes)) {
+        .SUCCESS => received_bytes,
+        .AGAIN => 0,
+        .INVAL => ReceiveError.InvalidArgument,
+        else => ReceiveError.Unknown,
+    };
 }
 
-test "open socket" {
+test "Socket: open, send/receive, close then send fails" {
     const addr = Address.initIp4(.{ 127, 0, 0, 1 }, 12601);
     var sender = try Socket.open(12600);
-    defer sender.close();
     var receiver = try Socket.open(12601);
     defer receiver.close();
     var buffer: [512]u8 = @splat(0);
+    var from: Address = undefined;
 
     const sent = try sender.sendTo(&.{ 1, 2, 3, 4 }, addr);
     try expectEqual(4, sent);
-    const received = try receiver.receive(&buffer);
+    const received = try receiver.receive(&buffer, &from);
     try expectEqual(4, received);
-    return;
+
+    sender.close();
+    try expectError(error.InvalidSocket, sender.sendTo(&.{ 4, 3, 2, 1 }, addr));
 }
