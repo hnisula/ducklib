@@ -35,10 +35,10 @@ fn clientSock(io: std.Io) !void {
 }
 
 fn serverSock(io: std.Io) !void {
+    var from: net.Address = undefined;
     var socket = try net.Socket.open(12800);
     var buffer: [1024]u8 = undefined;
     var i: u32 = 0;
-    var from: net.Address = undefined;
 
     while (true) {
         const bytes_received = try socket.receive(&buffer, &from);

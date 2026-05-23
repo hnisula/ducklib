@@ -7,6 +7,8 @@ const Socket = @This();
 const Address = @import("Address.zig");
 
 fd: linux.fd_t,
+rng: std.Random.DefaultPrng,
+loss_rate: f32 = 0.0,
 
 const PacketHeader = struct {
     seq: u32 = 0,
@@ -19,12 +21,13 @@ const PacketHeader = struct {
     }
 };
 
-const OpenError = error{ AddressInUse, Unknown };
+const OpenError = error{ AddressInUse, Unknown, PermissionDenied };
 
 pub fn open(port: u16) OpenError!Socket {
     const socket_rc = linux.socket(linux.AF.INET6, linux.SOCK.DGRAM | linux.SOCK.NONBLOCK | linux.SOCK.CLOEXEC, linux.IPPROTO.UDP);
     switch (posix.errno(socket_rc)) {
         .SUCCESS => {},
+        .ACCES => return error.PermissionDenied,
         else => |err| {
             std.log.err("Failed to create socket: {s}", .{@tagName(err)});
             return OpenError.Unknown;
@@ -47,7 +50,9 @@ pub fn open(port: u16) OpenError!Socket {
         else => return OpenError.Unknown,
     }
 
-    return Socket{ .fd = fd };
+    var seed: u64 = undefined;
+    _ = linux.getrandom(std.mem.asBytes(&seed), @sizeOf(@TypeOf(seed)), 0);
+    return Socket{ .fd = fd, .rng = .init(seed) };
 }
 
 pub fn close(self: *Socket) void {
@@ -57,6 +62,9 @@ pub fn close(self: *Socket) void {
 const SendError = error{ Unknown, InvalidSocket };
 
 pub fn sendTo(self: *Socket, data: []const u8, to: Address) SendError!usize {
+    if (self.rng.random().float(f32) < self.loss_rate) {
+        return data.len;
+    }
     const sent_bytes = linux.sendto(self.fd, data.ptr, data.len, 0, @ptrCast(&to.sa), Address.sa_len);
     return switch (std.posix.errno(sent_bytes)) {
         .SUCCESS => sent_bytes,
@@ -69,10 +77,20 @@ const ReceiveError = error{ InvalidArgument, Unknown };
 
 pub fn receive(self: *Socket, buffer: []u8, from: *Address) ReceiveError!usize {
     var sa_len: linux.socklen_t = Address.sa_len;
-    const received_bytes = linux.recvfrom(self.fd, buffer.ptr, buffer.len, 0, @ptrCast(&from.sa), &sa_len);
+    var buffer_ptr = buffer.ptr;
+    var buffer_len = buffer.len;
+    
+    const is_lost = self.rng.random().float(f32) < self.loss_rate;
+    var fake_buffer: [4]u8 = undefined;
+    if (is_lost) {
+        buffer_ptr = &fake_buffer;
+        buffer_len = fake_buffer.len;
+    }
+    
+    const received_bytes = linux.recvfrom(self.fd, buffer_ptr, buffer_len, 0, @ptrCast(&from.sa), &sa_len);
     std.debug.assert(sa_len == @sizeOf(linux.sockaddr.in6));
     return switch (std.posix.errno(received_bytes)) {
-        .SUCCESS => received_bytes,
+        .SUCCESS => if (!is_lost) received_bytes else 0,
         .AGAIN => 0,
         .INVAL => ReceiveError.InvalidArgument,
         else => ReceiveError.Unknown,
