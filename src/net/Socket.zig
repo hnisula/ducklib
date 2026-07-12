@@ -10,6 +10,8 @@ fd: linux.fd_t,
 rng: std.Random.DefaultPrng,
 loss_rate: f32 = 0.0,
 
+pub const MTU: u32 = 1200;
+
 const PacketHeader = struct {
     seq: u32 = 0,
     ack_seq: u32 = 0,
@@ -75,8 +77,14 @@ pub fn sendTo(self: *Socket, data: []const u8, to: Address) SendError!usize {
 
 const ReceiveError = error{ InvalidArgument, Unknown };
 
-pub fn receive(self: *Socket, buffer: []u8, from: *Address) ReceiveError!usize {
+const ReceiveResult = struct {
+    packet: []u8,
+    from: Address,
+};
+
+pub fn receive(self: *Socket, buffer: []u8) ReceiveError!?ReceiveResult {
     var sa_len: linux.socklen_t = Address.sa_len;
+    var from: Address = undefined;
     var buffer_ptr = buffer.ptr;
     var buffer_len = buffer.len;
     
@@ -90,8 +98,8 @@ pub fn receive(self: *Socket, buffer: []u8, from: *Address) ReceiveError!usize {
     const received_bytes = linux.recvfrom(self.fd, buffer_ptr, buffer_len, 0, @ptrCast(&from.sa), &sa_len);
     std.debug.assert(sa_len == @sizeOf(linux.sockaddr.in6));
     return switch (std.posix.errno(received_bytes)) {
-        .SUCCESS => if (!is_lost) received_bytes else 0,
-        .AGAIN => 0,
+        .SUCCESS => if (!is_lost) .{ .packet = buffer[0..received_bytes], .from = .{ .sa = from.sa } } else null,
+        .AGAIN => null,
         .INVAL => ReceiveError.InvalidArgument,
         else => ReceiveError.Unknown,
     };
@@ -103,12 +111,12 @@ test "Socket: open, send/receive, close then send fails" {
     var receiver = try Socket.open(12601);
     defer receiver.close();
     var buffer: [512]u8 = @splat(0);
-    var from: Address = undefined;
 
     const sent = try sender.sendTo(&.{ 1, 2, 3, 4 }, addr);
     try expectEqual(4, sent);
-    const received = try receiver.receive(&buffer, &from);
-    try expectEqual(4, received);
+    if (try receiver.receive(&buffer)) |received| {
+        try expectEqual(4, received.packet.len);
+    } else unreachable;
 
     sender.close();
     try expectError(error.InvalidSocket, sender.sendTo(&.{ 4, 3, 2, 1 }, addr));

@@ -1,11 +1,13 @@
 const std = @import("std");
 const linux = std.os.linux;
 const posix = std.posix;
+
 const Address = @This();
 
 sa: linux.sockaddr.in6,
 
 pub const sa_len: u32 = @sizeOf(linux.sockaddr.in6);
+pub const invalid: Address = .{ .sa = std.mem.zeroes(linux.sockaddr.in6) };
 
 pub fn initIp4(octets: [4]u8, port: u16) Address {
     const addr: Address = .{ .sa = .{
@@ -55,4 +57,8 @@ pub fn format(self: *const Address, w: *std.Io.Writer) !void {
 pub fn isIp4(self: *const Address) bool {
     const ip4_prefix = [_]u8{ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0xff, 0xff };
     return std.mem.eql(u8, self.sa.addr[0..12], &ip4_prefix);
+}
+
+pub fn eq(self: *const Address, other: *const Address) bool {
+    return self.sa.family == other.sa.family and self.sa.port == other.sa.port and std.mem.eql(u8, &self.sa.addr, &other.sa.addr);
 }

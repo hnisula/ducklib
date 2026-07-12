@@ -25,15 +25,10 @@ pub fn build(b: *std.Build) void {
 
     // net tests
     const net_tests = b.addTest(.{ .root_module = net_module });
-    
+
     // install build
     b.installArtifact(net_lib);
     b.getInstallStep().dependOn(&net_conn_test_install.step);
-    
-    // check
-    const check = b.step("check", "Build everything for analysis");
-    check.dependOn(&net_lib.step);
-    check.dependOn(&net_conn_test.step);
 
     // test
     const test_step = b.step("test", "Run tests");
