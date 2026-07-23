@@ -2,8 +2,11 @@
 
 zig-cache/
 .zig-cache/
+zig-pkg/
 zig-out/
 build/
 build-*/
 docgen_tmp/
 .zbscanhelper.zig
+
+.claude/
