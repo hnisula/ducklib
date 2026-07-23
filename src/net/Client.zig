@@ -11,7 +11,7 @@ socket: Socket,
 conn: Connection,
 
 pub fn init(port: u16) !Client {
-    return .{ .socket = try Socket.open(port), .conn = try Connection.init() };
+    return .{ .socket = try Socket.open(port), .conn = .{} };
 }
 
 pub fn deinit(self: *Client) void {
@@ -20,6 +20,7 @@ pub fn deinit(self: *Client) void {
 
 pub fn connect(self: *Client, to: Address) !void {
     var buffer: [Socket.MTU]u8 = undefined;
+    self.conn = try .init(to);
     const effect = self.conn.handle(.{ .connect = .{ .addr = to } });
     if (effect == null) {
         return;

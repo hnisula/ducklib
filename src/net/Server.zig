@@ -48,7 +48,7 @@ pub fn tick(self: *Server) !void {
             if (received == .connect) {
                 if (self.conn_count < max_conns) {
                     const new_count = self.conn_count + 1;
-                    self.conns[new_count] = try .init();
+                    self.conns[new_count] = try .init(received_packet.from);
                     self.addrs[new_count] = received_packet.from;
                     self.conn_count = new_count;
 
