@@ -6,20 +6,24 @@ const Socket = @import("Socket.zig");
 const Address = @import("Address.zig");
 const shared = @import("shared.zig");
 
+const log = std.log.scoped(.server);
+
 const Server = @This();
 socket: Socket,
 conns: [max_conns]Connection,
-addrs: [max_conns]Address,
+addrs: [max_conns]Address, // TODO: Remove
 conn_count: u8 = 0,
 
 const max_conns = 16;
 
 pub fn init(port: u16) !Server {
+    log.info("Server initialized on port {d}", .{port});
     return .{ .socket = try Socket.open(port), .conns = @splat(.{}), .addrs = @splat(.invalid) };
 }
 
 pub fn deinit(self: *Server) void {
     self.socket.close();
+    log.info("Server shut down", .{});
 }
 
 pub fn tick(self: *Server) !void {
@@ -29,7 +33,6 @@ pub fn tick(self: *Server) !void {
     while (try self.socket.receive(&recv_buffer)) |received_packet| {
         const received = try Packet.read(received_packet.packet);
         const existing_conn = self.findConn(received_packet.from);
-        std.debug.print("SERVER: Received packet {s}\n", .{@tagName(received)});
 
         if (existing_conn) |conn| {
             const effect = conn.handle(.{ .packet = received });
@@ -51,7 +54,7 @@ pub fn tick(self: *Server) !void {
                     self.conns[new_count] = try .init(received_packet.from);
                     self.addrs[new_count] = received_packet.from;
                     self.conn_count = new_count;
-
+                    log.info("Server added connection {d} as connected", .{self.conns[new_count].id});
                     var conn = &self.conns[new_count];
                     conn.state = .connected;
                     const accept_packet: Packet = .{ .accept = .{} };

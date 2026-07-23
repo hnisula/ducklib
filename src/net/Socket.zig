@@ -3,12 +3,16 @@ const posix = std.posix;
 const linux = std.os.linux;
 const expectEqual = std.testing.expectEqual;
 const expectError = std.testing.expectError;
-const Socket = @This();
+
 const Address = @import("Address.zig");
 
+const log = std.log.scoped(.socket);
+
+const Socket = @This();
 fd: linux.fd_t,
 rng: std.Random.DefaultPrng,
 loss_rate: f32 = 0.0,
+port: u16 = 0,
 
 pub const MTU: u32 = 1200;
 
@@ -31,7 +35,7 @@ pub fn open(port: u16) OpenError!Socket {
         .SUCCESS => {},
         .ACCES => return error.PermissionDenied,
         else => |err| {
-            std.log.err("Failed to create socket: {s}", .{@tagName(err)});
+            log.err("[:{d}] Failed to create socket: {s}", .{ port, @tagName(err) });
             return OpenError.Unknown;
         },
     }
@@ -54,11 +58,13 @@ pub fn open(port: u16) OpenError!Socket {
 
     var seed: u64 = undefined;
     _ = linux.getrandom(std.mem.asBytes(&seed), @sizeOf(@TypeOf(seed)), 0);
+    log.info("[:{d}] Initialized", .{port});
     return Socket{ .fd = fd, .rng = .init(seed) };
 }
 
 pub fn close(self: *Socket) void {
     _ = linux.close(self.fd);
+    log.info("[:{d}] Closed", .{self.port});
 }
 
 const SendError = error{ Unknown, InvalidSocket };
@@ -87,14 +93,14 @@ pub fn receive(self: *Socket, buffer: []u8) ReceiveError!?ReceiveResult {
     var from: Address = undefined;
     var buffer_ptr = buffer.ptr;
     var buffer_len = buffer.len;
-    
+
     const is_lost = self.rng.random().float(f32) < self.loss_rate;
     var fake_buffer: [4]u8 = undefined;
     if (is_lost) {
         buffer_ptr = &fake_buffer;
         buffer_len = fake_buffer.len;
     }
-    
+
     const received_bytes = linux.recvfrom(self.fd, buffer_ptr, buffer_len, 0, @ptrCast(&from.sa), &sa_len);
     std.debug.assert(sa_len == @sizeOf(linux.sockaddr.in6));
     return switch (std.posix.errno(received_bytes)) {
