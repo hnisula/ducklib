@@ -1,0 +1,21 @@
+.{
+    .name = .ducklib,
+    .version = "0.0.0",
+    .fingerprint = 0xdd81b4bb882c32d5, // Changing this has security and trust implications.
+    .minimum_zig_version = "0.16.0",
+    .dependencies = .{
+        .vulkan = .{
+            .url = "git+https://github.com/Snektron/vulkan-zig#b496a6a561ffbbeb530b0f9ed4e059f88c0723a5",
+            .hash = "vulkan-0.0.0-r7Ytx7N9AwD7IZt5_XNHtkJ4G9qY0pCH-cpcOsbL8wzD",
+        },
+        .vulkan_headers = .{
+            .url = "git+https://github.com/KhronosGroup/Vulkan-Headers#d314eae73fdc90847bb8304a86ee7c6a8ee023b6",
+            .hash = "N-V-__8AADSXewLh83HGH4ZdFU58Bu_P_tGCvKnZgfAVt4_H",
+        },
+    },
+    .paths = .{
+        "build.zig",
+        "build.zig.zon",
+        "src",
+    },
+}
